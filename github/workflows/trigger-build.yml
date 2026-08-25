@@ -1,0 +1,18 @@
+name: Trigger Build APK
+
+on:
+  push:
+    branches: [arena/01a032b2-automatic-journey]
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Trigger Build APK Workflow
+        run: |
+          curl -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/abdurrehman6384-web/automatic-journey/actions/workflows/build-apk.yml/dispatches \
+            -d '{"ref":"arena/01a032b2-automatic-journey"}'
