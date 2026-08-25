@@ -39,15 +39,15 @@ cp "$HERE/apply_patch.py" "$TARGET/pet/apply_patch.py"
 chmod +x "$TARGET/pet/apply_patch.py"
 echo "  copied apply_patch.py -> pet/apply_patch.py"
 
-# CI workflow: builds the APK on GitHub's runners, no local toolchain needed.
-mkdir -p "$TARGET/.github/workflows"
-cp "$HERE/build-apk.yml" "$TARGET/.github/workflows/build-apk.yml"
-echo "  copied build-apk.yml -> .github/workflows/build-apk.yml"
+# CI workflow. NOTE: this one does NOT go into the OpenDroid checkout -- it is
+# self-contained and clones OpenDroid itself, so it belongs in whatever repo you
+# run Actions from. Just print where it is.
+echo "  CI workflow available at: pet/build-android-apk.yml"
+echo "    copy it to <your-repo>/.github/workflows/ to build APKs in Actions"
 
-echo
 echo
 echo "Now apply the wiring patch:"
 echo "    cd '$TARGET' && python3 pet/apply_patch.py ."
 echo
-echo "Or push to GitHub and let .github/workflows/build-apk.yml build the APK"
-echo "for you -- no local JDK, Android SDK or Gradle required."
+echo "Or copy pet/build-android-apk.yml into a repo's .github/workflows/ and let"
+echo "GitHub Actions build the APK -- no local JDK, Android SDK or Gradle needed."
