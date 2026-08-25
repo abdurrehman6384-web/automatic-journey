@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "androidctl"
+version = "1.0.0"
+description = "Deep Android device control (screenshots, UI tree, tap/swipe/type, apps, shell, multi-device) + MCP server"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+dependencies = [
+    "uiautomator2>=3.7,<4",
+    "mcp>=2.0,<3",
+    "Pillow>=10.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+# See README.md section 8 before enabling -- needs a rooted device and a
+# closed-source on-device server distributed from device-farm.com.
+lamda = ["lamda>=10.6"]
+
+[project.scripts]
+androidctl = "androidctl.cli:main"
+androidctl-mcp = "mcp_server:main"
+
+[tool.setuptools]
+packages = ["androidctl"]
+py-modules = ["mcp_server"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

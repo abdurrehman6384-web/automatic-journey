@@ -1,0 +1,52 @@
+{
+  "_comment": [
+    "MCP client config for the android-control server.",
+    "",
+    "Claude Desktop : merge the `mcpServers` object into",
+    "                   macOS   ~/Library/Application Support/Claude/claude_desktop_config.json",
+    "                   Windows %APPDATA%\\Claude\\claude_desktop_config.json",
+    "                   Linux   ~/.config/Claude/claude_desktop_config.json",
+    "Cursor           : Settings > MCP > Add, or project .cursor/mcp.json",
+    "Claude Code      : claude mcp add android-control -- <command> <args...>",
+    "",
+    "ABSOLUTE PATHS ONLY -- MCP clients do not inherit your shell's cwd.",
+    "Replace /ABSOLUTE/PATH/TO with the real path to this android-control folder."
+  ],
+
+  "mcpServers": {
+    "android-control": {
+      "command": "/ABSOLUTE/PATH/TO/android-control/.venv/bin/python",
+      "args": ["/ABSOLUTE/PATH/TO/android-control/mcp_server.py"],
+      "env": {
+        "ANDROIDCTL_LOG_LEVEL": "WARNING"
+      }
+    }
+  },
+
+  "_variant_python_windows": {
+    "mcpServers": {
+      "android-control": {
+        "command": "C:\\ABSOLUTE\\PATH\\TO\\android-control\\.venv\\Scripts\\python.exe",
+        "args": ["C:\\ABSOLUTE\\PATH\\TO\\android-control\\mcp_server.py"]
+      }
+    }
+  },
+
+  "_variant_explicit_adb": {
+    "_comment": "Only needed if `adb` is not on PATH and adbutils is not installed.",
+    "mcpServers": {
+      "android-control": {
+        "command": "/ABSOLUTE/PATH/TO/android-control/.venv/bin/python",
+        "args": ["/ABSOLUTE/PATH/TO/android-control/mcp_server.py"],
+        "env": {
+          "ADB_PATH": "/ABSOLUTE/PATH/TO/platform-tools/adb"
+        }
+      }
+    }
+  },
+
+  "_verify": {
+    "_comment": "Smoke-test the server without a client. Expect tool_count >= 24.",
+    "command": "/ABSOLUTE/PATH/TO/android-control/.venv/bin/python /ABSOLUTE/PATH/TO/android-control/mcp_server.py --list"
+  }
+}

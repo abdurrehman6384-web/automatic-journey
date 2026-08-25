@@ -1,0 +1,29 @@
+# android-control runtime dependencies
+#
+#   python3 -m venv .venv
+#   .venv/bin/pip install -r requirements.txt        (Linux / macOS)
+#   .venv\Scripts\pip install -r requirements.txt    (Windows)
+
+# Core device control (pulls in adbutils, which ships a real adb binary)
+uiautomator2>=3.7,<4
+
+# MCP server (Claude Desktop / Cursor / Claude Code). 2.x renamed FastMCP ->
+# MCPServer; mcp_server.py targets the 2.x API.
+mcp>=2.0,<3
+
+# Screenshots come back as Pillow images
+Pillow>=10.0
+
+# Tests
+pytest>=8.0
+
+# ---------------------------------------------------------------------------
+# OPTIONAL -- lamda / FIRERPA backend
+#
+# Installs the MIT-licensed Python *client* only. It is useless without the
+# on-device server, which is NOT in the repo or on PyPI: it is distributed from
+# device-farm.com behind an accepted DISCLAIMER, and that disclaimer states the
+# service requires root. See README.md > "Why uiautomator2 (and when to use
+# lamda)" before enabling this.
+#
+# lamda>=10.6
