@@ -1,0 +1,26 @@
+# Virtualenv
+.venv/
+venv/
+
+# Vendored reference clones (re-clone with: make vendor)
+vendor/
+
+# Bundled platform-tools (only present if you download it yourself)
+tools/platform-tools/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+*.egg-info/
+
+# Demo + test artifacts
+examples/output/
+*.png
+!docs/**/*.png
+
+# Local device/credential state
+.env
+*.pem
+adb_keys

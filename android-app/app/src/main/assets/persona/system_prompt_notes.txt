@@ -1,0 +1,15 @@
+The system prompt is generated in code, not stored here.
+
+See companion/Persona.kt:
+  - PersonaConfig      everything user-tunable (name, nickname, flirt level,
+                       language, hard limits, custom traits)
+  - Persona.buildSystemPrompt()   assembles identity + voice + output contract
+                                  + recalled memory + limits
+
+Keeping it in code rather than a text file means:
+  - the emotion-tag contract stays in sync with Emotion.kt
+  - memory injection is typed, not string-concatenated
+  - you can unit-test the prompt without touching assets
+
+If you would rather let users edit the raw prompt, add a "customPromptSuffix"
+field to PersonaConfig and append it in buildSystemPrompt().

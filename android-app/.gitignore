@@ -1,0 +1,21 @@
+# Gradle / build
+.gradle/
+build/
+local.properties
+*.hprof
+
+# IDE
+.idea/
+*.iml
+.DS_Store
+
+# Live2D SDK -- licence-restricted, download it yourself (README.md section 2)
+app/libs/Live2DCubismCore.aar
+
+# Live2D models -- large and separately licensed
+app/src/main/assets/models/*/
+!app/src/main/assets/models/README.txt
+
+# Secrets
+*.keystore
+*.jks

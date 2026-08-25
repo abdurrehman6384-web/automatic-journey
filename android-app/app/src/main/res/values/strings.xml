@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">RGS Companion</string>
+
+    <string name="minimize_companion">Minimize companion</string>
+
+    <string name="companion_channel_name">Companion</string>
+    <string name="companion_notification_title">She\'s here</string>
+    <string name="companion_notification_text">Tap to open the chat</string>
+
+    <string name="accessibility_service_label">Companion phone control</string>
+    <string name="accessibility_service_description">Lets the companion open apps, tap labelled buttons, type text and read what is on screen when you ask her to. She can act only while this is switched on, and you can switch it off at any time.</string>
+</resources>

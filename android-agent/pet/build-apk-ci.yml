@@ -1,0 +1,105 @@
+name: Build APK (OpenDroid + Toni)
+
+# Builds an installable Android APK on GitHub's runners. You do NOT need a
+# local JDK, Android SDK or Gradle.
+#
+#   1. Go to Actions (on your phone or PC).
+#   2. Pick "Build APK (OpenDroid + Toni)".
+#   3. Tap "Run workflow".
+#   4. When it finishes, open the run and download the artifact
+#      "toni-debug-apk" -> app-debug.apk, then `adb install -r app-debug.apk`.
+#
+# Why no android-setup step? ubuntu-latest runners ship with the Android SDK
+# preinstalled -- the same reason OpenDroid's own android-ci.yml has none.
+#
+# The job clones OpenDroid, installs the Toni pet, applies a verified idempotent
+# patch, and builds. It never touches anything else in this repo.
+
+on:
+  workflow_dispatch:            # run it by hand from the Actions tab
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-apk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Assemble OpenDroid + Toni
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout this repository
+        uses: actions/checkout@v4
+
+      # Must match jvmToolchain(21) in OpenDroid's app/build.gradle.
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Clone OpenDroid
+        run: |
+          set -euo pipefail
+          git clone --depth 1 https://github.com/yashab-cyber/opendroid.git /tmp/opendroid
+          echo "  cloned OpenDroid: $(du -sh /tmp/opendroid | cut -f1)"
+
+      - name: Copy Toni into OpenDroid
+        run: |
+          set -euo pipefail
+          PET="android-agent/pet"
+          DEST="/tmp/opendroid/app/src/main/java/com/opendroid/ai/pet"
+          mkdir -p "$DEST"
+          for f in ToniPetView.kt ToniPetController.kt ToniPetBridge.kt; do
+            test -f "$PET/$f" || { echo "missing $PET/$f"; exit 1; }
+            cp "$PET/$f" "$DEST/$f"
+            echo "  copied $f"
+          done
+          cp "$PET/apply_patch.py" /tmp/opendroid/pet_apply_patch.py
+
+      - name: Verify wiring anchors
+        run: python3 /tmp/opendroid/pet_apply_patch.py /tmp/opendroid --check
+
+      - name: Apply the Toni wiring patch
+        run: python3 /tmp/opendroid/pet_apply_patch.py /tmp/opendroid
+
+      - name: Show the applied patch (for review)
+        run: |
+          cd /tmp/opendroid
+          git --no-pager diff --stat || true
+          git --no-pager diff -- app/src/main/java/com/opendroid/ai/accessibility/OpenDroidAccessibilityService.kt | head -60 || true
+
+      - name: Build debug APK
+        run: |
+          cd /tmp/opendroid
+          chmod +x gradlew
+          ./gradlew :app:assembleDebug --stacktrace
+
+      - name: Report the APK
+        run: |
+          APK=/tmp/opendroid/app/build/outputs/apk/debug/app-debug.apk
+          test -f "$APK" || { echo "no APK produced"; exit 1; }
+          ls -lh "$APK"
+          echo "sha256: $(sha256sum "$APK" | cut -d' ' -f1)"
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: toni-debug-apk
+          path: /tmp/opendroid/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14
