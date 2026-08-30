@@ -204,6 +204,141 @@ def build_orchestration_core():
     except Exception as exc:
         log.error("Chat agent wiring failed: %s", exc)
 
+    # ── RASHEED Agents (from abdurrehman-ai project.zip) ─────────────────────
+
+    # SystemControlAgent (app launch, file ops, OS control, notifications)
+    try:
+        from rgs_ai_desktop.agents.rasheed.system_control_agent import (
+            AGENT as sys_agent, smoke_test as sys_test
+        )
+        if sys_test():
+            def _sys_dispatch(goal: str, **kw):
+                action = kw.get("action", "get_datetime")
+                fn_map = {
+                    "open_app":       lambda: sys_agent.open_app(kw.get("app_name", goal)),
+                    "close_app":      lambda: sys_agent.close_app(kw.get("app_name", goal)),
+                    "open_website":   lambda: sys_agent.open_website(kw.get("url", goal)),
+                    "run_command":    lambda: sys_agent.run_command(kw.get("command", goal)),
+                    "list_files":     lambda: sys_agent.list_files(kw.get("path", "desktop")),
+                    "create_file":    lambda: sys_agent.create_file(kw["path"], kw.get("content", "")),
+                    "delete_file":    lambda: sys_agent.delete_file(kw["path"]),
+                    "read_file":      lambda: sys_agent.read_file(kw["path"]),
+                    "search_file":    lambda: sys_agent.search_file(kw.get("name", goal)),
+                    "create_folder":  lambda: sys_agent.create_folder(kw["path"]),
+                    "rename_file":    lambda: sys_agent.rename_file(kw["src"], kw["new_name"]),
+                    "system_info":    lambda: sys_agent.get_system_info(),
+                    "battery":        lambda: sys_agent.get_battery(),
+                    "processes":      lambda: sys_agent.get_running_processes(),
+                    "kill_process":   lambda: sys_agent.kill_process(kw.get("name_or_pid", "")),
+                    "shutdown":       lambda: sys_agent.shutdown(),
+                    "restart":        lambda: sys_agent.restart(),
+                    "lock":           lambda: sys_agent.lock_screen(),
+                    "sleep":          lambda: sys_agent.sleep_pc(),
+                    "volume_up":      lambda: sys_agent.volume_up(),
+                    "volume_down":    lambda: sys_agent.volume_down(),
+                    "mute":           lambda: sys_agent.volume_mute(),
+                    "get_clipboard":  lambda: sys_agent.get_clipboard(),
+                    "set_clipboard":  lambda: sys_agent.set_clipboard(kw.get("text", goal)),
+                    "get_datetime":   lambda: sys_agent.get_datetime(),
+                    "notify":         lambda: sys_agent.show_notification(kw.get("title", "RGS"), kw.get("message", goal)),
+                    "google_search":  lambda: sys_agent.google_search(goal),
+                    "youtube_search": lambda: sys_agent.youtube_search(goal),
+                    "screenshot":     lambda: sys_agent.take_screenshot(kw.get("path")),
+                }
+                fn = fn_map.get(action, lambda: sys_agent.get_datetime())
+                return fn()
+            core.register_agent(
+                "system", capability="tool_calling",
+                fn=_sys_dispatch,
+                meta={"description": "RASHEED System Control — apps, files, OS, notifications"},
+            )
+    except Exception as exc:
+        log.error("SystemControlAgent load failed: %s", exc)
+
+    # LifestyleAgent (prayer, crypto, budget, reminders, knowledge graph)
+    try:
+        from rgs_ai_desktop.agents.rasheed.lifestyle_agent import (
+            AGENT as life_agent, smoke_test as life_test
+        )
+        if life_test():
+            def _life_dispatch(goal: str, **kw):
+                action = kw.pop("action", "prayer_times")
+                # inject goal as relevant param if not specified
+                if action == "crypto_price" and "symbol" not in kw:
+                    kw["symbol"] = goal.upper().replace(" ", "")
+                elif action in ("set_reminder",) and "message" not in kw:
+                    kw["message"] = goal
+                return life_agent.dispatch(action, **kw)
+            core.register_agent(
+                "lifestyle", capability="tool_calling",
+                fn=_life_dispatch,
+                meta={"description": "RASHEED Lifestyle — prayer, crypto, budget, reminders, knowledge graph"},
+            )
+    except Exception as exc:
+        log.error("LifestyleAgent load failed: %s", exc)
+
+    # GenerativeAgent (image gen, content creator, PDF assistant)
+    try:
+        from rgs_ai_desktop.agents.rasheed.generative_agent import (
+            AGENT as gen_agent, smoke_test as gen_test
+        )
+        if gen_test():
+            gen_agent.set_llm(llm.as_callable())
+            def _gen_dispatch(goal: str, **kw):
+                action = kw.pop("action", "write_code")
+                if "prompt" not in kw and "topic" not in kw and "description" not in kw:
+                    # Route goal to most likely param
+                    if action in ("generate_image", "thumbnail_prompt"):
+                        kw["prompt"] = goal
+                    elif action in ("write_script", "analyze_trends"):
+                        kw["topic"] = goal
+                    elif action in ("write_code",):
+                        kw["description"] = goal
+                    elif action in ("seo_optimize",):
+                        kw["title"] = goal
+                return gen_agent.dispatch(action, **kw)
+            core.register_agent(
+                "generative", capability="tool_calling",
+                fn=_gen_dispatch,
+                meta={"description": "RASHEED Generative AI — image, script, SEO, PDF, code"},
+            )
+    except Exception as exc:
+        log.error("GenerativeAgent load failed: %s", exc)
+
+    # ProactiveAgent (clipboard, RPA, digital twin, proactive engine)
+    try:
+        from rgs_ai_desktop.agents.rasheed.proactive_agent import (
+            AGENT as pro_agent, smoke_test as pro_test
+        )
+        if pro_test():
+            def _pro_dispatch(goal: str, **kw):
+                action = kw.pop("action", "clipboard_history")
+                return pro_agent.dispatch(action, **kw)
+            core.register_agent(
+                "proactive", capability="tool_calling",
+                fn=_pro_dispatch,
+                meta={"description": "RASHEED Proactive — clipboard, RPA macros, digital twin"},
+            )
+    except Exception as exc:
+        log.error("ProactiveAgent load failed: %s", exc)
+
+    # SecurityAgent (vault, encryption, network scan, honeypot)
+    try:
+        from rgs_ai_desktop.agents.rasheed.security_agent import (
+            AGENT as sec_agent, smoke_test as sec_test
+        )
+        if sec_test():
+            def _sec_dispatch(goal: str, **kw):
+                action = kw.pop("action", "local_ip")
+                return sec_agent.dispatch(action, **kw)
+            core.register_agent(
+                "security", capability="tool_calling",
+                fn=_sec_dispatch,
+                meta={"description": "RASHEED Security — vault, encryption, network, honeypot"},
+            )
+    except Exception as exc:
+        log.error("SecurityAgent load failed: %s", exc)
+
     log.info("All agents loaded. Registered: %s", core.agent_names())
     return core
 

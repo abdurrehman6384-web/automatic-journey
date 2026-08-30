@@ -1,7 +1,8 @@
 # RGS AI Desktop — Merge Test Report
-**Generated:** 2026-08-30  
+**Generated:** 2026-08-30 (Updated with abdurrehman-ai project.zip integration)  
 **Branch:** `arena/01a0508f-automatic-journey`  
-**Merge result:** 10 / 10 smoke tests PASS ✅
+**Merge result:** 15 / 15 smoke tests PASS ✅  
+**Total agents:** 15 (10 original + 5 RASHEED/abdurrehman-ai)
 
 ---
 
@@ -59,19 +60,27 @@
 
 ---
 
-## 3. Smoke Test Results (all modules)
+## 3. Smoke Test Results (all 15 modules)
 
 ```
-  ToolRunner                      PASS ✅
-  ScreenControlAgent              PASS ✅  (headless env — xcb missing, graceful fallback)
-  VisionAgent                     PASS ✅  (pytesseract optional, fallback accepted)
-  MemoryAgent                     PASS ✅  (in-memory store, persistence tested)
-  BrowserAgent                    PASS ✅  (KnowledgeBaseAgent RAG tested)
-  CodeExecAgent                   PASS ✅  (print('hello rgs') executed, output matched)
-  VoiceAgent                      PASS ✅  (pyttsx3 headless warn — graceful fallback)
-  PluginLifecycle                 PASS ✅  (state machine instantiation tested)
-  OrchestrationCore               PASS ✅  (task dispatch + event bus + license gate)
-  ModelRouter                     PASS ✅  (mock adapter tested)
+  ✅  ToolRunner                  PASS   (Goose tool calling registry)
+  ✅  ScreenControlAgent          PASS   (headless xcb fallback — graceful)
+  ✅  VisionAgent                 PASS   (pytesseract optional fallback)
+  ✅  MemoryAgent                 PASS   (in-memory + persistence tested)
+  ✅  BrowserAgent                PASS   (RAG KnowledgeBase tested)
+  ✅  CodeExecAgent               PASS   (print('hello rgs') stdout matched)
+  ✅  VoiceAgent                  PASS   (pyttsx3 headless warn — fallback ok)
+  ✅  PluginLifecycle             PASS   (Zoey state machine instantiated)
+  ✅  OrchestrationCore           PASS   (dispatch + EventBus + LicenseGate)
+  ✅  ModelRouter                 PASS   (mock adapter round-trip)
+  --- RASHEED / abdurrehman-ai project.zip ---
+  ✅  SystemControlAgent          PASS   (datetime + list_files verified)
+  ✅  LifestyleAgent              PASS   (KG entity + budget + journal)
+  ✅  GenerativeAgent             PASS   (content creator LLM stub)
+  ✅  ProactiveAgent              PASS   (clipboard history + RPA list)
+  ✅  SecurityAgent               PASS   (SHA256 hash + vault list + IP)
+
+  15 / 15 PASS   0 FAIL
 ```
 
 ---
@@ -139,28 +148,72 @@ so a broken plugin never prevents other agents from loading.
 ```
 rgs_ai_desktop/
 ├── __init__.py
-├── main.py                          ← entry point, wires everything
+├── main.py                          ← entry point, wires ALL 15 agents
 ├── merge_test_report.md             ← this file
 ├── agents/
 │   ├── __init__.py
-│   ├── tool_runner.py               ← Goose
+│   ├── tool_runner.py               ← Goose (Apache-2.0)
 │   ├── screen_control_agent.py      ← Bytebot
 │   ├── vision_agent.py              ← Self-Operating Computer
-│   ├── memory_agent.py              ← Hermes (CANONICAL)
-│   ├── browser_agent.py             ← OpenAgent
-│   ├── code_exec_agent.py           ← Open Interpreter
+│   ├── memory_agent.py              ← Hermes MIT (CANONICAL)
+│   ├── browser_agent.py             ← OpenAgent (browser + RAG)
+│   ├── code_exec_agent.py           ← Open Interpreter MIT
 │   ├── voice_agent.py               ← OpenDesktop+JARVIS+OpenJarvis (merged)
-│   └── plugin_lifecycle.py          ← Zoey (Python port)
+│   ├── plugin_lifecycle.py          ← Zoey Rust pattern → Python port
+│   └── rasheed/
+│       ├── __init__.py
+│       ├── system_control_agent.py  ← RASHEED: app/file/OS/notify/volume/clipboard
+│       ├── lifestyle_agent.py       ← RASHEED: prayer/crypto/budget/KG/reminder/journal
+│       ├── generative_agent.py      ← RASHEED: image gen/scripts/SEO/PDF/code writer
+│       ├── proactive_agent.py       ← RASHEED: clipboard history/RPA/digital twin
+│       └── security_agent.py        ← RASHEED: vault/encryption/network/honeypot
 ├── core/
 │   ├── __init__.py
 │   └── orchestration_core.py        ← Orkas Commander + EventBus + LicenseGate
 ├── ui/
 │   ├── __init__.py
 │   └── ui_shell.py                  ← IRIS-style PyQt6 glass shell (ONE UI)
+│                                       Agent dock shows ALL 15 agents
 └── services/
     ├── __init__.py
-    └── model_router.py              ← LLM provider router (OpenAI/Claude/Ollama/mock)
+    └── model_router.py              ← LLM provider router (OpenAI/Claude/Ollama/Groq/mock)
 ```
+
+## 8. RASHEED Integration Details (from abdurrehman-ai project.zip)
+
+| Source File | What Was Extracted | Integrated Into |
+|-------------|-------------------|----------------|
+| `app.py` + `open_app.py` | Cross-platform app launcher (60+ app aliases) | `system_control_agent.py` |
+| `computer_control.py` | Mouse/keyboard/clipboard/window control | `system_control_agent.py` |
+| `os_control.py` | Deep OS control (registry, startup apps) | `system_control_agent.py` |
+| `file_controller.py` | File CRUD, path shortcuts, trash-safe delete | `system_control_agent.py` |
+| `reminder.py` | Thread-based reminder system | `lifestyle_agent.py` |
+| `lifestyle.py` | Prayer times, Crypto tracker, Pomodoro | `lifestyle_agent.py` |
+| `budget_manager.py` | SQLite expense tracker + auto-categorization | `lifestyle_agent.py` |
+| `knowledge_graph.py` | Entity-relationship graph (JSON persistence) | `lifestyle_agent.py` |
+| `idea_capture.py` | Dream journal + idea vault (SQLite) | `lifestyle_agent.py` |
+| `generative_suite.py` | Stability AI + HuggingFace SDXL image gen | `generative_agent.py` |
+| `content_creator.py` | YouTube script, SEO optimizer, trend analyzer | `generative_agent.py` |
+| `pdf_assistant.py` | PyPDF2 extractor + LLM summarizer | `generative_agent.py` |
+| `clipboard_manager.py` | SQLite clipboard history + pinning | `proactive_agent.py` |
+| `rpa_engine.py` | pynput record + replay macros | `proactive_agent.py` |
+| `digital_twin.py` | Chat style learner + reply generator | `proactive_agent.py` |
+| `proactive_engine.py` | Active window watcher + auto-suggestions | `proactive_agent.py` |
+| `security_ghost.py` | ARP scan, port scan, IP lookup | `security_agent.py` |
+| `password_vault.py` | Fernet-encrypted SQLite vault | `security_agent.py` |
+| `cyber_shield.py` | Honeypot deployment (fake port listener) | `security_agent.py` |
+
+**Skipped from RASHEED (duplicate or out-of-scope):**
+- `ai_brain.py` MultiLLM → Already covered by `model_router.py`
+- `memory.py` RasheedMemory → Duplicate of canonical `memory_agent.py` (Hermes)
+- `vision.py` VisionEngine → Duplicate of `vision_agent.py` (Self-Operating Computer)
+- `Chatbot.py` → Duplicate of `chat` dispatcher in orchestration core
+- `browser_agent.py` (RASHEED) → Duplicate of canonical `browser_agent.py` (OpenAgent)
+- `SpeechToText.py` / `TextToSpeech.py` → Duplicate of canonical `voice_agent.py`
+- `executor.py` → RASHEED tool routing fully replaced by `orchestration_core.py`
+- `agent.py` AutonomousAgent → Replaced by `OrchestrationCore.dispatch()` chain
+- Windows-only modules (`winreg`, OS-specific) → Platform checks added in system agent
+
 
 ---
 

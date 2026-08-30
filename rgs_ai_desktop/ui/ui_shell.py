@@ -462,7 +462,7 @@ if _HAS_PYQT6:
             self._agent_list_widget.setObjectName("AgentList")
             lay.addWidget(self._agent_list_widget, stretch=1)
 
-            # default agent items
+            # default agent items — includes all RASHEED agents
             for name, icon in [
                 ("🔧  ToolRunner",      "tool_runner"),
                 ("🖥  ScreenControl",   "screen_control"),
@@ -472,6 +472,13 @@ if _HAS_PYQT6:
                 ("💻  CodeExec",        "code_exec"),
                 ("🎙  Voice",           "voice"),
                 ("🔌  PluginManager",   "plugin_lifecycle"),
+                ("─────────────",       "separator"),
+                ("🖥  SystemControl",   "system"),
+                ("🌙  Lifestyle",       "lifestyle"),
+                ("🎨  Generative AI",   "generative"),
+                ("⚡  Proactive",       "proactive"),
+                ("🔒  Security",        "security"),
+                ("💬  Chat",            "chat"),
             ]:
                 item = QListWidgetItem(name)
                 item.setData(Qt.ItemDataRole.UserRole, icon)
