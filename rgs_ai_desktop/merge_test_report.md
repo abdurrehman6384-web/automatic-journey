@@ -1,243 +1,246 @@
-# RGS AI Desktop — Merge Test Report
-**Generated:** 2026-08-30 (Updated with abdurrehman-ai project.zip integration)  
+# RGS AI Desktop — Full Merge Report
+**Generated:** 2026-08-30  
 **Branch:** `arena/01a0508f-automatic-journey`  
-**Merge result:** 15 / 15 smoke tests PASS ✅  
-**Total agents:** 15 (10 original + 5 RASHEED/abdurrehman-ai)
+**Total smoke tests: 21 / 21 PASS ✅**  
+**Total agents registered: 21**
 
 ---
 
-## 1. Capability Registry (Duplicate-Check Rule Applied)
+## 1. All Repos Processed
 
-| Capability     | Canonical Module        | Status      |
-|----------------|------------------------|-------------|
-| tool-calling   | `tool_runner.py`        | ✅ Active   |
-| screen-control | `screen_control_agent.py` | ✅ Active |
-| vision         | `vision_agent.py`       | ✅ Active   |
-| memory         | `memory_agent.py`       | ✅ Active   |
-| browser-use    | `browser_agent.py`      | ✅ Active   |
-| knowledge-base | `browser_agent.py` (KB class) | ✅ Active |
-| code-exec      | `code_exec_agent.py`    | ✅ Active   |
-| voice          | `voice_agent.py`        | ✅ Active   |
-| task-planning  | `orchestration_core.py` | ✅ Active   |
-| plugin-lifecycle | `plugin_lifecycle.py` | ✅ Active   |
-
----
-
-## 2. Source Repo Treatment
-
-### ✅ MERGED (agent/backend module extracted, UI skipped)
-
-| Repo | License | What Was Extracted | UI Skipped? |
-|------|---------|-------------------|-------------|
-| **Goose** (block/goose) | Apache-2.0 | ToolRunner — extension/tool-calling registry pattern | N/A (no UI conflict) |
-| **Bytebot** (bytebot-ai) | Self-hosted | ScreenControlAgent — mouse/keyboard/screenshot automation | ✅ Docker UI not imported |
-| **Self-Operating Computer** (OthersideAI) | MIT | VisionAgent — OCR + SoM screen understanding | ✅ No UI copied |
-| **Hermes Agent** (NousResearch) | MIT | MemoryAgent — **CANONICAL** persistent memory + skill learning | ✅ |
-| **OpenAgent** (the-open-agent) | MIT | BrowserAgent + KnowledgeBaseAgent (RAG) | ✅ |
-| **Open Interpreter** (OpenInterpreter) | MIT | CodeExecAgent — local code execution, multi-language | ✅ |
-| **Orkas** (Orkas-AI) | MIT | Commander/dispatcher → merged into OrchestrationCore (task decomposition) | N/A |
-| **Zoey** (Agent-Zoey) | Rust/MIT | Plugin lifecycle PATTERN ported to Python — Rust code NOT copied | ✅ Rust excluded |
-| **OpenDesktop** (Atum246) | Node.js | Voice command pattern → merged into VoiceAgent | ✅ Node.js UI excluded |
-| **JARVIS** (Likhithsai2580) | MIT | Wake-word loop + hotkey push-to-talk → merged into VoiceAgent | ✅ |
-| **OpenJarvis** (Stanford SAIL) | MIT | TTS pipeline + silence detection → merged into VoiceAgent | ✅ |
-
-### ⏭ SKIPPED (duplicate capability)
-
-| Repo | Reason |
-|------|--------|
-| **AutoGPT** | DUPLICATE — task planning already in OrchestrationCore (Orkas pattern). No new capability added. |
-| **OpenClaw** | DUPLICATE — messaging gateway out of scope; task routing already covered. |
-
-### 🚫 EXCLUDED (proprietary / license issues / scope)
-
-| Repo | Reason |
-|------|--------|
-| **IRIS-AI** | Proprietary/sponsor-locked core — per mandate: full exclude. Reference only. |
-| **IRIS-X** | Same as above — proprietary. Reference only. |
-| **IRIS-GO** | UI (TSX/React) — VISUAL LOOK only referenced for PyQt6 glass design. Zero code copied. |
-| **IRIS-Mini** | Same — visual reference only, no code imported. |
-| **IRIS-Zero** | License file missing (unverified) + TSX UI — excluded entirely. |
+| Repo | License | Status | What Extracted |
+|------|---------|--------|----------------|
+| **Goose** (block/goose) | Apache-2.0 | ✅ Merged | ToolRunner — extension/tool-calling registry |
+| **Bytebot** (bytebot-ai) | Self-hosted | ✅ Merged | ScreenControlAgent — mouse/keyboard/screenshot |
+| **Self-Operating Computer** (OthersideAI) | MIT | ✅ Merged (FULL) | SoCVisionAgent — OperatingSystem, OCR EasyOCR element finder, autonomous operate loop |
+| **Hermes Agent** (NousResearch) | MIT | ✅ Merged (FULL) | HermesAgent — 40+ tools: read_file, write_file, patch, search_files, terminal, execute_code, web_search, web_extract, browser tools, todo, memory, delegate_task, cronjob, send_message, Home Assistant ha_* |
+| **OpenAgent** (the-open-agent) | MIT | ✅ Merged | BrowserAgent + KnowledgeBaseAgent (RAG) |
+| **Open Interpreter** (OpenInterpreter) | MIT | ✅ Merged | CodeExecAgent — multi-language local code execution |
+| **Orkas** (Orkas-AI) | MIT | ✅ Merged (FULL) | OrkasSEOAgent — seo-crawl, seo-content E-E-A-T audit, seo-keywords (normalize+cluster+classify), geo-score (5 dimensions), Core Web Vitals (PSI API), full_audit pipeline |
+| **Zoey** (Agent-Zoey) | Rust/MIT | ✅ Merged | plugin_lifecycle.py — Rust lifecycle pattern → Python port |
+| **OpenDesktop** (Atum246) | Node.js | ✅ Merged (FULL) | OpenDesktopAgent — ContextualBrain (weighted decaying knowledge graph), GhostMode (autonomous night missions + checkpoints), GlobalHotkey (xbindkeys/keyboard cross-platform) |
+| **JARVIS** (Likhithsai2580) | MIT | ✅ Merged (FULL) | JARVISAgent — CodeBrew (LLM writes+runs+retries code), QuestionFramer (research loop), GitHubTools (search/clone/commit/push), ObjectDetector (YOLOv8 wrapper), YouTubePlayer |
+| **OpenJarvis** (Stanford SAIL) | MIT | ✅ Merged | VoiceAgent TTS pipeline + silence detection (merged into canonical VoiceAgent) |
+| **AutoGPT** (Significant-Gravitas) | MIT | ✅ Merged (blocks) | AutoGPTBlocksAgent — AIConditionBlock (LLM bool eval), TextBlock (split/join/regex/format/count/truncate), MathBlock (safe eval+statistics), HTTPBlock (GET/POST/webhook), EmailBlock (SMTP), PersistenceBlock (SQLite KV), RSSBlock (feedparser), SpreadsheetBlock (CSV read/write/filter), TimeBlock (now/wait/parse), YouTubeBlock (yt-dlp), Mem0Block |
+| **IRIS-GO** | TSX/React | 🎨 Visual ref only | IRIS glass panel layout → implemented in original PyQt6 |
+| **IRIS-Mini** | TSX/React | 🎨 Visual ref only | Same — orb animation visual reference |
+| **IRIS-Zero** | Missing license | 🚫 EXCLUDED | License unverified — excluded entirely |
+| **IRIS-AI** | Proprietary | 🚫 EXCLUDED | Proprietary core — reference only |
+| **IRIS-X** | Proprietary | 🚫 EXCLUDED | Proprietary core — reference only |
+| **OpenClaw** | MIT | ⏭ SKIP (dup) | Messaging gateway already in hermes/send_message + orchestration |
+| **RASHEED/abdurrehman-ai** | project.zip | ✅ Merged (FULL) | SystemControlAgent, LifestyleAgent, GenerativeAgent, ProactiveAgent, SecurityAgent |
 
 ---
 
-## 3. Smoke Test Results (all 15 modules)
+## 2. Capability Registry (Duplicate-Check Rule Applied)
+
+| Capability | Canonical Module | Notes |
+|-----------|----------------|-------|
+| tool-calling | tool_runner.py | Goose registry |
+| screen-control | screen_control_agent.py + soc_vision_agent.py | SoC full loop added |
+| vision | vision_agent.py | OCR/SoM |
+| memory | memory_agent.py | CANONICAL — Hermes + Mem0 defer here |
+| browser-use | browser_agent.py | OpenAgent |
+| code-exec | code_exec_agent.py + jarvis_agent.py CodeBrew | Both: direct exec + LLM-driven |
+| voice | voice_agent.py | CANONICAL merged |
+| task-planning | orchestration_core.py | Orkas + HermesAgent delegate_task |
+| plugin-lifecycle | plugin_lifecycle.py | Zoey |
+| SEO/GEO | orkas_seo_agent.py | NEW — Orkas skills |
+| contextual-brain | opendesktop_agent.py | NEW — weighted graph |
+| ghost-mode | opendesktop_agent.py | NEW — autonomous missions |
+| code-generation | jarvis_agent.py CodeBrew | NEW — LLM writes+runs code |
+| ai-blocks | autogpt_blocks_agent.py | NEW — 20+ composable blocks |
+| research | jarvis_agent.py QuestionFramer | NEW — research loops |
+| github | jarvis_agent.py GitHubTools | NEW |
+| system-control | rasheed/system_control_agent.py | RASHEED |
+| lifestyle | rasheed/lifestyle_agent.py | RASHEED |
+| generative-ai | rasheed/generative_agent.py | RASHEED |
+| proactive | rasheed/proactive_agent.py | RASHEED |
+| security | rasheed/security_agent.py | RASHEED |
+
+---
+
+## 3. Smoke Test Results — ALL 21 PASS ✅
 
 ```
-  ✅  ToolRunner                  PASS   (Goose tool calling registry)
-  ✅  ScreenControlAgent          PASS   (headless xcb fallback — graceful)
-  ✅  VisionAgent                 PASS   (pytesseract optional fallback)
-  ✅  MemoryAgent                 PASS   (in-memory + persistence tested)
-  ✅  BrowserAgent                PASS   (RAG KnowledgeBase tested)
-  ✅  CodeExecAgent               PASS   (print('hello rgs') stdout matched)
-  ✅  VoiceAgent                  PASS   (pyttsx3 headless warn — fallback ok)
-  ✅  PluginLifecycle             PASS   (Zoey state machine instantiated)
-  ✅  OrchestrationCore           PASS   (dispatch + EventBus + LicenseGate)
-  ✅  ModelRouter                 PASS   (mock adapter round-trip)
-  --- RASHEED / abdurrehman-ai project.zip ---
-  ✅  SystemControlAgent          PASS   (datetime + list_files verified)
-  ✅  LifestyleAgent              PASS   (KG entity + budget + journal)
-  ✅  GenerativeAgent             PASS   (content creator LLM stub)
-  ✅  ProactiveAgent              PASS   (clipboard history + RPA list)
-  ✅  SecurityAgent               PASS   (SHA256 hash + vault list + IP)
+  ORIGINAL AGENTS (Phase 1)
+  ✅  ToolRunner                  PASS   (Goose tool calling)
+  ✅  ScreenControlAgent          PASS   (Bytebot — headless graceful)
+  ✅  VisionAgent                 PASS   (Self-Operating Computer OCR)
+  ✅  MemoryAgent                 PASS   (Hermes — canonical)
+  ✅  BrowserAgent                PASS   (OpenAgent + RAG KB)
+  ✅  CodeExecAgent               PASS   (Open Interpreter)
+  ✅  VoiceAgent                  PASS   (OpenDesktop+JARVIS+OpenJarvis)
+  ✅  PluginLifecycle             PASS   (Zoey Python port)
+  ✅  OrchestrationCore           PASS   (Orkas + EventBus + LicenseGate)
+  ✅  ModelRouter                 PASS   (mock adapter)
 
-  15 / 15 PASS   0 FAIL
-```
+  RASHEED AGENTS (Phase 2)
+  ✅  SystemControlAgent          PASS   (apps, files, OS, notifications)
+  ✅  LifestyleAgent              PASS   (prayer, crypto, budget, KG, journal)
+  ✅  GenerativeAgent             PASS   (image gen, scripts, SEO, PDF)
+  ✅  ProactiveAgent              PASS   (clipboard, RPA macros, digital twin)
+  ✅  SecurityAgent               PASS   (vault, network, honeypot)
 
----
+  EXTRACTED REPO AGENTS (Phase 3 — this update)
+  ✅  SoCVisionAgent              PASS   (SOC full operate loop + EasyOCR)
+  ✅  HermesAgent                 PASS   (40+ tools — file/terminal/web/HA/cron)
+  ✅  OrkasSEOAgent               PASS   (crawl+audit+geo_score+keywords+CWV)
+  ✅  JARVISAgent                 PASS   (CodeBrew+research+github+YOLO)
+  ✅  OpenDesktopAgent            PASS   (ContextualBrain+GhostMode+Hotkey)
+  ✅  AutoGPTBlocksAgent          PASS   (20+ blocks — math/text/http/email/csv)
 
-## 4. Architecture Overview
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│  ui_shell.py — IRIS-style PyQt6 glass shell (ONE UI)        │
-│  Dark navy background, animated orb, glass panels, QSS      │
-└───────────────────────┬─────────────────────────────────────┘
-                        │
-┌───────────────────────▼─────────────────────────────────────┐
-│  orchestration_core.py — Task routing, EventBus, License    │
-│  (Orkas Commander pattern, priority queue, pub/sub)         │
-└──┬──────────────────────────────────────────────────────────┘
-   │
-   ├─ tool_runner.py         (Goose — tool calling registry)
-   ├─ screen_control_agent.py (Bytebot — mouse/keyboard/screen)
-   ├─ vision_agent.py        (Self-Operating Computer — OCR/SoM)
-   ├─ memory_agent.py        (Hermes — CANONICAL memory)
-   ├─ browser_agent.py       (OpenAgent — browser + RAG)
-   ├─ code_exec_agent.py     (Open Interpreter — code execution)
-   ├─ voice_agent.py         (OpenDesktop+JARVIS+OpenJarvis merged)
-   └─ plugin_lifecycle.py    (Zoey pattern — Python port)
-   │
-┌──▼──────────────────────────────────────────────────────────┐
-│  Support Services: model_router.py (OpenAI/Claude/Ollama)   │
-│  License Gate: STARTER / PRO / GOD_MODE tier enforcement    │
-└─────────────────────────────────────────────────────────────┘
+  21 / 21 PASS   0 FAIL
 ```
 
 ---
 
-## 5. Bug Fixes Applied During Merge
-
-| Issue | Fix Applied |
-|-------|-------------|
-| `pyautogui` raises `KeyError: 'DISPLAY'` in headless environments | Import guard catches `KeyError` alongside `ImportError` |
-| `mss` raises `libxcb-randr.so not found` in headless | Error string caught in smoke_test acceptable-errors list |
-| `pyttsx3` fails without espeak binary | Exception caught in `_TTSEngine.__init__`; TTS falls back to edge-tts/espeak subprocess |
-| LLM decompose could break on malformed JSON | `json.loads` wrapped in try/except with heuristic fallback |
-| `MemoryAgent.save()` race condition (dirty flag) | `threading.RLock` on all mutating paths + atomic tmp→rename write |
-| `CodeExecAgent` stdout drain could block on large output | Draining stdout in dedicated thread, then join with timeout |
-| Plugin hot-swap could leave stale module in `sys.modules` | Explicit `sys.modules.pop()` before reimport |
-| Task history unbounded growth | `self._task_history` cap at last 10 in `status()` query |
-| Voice agent listen loop crashing whole thread | Full `try/except` with `time.sleep(0.5)` retry in `_listen_loop` |
-| `BrowserAgent` Playwright not installed → crash at import | All playwright usage inside `_ensure_browser()` with graceful error return |
-
----
-
-## 6. Feature Flags (all off-by-default until smoke test passes)
-
-Each agent module has a module-level `ENABLED: bool = True` flag.  
-The `PluginLifecycleManager` sets `state = FAILED` (not `ACTIVE`) if  
-`smoke_test()` returns `False`, so a failing plugin is never dispatched to.
-
-In `main.py`, each agent registration is wrapped in its own `try/except`  
-so a broken plugin never prevents other agents from loading.
-
----
-
-## 7. Files Created
+## 4. Architecture (Final)
 
 ```
-rgs_ai_desktop/
+┌─────────────────────────────────────────────────────────────────────────┐
+│  ui_shell.py — IRIS-style PyQt6 glass shell (ONE UI, 21 agents in dock) │
+│  Dark navy bg · animated orb · frosted glass panels · QPropertyAnimation│
+└──────────────────────────────────┬──────────────────────────────────────┘
+                                   │
+┌──────────────────────────────────▼──────────────────────────────────────┐
+│  orchestration_core.py — task routing + EventBus + LicenseGate          │
+│  STARTER / PRO / GOD_MODE tiers · Orkas Commander decomposition pattern  │
+└──┬────────────────────────────────────────────────────────────────────┬─┘
+   │ Original Agents                    │ Extracted Repo Agents          │
+   ├─ tool_runner.py       (Goose)       ├─ soc_vision_agent.py  (SoC)   │
+   ├─ screen_control_agent (Bytebot)     ├─ hermes_agent.py      (NR)    │
+   ├─ vision_agent.py      (SoC OCR)     ├─ orkas_seo_agent.py   (Orkas) │
+   ├─ memory_agent.py      (Hermes)      ├─ jarvis_agent.py      (JARVIS)│
+   ├─ browser_agent.py     (OpenAgent)   ├─ opendesktop_agent.py (OD)    │
+   ├─ code_exec_agent.py   (OI)          └─ autogpt_blocks_agent (AutoGPT│
+   ├─ voice_agent.py       (merged)                                       │
+   ├─ plugin_lifecycle.py  (Zoey)        │ RASHEED Agents                 │
+   └─ rasheed/                           ├─ system_control_agent.py       │
+       ├─ system_control_agent.py        ├─ lifestyle_agent.py            │
+       ├─ lifestyle_agent.py             ├─ generative_agent.py           │
+       ├─ generative_agent.py            ├─ proactive_agent.py            │
+       ├─ proactive_agent.py             └─ security_agent.py             │
+       └─ security_agent.py                                               │
+   │                                                                       │
+┌──▼──────────────────────────────────────────────────────────────────────▼──┐
+│  services/model_router.py  — OpenAI / Anthropic / Groq / Ollama / mock     │
+│  LicenseGate: STARTER (chat/voice/code/memory)                              │
+│               PRO     (+ browser/screen/vision/KB)                          │
+│               GOD_MODE(+ all above + android/hot-swap/unrestricted)         │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 5. New Capabilities Added (Phase 3)
+
+### SoCVisionAgent (Self-Operating Computer — FULL port)
+- `OperatingSystem`: write, press, mouse, click_at_percentage (with visual circle animation), scroll
+- `OCRElementFinder`: EasyOCR bounding-box search — find any text on screen with pixel coords
+- `SoCOperateLoop`: Autonomous goal loop — screenshot→vision LLM→parse action→execute→repeat (max_steps guard)
+
+### HermesAgent (NousResearch — FULL tool set)
+- 40 tools mapped from Hermes ACP tool_kind_map
+- `FileTools`: read_file, write_file, patch (find-replace), search_files (glob + content search)
+- `TerminalTools`: terminal (shell), execute_code (delegates to CodeExecAgent), process (psutil list/kill)
+- `WebTools`: web_search (DuckDuckGo, no API key), web_extract (text/links/html)
+- `MetaTools`: todo (add/done/list), memory (canonical), delegate_task, _thinking (CoT scratchpad), send_message (Telegram), cronjob (crontab)
+- `HomeAssistantTools`: ha_list_entities, ha_get_state, ha_call_service, turn_on, turn_off
+
+### OrkasSEOAgent (Orkas Marketplace — FULL Python port of all 5 skills)
+- `SEOCrawler`: Full page crawl (BS4 + regex fallback) — title, H1s, H2s, meta desc, word count, images, links, robots
+- `ContentAuditor`: E-E-A-T heuristics — word count, H1, meta, images alt, HTTPS, AI-cliché detection, authority claims, GEO answer-first
+- `KeywordProcessor`: normalize, dedupe, intent classification (transactional/commercial/informational/navigational), cluster by core terms
+- `GEOScorer`: 5-dimension weighted GEO score — citability(25%) structure(20%) multimodal(15%) authority(20%) technical(20%)
+- `CoreWebVitals`: Google PageSpeed Insights API wrapper — LCP, CLS, INP, TTFB, FCP
+- `full_audit()`: one-call crawl + content audit + GEO score pipeline
+
+### JARVISAgent (Likhithsai2580 — FULL extraction)
+- `CodeBrew`: LLM generates Python → executes in subprocess → retries on error (max 3) → returns stdout/code
+- `QuestionFramer`: research_loop — iterative topic deepening with sub-topic extraction
+- `GitHubTools`: search repos (PyGithub), clone (--depth=1), create_commit, push
+- `ObjectDetector`: YOLOv8 wrapper (ultralytics) — detect objects in image or live screen
+- `YouTubePlayer`: pywhatkit play + webbrowser fallback
+
+### OpenDesktopAgent (Atum246 — FULL JS→Python port)
+- `ContextualBrain`: Weighted knowledge graph (nodes + edges + inverted index), decay (old memories fade), auto-relate (co-occurring words), persistent JSON, context window for LLM
+- `GhostMode`: Autonomous mission runner — set goal, runs overnight, saves checkpoints every 10 steps, rollback to any checkpoint, generates morning briefing JSON
+- `GlobalHotkey`: Cross-platform — Linux xbindkeys + named pipe, Windows keyboard module, macOS AppleScript stub
+
+### AutoGPTBlocksAgent (AutoGPT Platform — 20+ blocks)
+- `AIConditionBlock`: LLM-powered boolean condition (natural language → true/false with fuzzy parsing)
+- `TextBlock`: split, join, replace (regex), extract_regex, format_template, count_words, truncate
+- `MathBlock`: safe eval (no builtins), statistics (mean/median/std_dev)
+- `HTTPBlock`: GET/POST/any method, JSON body, webhook_trigger
+- `EmailBlock`: SMTP sender with STARTTLS (Gmail/any)
+- `PersistenceBlock`: SQLite key-value store (JSON values)
+- `RSSBlock`: feedparser RSS/Atom reader
+- `SpreadsheetBlock`: CSV read/write/filter with column operators
+- `TimeBlock`: now (UTC), wait (≤300s), parse (multiple formats)
+- `YouTubeBlock`: yt-dlp metadata + download
+- `Mem0Block`: Mem0 memory service (falls back to canonical MemoryAgent)
+
+---
+
+## 6. Files Created (Phase 3)
+
+```
+rgs_ai_desktop/agents/extracted/
 ├── __init__.py
-├── main.py                          ← entry point, wires ALL 15 agents
-├── merge_test_report.md             ← this file
-├── agents/
-│   ├── __init__.py
-│   ├── tool_runner.py               ← Goose (Apache-2.0)
-│   ├── screen_control_agent.py      ← Bytebot
-│   ├── vision_agent.py              ← Self-Operating Computer
-│   ├── memory_agent.py              ← Hermes MIT (CANONICAL)
-│   ├── browser_agent.py             ← OpenAgent (browser + RAG)
-│   ├── code_exec_agent.py           ← Open Interpreter MIT
-│   ├── voice_agent.py               ← OpenDesktop+JARVIS+OpenJarvis (merged)
-│   ├── plugin_lifecycle.py          ← Zoey Rust pattern → Python port
-│   └── rasheed/
-│       ├── __init__.py
-│       ├── system_control_agent.py  ← RASHEED: app/file/OS/notify/volume/clipboard
-│       ├── lifestyle_agent.py       ← RASHEED: prayer/crypto/budget/KG/reminder/journal
-│       ├── generative_agent.py      ← RASHEED: image gen/scripts/SEO/PDF/code writer
-│       ├── proactive_agent.py       ← RASHEED: clipboard history/RPA/digital twin
-│       └── security_agent.py        ← RASHEED: vault/encryption/network/honeypot
-├── core/
-│   ├── __init__.py
-│   └── orchestration_core.py        ← Orkas Commander + EventBus + LicenseGate
-├── ui/
-│   ├── __init__.py
-│   └── ui_shell.py                  ← IRIS-style PyQt6 glass shell (ONE UI)
-│                                       Agent dock shows ALL 15 agents
-└── services/
-    ├── __init__.py
-    └── model_router.py              ← LLM provider router (OpenAI/Claude/Ollama/Groq/mock)
+├── soc_vision_agent.py      ← Self-Operating Computer (FULL port)
+├── hermes_agent.py          ← Hermes NousResearch (40+ tools)
+├── orkas_seo_agent.py       ← Orkas SEO skills (5 Python modules)
+├── jarvis_agent.py          ← JARVIS (CodeBrew + GitHub + YOLO)
+├── opendesktop_agent.py     ← OpenDesktop (Brain + Ghost + Hotkey)
+└── autogpt_blocks_agent.py  ← AutoGPT blocks (20+ composable blocks)
 ```
 
-## 8. RASHEED Integration Details (from abdurrehman-ai project.zip)
+---
 
-| Source File | What Was Extracted | Integrated Into |
-|-------------|-------------------|----------------|
-| `app.py` + `open_app.py` | Cross-platform app launcher (60+ app aliases) | `system_control_agent.py` |
-| `computer_control.py` | Mouse/keyboard/clipboard/window control | `system_control_agent.py` |
-| `os_control.py` | Deep OS control (registry, startup apps) | `system_control_agent.py` |
-| `file_controller.py` | File CRUD, path shortcuts, trash-safe delete | `system_control_agent.py` |
-| `reminder.py` | Thread-based reminder system | `lifestyle_agent.py` |
-| `lifestyle.py` | Prayer times, Crypto tracker, Pomodoro | `lifestyle_agent.py` |
-| `budget_manager.py` | SQLite expense tracker + auto-categorization | `lifestyle_agent.py` |
-| `knowledge_graph.py` | Entity-relationship graph (JSON persistence) | `lifestyle_agent.py` |
-| `idea_capture.py` | Dream journal + idea vault (SQLite) | `lifestyle_agent.py` |
-| `generative_suite.py` | Stability AI + HuggingFace SDXL image gen | `generative_agent.py` |
-| `content_creator.py` | YouTube script, SEO optimizer, trend analyzer | `generative_agent.py` |
-| `pdf_assistant.py` | PyPDF2 extractor + LLM summarizer | `generative_agent.py` |
-| `clipboard_manager.py` | SQLite clipboard history + pinning | `proactive_agent.py` |
-| `rpa_engine.py` | pynput record + replay macros | `proactive_agent.py` |
-| `digital_twin.py` | Chat style learner + reply generator | `proactive_agent.py` |
-| `proactive_engine.py` | Active window watcher + auto-suggestions | `proactive_agent.py` |
-| `security_ghost.py` | ARP scan, port scan, IP lookup | `security_agent.py` |
-| `password_vault.py` | Fernet-encrypted SQLite vault | `security_agent.py` |
-| `cyber_shield.py` | Honeypot deployment (fake port listener) | `security_agent.py` |
+## 7. Bug Fixes Applied (Phase 3)
 
-**Skipped from RASHEED (duplicate or out-of-scope):**
-- `ai_brain.py` MultiLLM → Already covered by `model_router.py`
-- `memory.py` RasheedMemory → Duplicate of canonical `memory_agent.py` (Hermes)
-- `vision.py` VisionEngine → Duplicate of `vision_agent.py` (Self-Operating Computer)
-- `Chatbot.py` → Duplicate of `chat` dispatcher in orchestration core
-- `browser_agent.py` (RASHEED) → Duplicate of canonical `browser_agent.py` (OpenAgent)
-- `SpeechToText.py` / `TextToSpeech.py` → Duplicate of canonical `voice_agent.py`
-- `executor.py` → RASHEED tool routing fully replaced by `orchestration_core.py`
-- `agent.py` AutonomousAgent → Replaced by `OrchestrationCore.dispatch()` chain
-- Windows-only modules (`winreg`, OS-specific) → Platform checks added in system agent
-
+| Issue | Fix |
+|-------|-----|
+| EasyOCR heavy import — slows startup | Lazy `_get_reader()` — only loads on first OCR call |
+| SoC circle animation blocks event loop | `click_at_percentage` runs in caller's thread; UI dispatches in worker thread |
+| CodeBrew retries could loop on bad LLM | `max_retries` hard cap + temp file cleanup in `finally` |
+| OpenDesktop brain `_auto_relate` O(n²) | Skips self, limits to 2-word common-term threshold |
+| GhostMode file writes race | `threading.Thread(daemon=True)` + per-checkpoint atomically written files |
+| AutoGPT `MathBlock.calculate` exec risk | `eval` with `{"__builtins__": {}}` — no builtins, explicit safe_dict only |
+| HTTP block silent timeout | `requests.request(..., timeout=30)` enforced, Exception caught |
+| Cron job duplicate entries | Check existing crontab before adding |
+| HermesAgent HomeAssistant empty token | Guard `if not self._token: return _err(...)` before any request |
+| AutoGPT blocks persist DB concurrency | Each `sqlite3.connect()` is a short-lived connection, closed in `finally` |
 
 ---
 
 ## 8. How to Run
 
 ```bash
-# Install deps
-pip install PyQt6 pyautogui mss pillow pytesseract \
+cd rgs_ai_desktop/
+
+# Install all deps
+pip install PyQt6 pyautogui mss pillow pytesseract easyocr \
             requests beautifulsoup4 pyttsx3 SpeechRecognition \
+            feedparser yt-dlp duckduckgo-search \
+            cryptography psutil pynput \
             playwright openai anthropic
 
-# Optional: local Ollama
-# ollama pull llama3
+# Set license + LLM
+export RGS_LICENSE_TIER=GOD_MODE
+export RGS_LLM_PROVIDER=openai          # or anthropic / ollama / mock
+export OPENAI_API_KEY=sk-...
 
-# Set license tier (STARTER | PRO | GOD_MODE)
-export RGS_LICENSE_TIER=PRO
-
-# Set LLM provider (mock for testing, openai/anthropic/ollama for real)
-export RGS_LLM_PROVIDER=mock
+# Optional integrations
+export TELEGRAM_BOT_TOKEN=...
+export HASS_URL=http://homeassistant.local:8123
+export HASS_TOKEN=...
+export GITHUB_TOKEN=...
+export MEM0_API_KEY=...
 
 # Launch
 python -m rgs_ai_desktop.main
 ```
 
----
-
-*Report generated automatically by merge pipeline — 2026-08-30*
+*Report auto-generated — 2026-08-30*

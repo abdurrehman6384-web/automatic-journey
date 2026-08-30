@@ -347,6 +347,11 @@ def main():
     log.info("RGS AI Desktop starting…")
     core = build_orchestration_core()
 
+    # Wire extracted repo agents
+    from rgs_ai_desktop.services.model_router import ModelRouter
+    llm = ModelRouter.from_env()
+    build_extracted_agents(core, llm)
+
     # Launch the IRIS shell
     from rgs_ai_desktop.ui.ui_shell import launch
     launch(orchestration_core=core)
@@ -354,3 +359,157 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+def build_extracted_agents(core, llm):
+    """Wire all extracted repo agents into orchestration core."""
+    from rgs_ai_desktop.core.orchestration_core import LicenseTier
+
+    # ── SoCVisionAgent (Self-Operating Computer full loop) ───────────────────
+    try:
+        from rgs_ai_desktop.agents.extracted.soc_vision_agent import (
+            LOOP as soc_loop, OS_CTRL, OCR_FIND, smoke_test as soc_test
+        )
+        if soc_test():
+            soc_loop.set_llm(llm.as_callable())
+            def _soc_dispatch(goal: str, **kw):
+                action = kw.get("action", "screenshot")
+                if action == "run":
+                    return soc_loop.run(goal, max_steps=kw.get("max_steps", 10))
+                elif action == "click":
+                    return OS_CTRL.click_at_percentage(kw["x"], kw["y"])
+                elif action == "write":
+                    return OS_CTRL.write(kw.get("text", goal))
+                elif action == "press":
+                    return OS_CTRL.press(kw.get("keys", []))
+                elif action == "find_text":
+                    import tempfile, base64
+                    sc = OS_CTRL.screenshot()
+                    if not sc["ok"]:
+                        return sc
+                    with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as f:
+                        import base64 as b64
+                        f.write(b64.b64decode(sc["result"]["base64"]))
+                        return OCR_FIND.find_text(f.name, kw.get("search_text", goal))
+                return OS_CTRL.screenshot()
+            core.register_agent("soc_vision", capability="screen_control",
+                fn=_soc_dispatch,
+                meta={"description": "Self-Operating Computer — full visual operate loop"})
+    except Exception as exc:
+        log.error("SoCVisionAgent load failed: %s", exc)
+
+    # ── HermesAgent (NousResearch full tool set) ─────────────────────────────
+    try:
+        from rgs_ai_desktop.agents.extracted.hermes_agent import (
+            AGENT as hermes, smoke_test as hermes_test
+        )
+        if hermes_test():
+            def _hermes_dispatch(goal: str, **kw):
+                tool = kw.pop("tool", "terminal")
+                if not kw and tool in ("web_search", "web_extract"):
+                    kw["query" if tool == "web_search" else "url"] = goal
+                elif not kw and tool == "terminal":
+                    kw["command"] = goal
+                elif not kw and tool in ("read_file","write_file","search_files"):
+                    kw["path"] = goal
+                return hermes.dispatch(tool, **kw)
+            core.register_agent("hermes", capability="tool_calling",
+                fn=_hermes_dispatch,
+                meta={"description": "Hermes (NousResearch) — 40+ tools: files, terminal, web, HA, cron"})
+    except Exception as exc:
+        log.error("HermesAgent load failed: %s", exc)
+
+    # ── OrkasSEO Agent ────────────────────────────────────────────────────────
+    try:
+        from rgs_ai_desktop.agents.extracted.orkas_seo_agent import (
+            AGENT as orkas, smoke_test as orkas_test
+        )
+        if orkas_test():
+            def _orkas_dispatch(goal: str, **kw):
+                action = kw.pop("action", "full_audit")
+                if action == "full_audit" and "url" not in kw:
+                    kw["url"] = goal
+                elif action == "process_keywords" and "keywords" not in kw:
+                    kw["keywords"] = [goal]
+                return orkas.dispatch(action, **kw)
+            core.register_agent("orkas_seo", capability="tool_calling",
+                fn=_orkas_dispatch,
+                meta={"description": "Orkas SEO — crawl, content audit, GEO score, keywords, CWV"})
+    except Exception as exc:
+        log.error("OrkasSEO load failed: %s", exc)
+
+    # ── JARVISAgent ───────────────────────────────────────────────────────────
+    try:
+        from rgs_ai_desktop.agents.extracted.jarvis_agent import (
+            AGENT as jarvis, smoke_test as jarvis_test
+        )
+        if jarvis_test():
+            jarvis.set_llm(llm.as_callable())
+            def _jarvis_dispatch(goal: str, **kw):
+                action = kw.pop("action", "frame_questions")
+                if action in ("frame_questions", "research_loop") and "topic" not in kw:
+                    kw["topic"] = goal
+                elif action == "codebrew" and "task" not in kw:
+                    kw["task"] = goal
+                elif action == "play_youtube" and "query" not in kw:
+                    kw["query"] = goal
+                elif action == "github_search" and "query" not in kw:
+                    kw["query"] = goal
+                return jarvis.dispatch(action, **kw)
+            core.register_agent("jarvis", capability="tool_calling",
+                fn=_jarvis_dispatch,
+                meta={"description": "JARVIS — CodeBrew, question framer, GitHub, YOLOv8, YouTube"})
+    except Exception as exc:
+        log.error("JARVISAgent load failed: %s", exc)
+
+    # ── OpenDesktopAgent (ContextualBrain + GhostMode + GlobalHotkey) ────────
+    try:
+        from rgs_ai_desktop.agents.extracted.opendesktop_agent import (
+            AGENT as opendesk, smoke_test as od_test
+        )
+        if od_test():
+            def _od_dispatch(goal: str, **kw):
+                action = kw.pop("action", "brain_search")
+                if action in ("brain_add",) and "content" not in kw:
+                    kw["content"] = goal
+                    kw.setdefault("node_type", "fact")
+                elif action in ("brain_search","brain_context") and "query" not in kw:
+                    kw["query"] = goal
+                elif action == "ghost_start" and "goal" not in kw:
+                    kw["goal"] = goal
+                return opendesk.dispatch(action, **kw)
+            core.register_agent("opendesktop", capability="tool_calling",
+                fn=_od_dispatch,
+                meta={"description": "OpenDesktop — ContextualBrain, GhostMode night missions, GlobalHotkey"})
+    except Exception as exc:
+        log.error("OpenDesktopAgent load failed: %s", exc)
+
+    # ── AutoGPT Blocks Agent ──────────────────────────────────────────────────
+    try:
+        from rgs_ai_desktop.agents.extracted.autogpt_blocks_agent import (
+            AGENT as agpt, smoke_test as agpt_test
+        )
+        if agpt_test():
+            agpt.set_llm(llm.as_callable())
+            def _agpt_dispatch(goal: str, **kw):
+                block = kw.pop("block", "calculate")
+                if block == "calculate" and "expression" not in kw:
+                    kw["expression"] = goal
+                elif block == "text_split" and "text" not in kw:
+                    kw["text"] = goal
+                elif block in ("http_get","http_post") and "url" not in kw:
+                    kw["url"] = goal
+                elif block == "rss_fetch" and "feed_url" not in kw:
+                    kw["feed_url"] = goal
+                elif block == "time_parse" and "date_string" not in kw:
+                    kw["date_string"] = goal
+                return agpt.dispatch(block, **kw)
+            core.register_agent("autogpt_blocks", capability="tool_calling",
+                fn=_agpt_dispatch,
+                meta={"description": "AutoGPT Blocks — AI condition, text, math, HTTP, email, KV, RSS, CSV, time, YouTube, Mem0"})
+    except Exception as exc:
+        log.error("AutoGPTBlocksAgent load failed: %s", exc)
+
+    log.info("Extracted agents loaded. All registered: %s", core.agent_names())
+
+
