@@ -28,20 +28,26 @@ registers AG2, OpenHands, Firecrawl, Firecrawl Web-Agent and Crawl4AI. Batch 03
 registers Mem0, OpenClaw, TruffleHog, Gitleaks and the native control/audit
 review. Batch 04 registers Goose, Orkas, Bytebot, OpenDesktop, Hermes Agent,
 OpenAgent, IRIS-GO, IRIS-Mini, IRIS-Zero and Zoey, plus reference-only IRIS-AI
-and IRIS-X records. They can prepare bounded, policy-screened plans, but the
-backend will not install or execute an upstream runtime. OpenHands has no
-container/sandbox path; OpenClaw has no gateway/channel/skill path; Batch 04
-computer-use lanes have no container, screen, input, voice, vision, browser or
-shell path; secret scanners have no file or Git-history scan path. Firecrawl,
-TruffleHog, IRIS-GO, IRIS-Mini and IRIS-Zero are
-`license-review-required`; Bytebot is archived-upstream; IRIS-AI and IRIS-X are
-reference-only. Any future adapter must return proposed work through Jinwoo's
-policy, approval, workspace and audit boundaries. See
+and IRIS-X records. Batch 05 registers lawful media, defensive-security,
+document/research, coding, connector/MCP, browser, multi-agent, science,
+Android and source-intake lanes. They can prepare bounded, policy-screened
+plans, but the backend will not install or execute an upstream runtime.
+OpenHands has no container/sandbox path; OpenClaw has no gateway/channel/skill
+path; Batch 04/05 computer-use lanes have no container, device, screen, input,
+voice, vision, browser or shell path; secret scanners have no file or Git-history
+scan path. Firecrawl, TruffleHog, IRIS-GO, IRIS-Mini, IRIS-Zero, Anthropic
+Skills, WordPress Agent Skill Prototypes and Official MCP Servers are
+`license-review-required`; Bytebot is archived-upstream; IRIS-AI, IRIS-X,
+Awesome MCP Servers and 500 AI Agents Projects are reference-only; Open-AutoGLM
+is queued for a separate Android phase; EnvAgent needs an exact source URL.
+Any future adapter must return proposed work through Jinwoo's policy, approval,
+workspace and audit boundaries. See
 [`FRAMEWORK_ADAPTERS.md`](FRAMEWORK_ADAPTERS.md),
 [`INTEGRATION_BATCH_01.md`](INTEGRATION_BATCH_01.md),
 [`INTEGRATION_BATCH_02.md`](INTEGRATION_BATCH_02.md),
-[`INTEGRATION_BATCH_03.md`](INTEGRATION_BATCH_03.md), and
-[`INTEGRATION_BATCH_04.md`](INTEGRATION_BATCH_04.md).
+[`INTEGRATION_BATCH_03.md`](INTEGRATION_BATCH_03.md),
+[`INTEGRATION_BATCH_04.md`](INTEGRATION_BATCH_04.md), and
+[`INTEGRATION_BATCH_05.md`](INTEGRATION_BATCH_05.md).
 
 ## Tank research gate
 
@@ -67,8 +73,8 @@ controls.
 
 The Jinwoo-native lane is a zero-side-effect `POST /api/control/review`
 report. It verifies capacity, native ownership, disabled external runtimes,
-Batch 03/04 inventory, restricted source/licence gates, read-only workspace
-status and local audit availability. It cannot enable a runtime or read
+Batch 03/04/05 inventory, restricted source/licence/review gates, read-only
+workspace status and local audit availability. It cannot enable a runtime or read
 workspace data; its audit entry contains aggregate metadata only.
 
 ## Why Rust and Go are not initial services

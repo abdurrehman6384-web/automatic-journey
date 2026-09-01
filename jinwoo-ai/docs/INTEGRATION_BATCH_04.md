@@ -126,9 +126,11 @@ of these must be separately implemented and approved:
 | Bytebot | Identify a maintained source/fork and complete security/support review before even a sandboxed runtime proposal |
 | IRIS-AI / IRIS-X | Remain reference-only unless the project owner later approves a new, documented source-compatibility decision; proprietary cores stay excluded |
 
-## Final boundary
+## Continuing boundary
 
-Batch 04 expands Jinwoo's visible **capability catalogue**, not its default
-power. No integration is activated merely because it appears in the UI or has a
-safe dry-run plan. Jinwoo continues to be local-first, approval-gated,
+Batch 04 remains a controlled capability catalogue. The subsequently
+owner-requested Batch 05 specialist-skill catalogue is documented in
+[`INTEGRATION_BATCH_05.md`](INTEGRATION_BATCH_05.md) and remains non-executing.
+No integration is activated merely because it appears in the UI or has a safe
+dry-run plan. Jinwoo continues to be local-first, approval-gated,
 workspace-confined and auditable.

@@ -14,8 +14,8 @@ An original, local-first desktop assistant foundation for the **Jinwoo AI / Shad
 - redacted local audit trail for mission routing, approvals, completion and Memory Vault changes;
 - Igris Workspace Guard: user-selected, read-only folder listing and bounded source diagnostics with path-escape protection;
 - provider registry for Ollama, LM Studio, Claude, GLM/Z.ai, Hugging Face and optional Mem0;
-- controlled Batch 01–04 adapter/advanced-skill registry for Swarms, Agency-Swarm, Ruflo, LangGraph, CrewAI, AG2, OpenHands, Firecrawl, Firecrawl Web-Agent, Crawl4AI, Mem0, OpenClaw, TruffleHog, Gitleaks, Goose, Orkas, Bytebot, OpenDesktop, Hermes Agent, OpenAgent, IRIS-GO, IRIS-Mini, IRIS-Zero and Zoey; every external lane is policy-gated and cannot execute an upstream runtime in V1;
-- IRIS-AI and IRIS-X are registered as reference-only advanced-skill sources; their proprietary cores are not copied, linked, installed or invoked;
+- controlled Batch 01–05 adapter/advanced-skill registry: core orchestration, coding, research, memory, security, media, document, connector, browser, MCP, science and mobile-companion lanes all remain policy-gated and non-executing in V1;
+- Batch 05 registers lawful AI-video, defensive-security, document/research, engineering, connector/MCP, browser, multi-agent and science skill contracts; IRIS-AI, IRIS-X, Awesome MCP Servers and 500 AI Agents Projects remain reference-only, while the required licence/source gates stay locked;
 - Tank's no-fetch Research Gate for validating explicit public HTTPS source plans without opening a URL, starting a browser or calling a crawler;
 - Greed's no-scan secret-review preflight for selected workspaces, with no file/history read, scanner launch or credential disclosure;
 - Jinwoo Native Control & Audit Review for zero-side-effect local checks of capacity, disabled runtimes, licence gates, workspace containment and audit availability;
@@ -93,9 +93,14 @@ OpenHands, Firecrawl, Firecrawl Web-Agent and Crawl4AI; Batch 03 contains Mem0,
 OpenClaw, TruffleHog, Gitleaks and Jinwoo Native Control & Audit Review; Batch 04
 contains the owner-requested advanced-skill lanes Goose, Orkas, Bytebot,
 OpenDesktop, Hermes Agent, OpenAgent, IRIS-GO, IRIS-Mini, IRIS-Zero, Zoey and the
-reference-only IRIS-AI / IRIS-X records. External adapters can prepare a bounded,
-policy-screened dry run through `POST /api/frameworks/{id}/dry-run`, but no
-upstream runtime is invoked or enabled in V1.
+reference-only IRIS-AI / IRIS-X records. Batch 05 contains lawful media,
+defensive-security, document/research, engineering, connector/MCP, browser,
+science and mobile-companion skill lanes; see
+[`docs/INTEGRATION_BATCH_05.md`](docs/INTEGRATION_BATCH_05.md) for the full
+source matrix and excluded CapCut patcher boundary. External adapters can
+prepare a bounded, policy-screened dry run through
+`POST /api/frameworks/{id}/dry-run`, but no upstream runtime is invoked or
+enabled in V1.
 
 `POST /api/control/review` runs the native control lane: a zero-side-effect local
 control check that cannot enable a runtime, scan files or modify policy.
@@ -110,10 +115,14 @@ approved retrieval implementation later. Firecrawl and TruffleHog are explicitly
 blocked from activation pending AGPL-3.0 compatibility decisions. IRIS-GO,
 IRIS-Mini and IRIS-Zero are blocked pending their individual licence decisions;
 Bytebot is marked archived-upstream; IRIS-AI and IRIS-X are reference-only.
-See [`docs/INTEGRATION_BATCH_01.md`](docs/INTEGRATION_BATCH_01.md),
+Batch 05 also locks Anthropic Skills, WordPress Agent Skill Prototypes and
+Official MCP Servers pending individual licence/component review; it leaves
+Open-AutoGLM queued for a separate Android phase and EnvAgent pending an exact
+source URL. See [`docs/INTEGRATION_BATCH_01.md`](docs/INTEGRATION_BATCH_01.md),
 [`docs/INTEGRATION_BATCH_02.md`](docs/INTEGRATION_BATCH_02.md),
 [`docs/INTEGRATION_BATCH_03.md`](docs/INTEGRATION_BATCH_03.md),
-[`docs/INTEGRATION_BATCH_04.md`](docs/INTEGRATION_BATCH_04.md), and
+[`docs/INTEGRATION_BATCH_04.md`](docs/INTEGRATION_BATCH_04.md),
+[`docs/INTEGRATION_BATCH_05.md`](docs/INTEGRATION_BATCH_05.md), and
 [`docs/FRAMEWORK_ADAPTERS.md`](docs/FRAMEWORK_ADAPTERS.md) before enabling any
 adapter.
 

@@ -50,7 +50,10 @@ class ApiTests(unittest.TestCase):
     def test_framework_batches_are_visible_but_optional_adapters_are_disabled(self) -> None:
         response = self.client.get("/api/frameworks")
         self.assertEqual(response.status_code, 200)
-        frameworks = {item["id"]: item for item in response.json()["frameworks"]}
+        framework_items = response.json()["frameworks"]
+        self.assertEqual(len(framework_items), 49)
+        frameworks = {item["id"]: item for item in framework_items}
+        self.assertEqual(len(frameworks), 49)
         self.assertEqual(
             set(frameworks),
             {
@@ -59,6 +62,10 @@ class ApiTests(unittest.TestCase):
                 "mem0", "openclaw", "trufflehog", "gitleaks", "jinwoo-native-control-audit",
                 "goose", "orkas", "bytebot", "open-desktop", "hermes-agent", "openagent", "iris-go", "iris-mini",
                 "iris-zero", "zoey", "iris-ai", "iris-x",
+                "ai-video-editor", "ai-video-editor-pipeline", "watch-video-skill", "videodb-skills", "anthropic-cybersecurity-skills",
+                "anthropic-skills", "ai-research-skills", "addy-osmani-agent-skills", "wordpress-agent-skills", "composio", "stagehand",
+                "langchain-community", "official-mcp-servers", "awesome-mcp-servers", "metagpt", "autogen", "pydantic-ai",
+                "scientific-agent-skills", "open-autoglm", "500-ai-agent-projects", "envagent-source-intake",
             },
         )
         self.assertTrue(frameworks["jinwoo-native"]["execution_enabled"])
@@ -96,6 +103,24 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(frameworks["iris-ai"]["implementation_status"], "reference-only")
         self.assertEqual(frameworks["iris-ai"]["state"], "reference-only")
         self.assertEqual(frameworks["iris-x"]["activation_boundary"], "reference-only")
+        batch_five = (
+            "ai-video-editor", "ai-video-editor-pipeline", "watch-video-skill", "videodb-skills", "anthropic-cybersecurity-skills",
+            "anthropic-skills", "ai-research-skills", "addy-osmani-agent-skills", "wordpress-agent-skills", "composio", "stagehand",
+            "langchain-community", "official-mcp-servers", "awesome-mcp-servers", "metagpt", "autogen", "pydantic-ai",
+            "scientific-agent-skills", "open-autoglm", "500-ai-agent-projects", "envagent-source-intake",
+        )
+        for adapter in batch_five:
+            self.assertFalse(frameworks[adapter]["execution_enabled"])
+            self.assertEqual(frameworks[adapter]["integration_batch"], 5)
+            self.assertTrue(frameworks[adapter]["capabilities"])
+        self.assertEqual(frameworks["ai-video-editor"]["category"], "media")
+        self.assertEqual(frameworks["anthropic-cybersecurity-skills"]["activation_boundary"], "read-only")
+        self.assertEqual(frameworks["anthropic-skills"]["implementation_status"], "license-review-required")
+        self.assertEqual(frameworks["official-mcp-servers"]["implementation_status"], "license-review-required")
+        self.assertEqual(frameworks["awesome-mcp-servers"]["state"], "reference-only")
+        self.assertEqual(frameworks["open-autoglm"]["implementation_status"], "queued")
+        self.assertEqual(frameworks["envagent-source-intake"]["implementation_status"], "source-review-required")
+        self.assertNotIn("capcut-patcher", frameworks)
         self.assertTrue(frameworks["jinwoo-native-control-audit"]["execution_enabled"])
         self.assertEqual(frameworks["jinwoo-native-control-audit"]["state"], "canonical")
 
@@ -177,13 +202,49 @@ class ApiTests(unittest.TestCase):
         self.assertIn("reference-only", reference.json()["summary"])
         self.assertIn("Do not copy", " ".join(reference.json()["next_steps"]))
 
+    def test_batch_five_specialist_skill_plans_remain_non_executing_and_apply_boundaries(self) -> None:
+        video = self.client.post(
+            "/api/frameworks/watch-video-skill/dry-run",
+            json={"prompt": "Prepare a local video feedback plan", "requested_agents": 8},
+        )
+        defensive = self.client.post(
+            "/api/frameworks/anthropic-cybersecurity-skills/dry-run",
+            json={"prompt": "Prepare a defensive security controls review", "requested_agents": 3},
+        )
+        browser = self.client.post(
+            "/api/frameworks/stagehand/dry-run",
+            json={"prompt": "Prepare a browser automation boundary", "requested_agents": 3},
+        )
+        catalogue = self.client.post(
+            "/api/frameworks/500-ai-agent-projects/dry-run",
+            json={"prompt": "Compare public agent use cases", "requested_agents": 3},
+        )
+        source_intake = self.client.post(
+            "/api/frameworks/envagent-source-intake/dry-run",
+            json={"prompt": "Plan a sandbox architecture review", "requested_agents": 3},
+        )
+        self.assertEqual(video.status_code, 200)
+        self.assertFalse(video.json()["external_runtime_invoked"])
+        self.assertIn("user-supplied", " ".join(video.json()["next_steps"]))
+        self.assertEqual(defensive.status_code, 200)
+        self.assertFalse(defensive.json()["external_runtime_invoked"])
+        self.assertIn("defensive", " ".join(defensive.json()["next_steps"]).casefold())
+        self.assertEqual(browser.status_code, 200)
+        self.assertFalse(browser.json()["external_runtime_invoked"])
+        self.assertIn("Do not launch a browser", " ".join(browser.json()["next_steps"]))
+        self.assertEqual(catalogue.status_code, 200)
+        self.assertIn("reference-only", catalogue.json()["summary"])
+        self.assertEqual(source_intake.status_code, 200)
+        self.assertIn("source-intake", source_intake.json()["summary"])
+        self.assertFalse(source_intake.json()["external_runtime_invoked"])
+
     def test_native_control_review_reports_invariants_and_writes_redacted_metadata(self) -> None:
         response = self.client.post("/api/control/review")
         self.assertEqual(response.status_code, 200)
         payload = response.json()
         self.assertTrue(payload["all_passed"])
         self.assertFalse(payload["external_runtime_invoked"])
-        self.assertEqual(len(payload["checks"]), 8)
+        self.assertEqual(len(payload["checks"]), 9)
         self.assertTrue(all(check["passed"] for check in payload["checks"]))
         self.assertIn("external runtime", payload["summary"].casefold())
         audit = self.client.get("/api/audit").json()

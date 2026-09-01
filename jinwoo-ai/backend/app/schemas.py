@@ -67,11 +67,11 @@ class FrameworkStatus(BaseModel):
     label: str
     runtime: Literal[
         "builtin", "python", "typescript-mcp", "typescript-service", "container-sidecar", "go-cli", "go-service",
-        "rust-cli", "desktop-client", "mobile-client",
+        "rust-cli", "desktop-client", "mobile-client", "skill-catalog",
     ]
     category: Literal[
         "orchestration", "workflow", "coding", "research", "web-collection", "memory", "automation", "security",
-        "governance", "computer-use", "reference",
+        "governance", "computer-use", "reference", "media",
     ]
     integration_batch: int
     owner_commander: str
@@ -79,7 +79,7 @@ class FrameworkStatus(BaseModel):
     source_url: str | None = None
     state: FrameworkState
     implementation_status: Literal[
-        "active", "contract-ready", "license-review-required", "reference-only", "archived-upstream", "queued",
+        "active", "contract-ready", "license-review-required", "source-review-required", "reference-only", "archived-upstream", "queued",
     ]
     execution_enabled: bool
     capabilities: list[str] = Field(default_factory=list, max_length=8)

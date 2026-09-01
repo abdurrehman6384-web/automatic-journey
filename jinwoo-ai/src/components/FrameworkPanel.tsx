@@ -14,6 +14,7 @@ const runtimeIcon = (runtime: FrameworkStatus['runtime']) => {
   if (runtime === 'container-sidecar') return '▣'
   if (runtime === 'desktop-client') return '▤'
   if (runtime === 'mobile-client') return '▯'
+  if (runtime === 'skill-catalog') return '✦'
   if (runtime === 'go-cli' || runtime === 'go-service' || runtime === 'rust-cli') return '⌁'
   if (runtime === 'typescript-mcp' || runtime === 'typescript-service') return '⌘'
   return '◈'
@@ -67,7 +68,7 @@ export function FrameworkPanel({ frameworks, dryRun, busy, onDryRun }: Framework
                 <small className="framework-meta">{framework.integrationBatch ? `Batch ${framework.integrationBatch}` : 'Core'} · {framework.ownerCommander} · {framework.implementationStatus.replaceAll('-', ' ')}{framework.capabilities?.length && framework.activationBoundary ? <> · {framework.activationBoundary.replaceAll('-', ' ')}</> : null} · {framework.license}{framework.sourceUrl ? <> · <a href={framework.sourceUrl} target="_blank" rel="noreferrer">Source</a></> : null}</small>
                 {framework.id === 'jinwoo-native-control-audit'
                   ? <small className="framework-review-button">Use the local control review below.</small>
-                  : framework.integrationBatch > 0 && framework.implementationStatus !== 'queued' && <button className="framework-review-button" type="button" onClick={() => setSelectedId(framework.id)} disabled={busy}>{reviewLabel}</button>}
+                  : framework.integrationBatch > 0 && !['queued', 'source-review-required'].includes(framework.implementationStatus) && <button className="framework-review-button" type="button" onClick={() => setSelectedId(framework.id)} disabled={busy}>{reviewLabel}</button>}
               </div>
               <span className={`framework-state framework-state--${framework.state}`}>
                 {stateLabel}

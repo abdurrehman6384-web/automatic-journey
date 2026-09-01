@@ -41,6 +41,24 @@ authorise a network, shell, browser, desktop or mobile action.
 | 04 | Zoey | Ashborn | Privacy-first Rust local-agent patterns | Sandboxed review only; no binary/service/voice/provider start |
 | 04 | IRIS-AI | Ashborn | Desktop voice, memory and vision UX concepts | **Reference only**; proprietary core/source/runtime excluded |
 | 04 | IRIS-X | Ashborn | Future mobile-companion, voice and visual-context UX concepts | **Reference only**; proprietary engine/source/runtime excluded |
+| 05 | AI Video Editor / AI Video Editor Pipeline | Tusk | Lawful local timeline, vision-assisted edit and export patterns | Bounded plan only; no editor/render/model/upload/protected-content route |
+| 05 | Watch Video Skill / VideoDB Skills | Tusk | Authorised local video analysis, feedback and workflow patterns | Bounded plan only; no URL download, ingest, stream, service or media write |
+| 05 | Anthropic Cybersecurity Skills (community) | Greed | Defensive standards mapping and threat-model patterns | Read-only defensive plan only; no targeting, scan, exploit or credential route |
+| 05 | Anthropic Skills | Jima | Dynamic document, spreadsheet and workflow patterns | **Licence review required**; no script/component/file-production route |
+| 05 | AI Research SKILLs | Blades | AI research, evaluation, infrastructure and paper patterns | Bounded plan only; no training/model/data/experiment/file-production route |
+| 05 | Addy Osmani Agent Skills | Igris | API design, UI engineering and testing patterns | Bounded plan only; no hook/plugin/IDE/code/test/dependency route |
+| 05 | WordPress Agent Skill Prototypes | Igris | WordPress theme/site and IDE/MCP patterns | **Licence review required**; no Studio/CLI/MCP/site/deploy/share/sync route |
+| 05 | Composio | Fang | Connector, OAuth and external-action policy patterns | Bounded plan only; no toolkit/account/token/connector/action route |
+| 05 | Stagehand | Nox | Browser-agent workflow patterns | Bounded plan only; no browser/URL/cookie/login/form/data-transfer route |
+| 05 | LangChain Community Tools | Fang | Tool, retrieval and structured-workflow patterns | Bounded plan only; no community tool/network/filesystem route |
+| 05 | Official MCP Servers | Fang | Individual MCP capability and server-boundary patterns | **Licence review required**; no MCP server/service/connection route |
+| 05 | Awesome MCP Servers | Fang | Community MCP discovery list | **Reference only**; every downstream server needs individual review |
+| 05 | MetaGPT / Microsoft AutoGen | Beru / Bellion | Multi-agent role and event-flow patterns | Bounded plan only; no independent state machine/agent/provider/tool route |
+| 05 | Pydantic AI | Igris | Typed production-agent and structured-output patterns | Bounded plan only; no provider/tool/file/network route |
+| 05 | Scientific Agent Skills | Tank | Scientific research/reproducibility/database-boundary patterns | Bounded plan only; no database/data upload/experiment route |
+| 05 | Open-AutoGLM | Nox | Future Android screen-understanding and mobile-action design | **Queued companion phase**; no device/Accessibility/capture/input route |
+| 05 | 500 AI Agents Projects | Ashborn | Agent use-case and blueprint catalogue | **Reference only**; linked projects need individual review |
+| 05 | EnvAgent | Igris | Requested sandbox and runtime-bug-review capability | **Source review required**; exact GitHub URL/licence not yet supplied |
 
 `GET /api/frameworks` exposes each record's runtime/category, discovery state,
 licence, source URL, owner, capability tags, activation boundary and contract
@@ -82,8 +100,9 @@ rate/depth/size/domain limits, and retain cited data locally.
 `POST /api/control/review` and its Settings panel provide a zero-side-effect
 local review. It makes no network request, file read, tool call or
 execution-state change. It verifies final Army capacity, native ownership,
-external-runtime locks, Batch 03 and Batch 04 inventories, restricted source
-and licence gates, read-only Workspace Guard and audit availability.
+external-runtime locks, Batch 03, Batch 04 and Batch 05 inventories,
+restricted source/licence/review gates, read-only Workspace Guard and audit
+availability.
 
 ## Why detection is not activation
 
@@ -93,18 +112,26 @@ privacy, network behavior or tool access. Therefore all external adapters have
 
 The following restrictions are specifically enforced in the registry:
 
-- **Licence-review-required:** Firecrawl, TruffleHog, IRIS-GO, IRIS-Mini and
-  IRIS-Zero cannot be copied, bundled, linked, installed or run until their
-  individual licence and deployment decision is documented.
+- **Licence-review-required:** Firecrawl, TruffleHog, IRIS-GO, IRIS-Mini,
+  IRIS-Zero, Anthropic Skills, WordPress Agent Skill Prototypes and Official
+  MCP Servers cannot be copied, bundled, linked, installed or run until their
+  individual licence/component/deployment decision is documented.
 - **Archived upstream:** Bytebot cannot be adopted until a maintained source,
   security and support review passes.
-- **Reference-only:** IRIS-AI and IRIS-X cannot be used as source/runtime
-  integrations. Their proprietary cores remain excluded; any Jinwoo feature
-  must be independently designed.
-- **Computer-use or execution lanes:** Goose, Bytebot, OpenDesktop, Hermes
-  Agent, OpenAgent, IRIS-Mini and IRIS-Zero receive no terminal, desktop,
-  browser, capture, plugin, schedule, provider or credential access simply by
-  being listed here.
+- **Reference-only:** IRIS-AI, IRIS-X, Awesome MCP Servers and 500 AI Agents
+  Projects cannot be used as source/runtime integrations. Their downstream or
+  proprietary sources need their own review; any Jinwoo feature must be
+  independently designed.
+- **Source-review-required:** EnvAgent has no selected upstream source. Jinwoo
+  will not guess a repository or install a package until the owner supplies an
+  exact GitHub URL and its licence can be reviewed.
+- **Queued companion phase:** Open-AutoGLM does not belong to desktop V1 and
+  has no phone, Accessibility, screen-capture or input capability.
+- **Computer-use, execution or external-tool lanes:** Goose, Bytebot,
+  OpenDesktop, Hermes Agent, OpenAgent, IRIS-Mini, IRIS-Zero, Composio,
+  Stagehand, LangChain Community and MCP sources receive no terminal, desktop,
+  browser, capture, plugin, schedule, provider, account or credential access
+  simply by being listed here.
 
 ## Required activation gate for a later phase
 
@@ -151,6 +178,7 @@ and implemented:
 
 See [`INTEGRATION_BATCH_01.md`](INTEGRATION_BATCH_01.md),
 [`INTEGRATION_BATCH_02.md`](INTEGRATION_BATCH_02.md),
-[`INTEGRATION_BATCH_03.md`](INTEGRATION_BATCH_03.md), and
-[`INTEGRATION_BATCH_04.md`](INTEGRATION_BATCH_04.md) for the source-review
+[`INTEGRATION_BATCH_03.md`](INTEGRATION_BATCH_03.md),
+[`INTEGRATION_BATCH_04.md`](INTEGRATION_BATCH_04.md), and
+[`INTEGRATION_BATCH_05.md`](INTEGRATION_BATCH_05.md) for the source-review
 records and adapter-specific activation requirements.

@@ -321,6 +321,13 @@ Jinwoo Native Mission Engine
 ├── IRIS-GO / Mini / Zero            → licence-gated local workflow / CLI capability references
 ├── Zoey                             → future privacy-first Rust local-agent capability lane
 ├── IRIS-AI / IRIS-X                 → proprietary-core / dual-licence reference-only UX sources
+├── Media skill lanes                → future lawful local video edit/analysis plans under Tusk
+├── Defensive/security skill lanes   → future standards and posture-review plans under Greed
+├── Document/research/engineering    → future approval-gated skills under Jima, Blades and Igris
+├── Connector/browser/MCP lanes      → future individually allowlisted tool contracts under Fang/Nox
+├── MetaGPT / AutoGen / Pydantic AI  → future bounded orchestration/typed workflow contracts
+├── Scientific / Open-AutoGLM        → research plan / separate Android-companion lane
+├── Community catalogues             → reference-only, individually reviewed source intake
 └── Native Control & Audit Review    → active zero-side-effect local invariant review
 ```
 
@@ -347,6 +354,15 @@ Jinwoo Native Mission Engine
 | IRIS-GO / IRIS-Mini / IRIS-Zero | licence-gated capability references; no source or runtime use pending individual licence decisions |
 | Zoey | optional privacy-first Rust local-agent capability adapter |
 | IRIS-AI / IRIS-X | reference-only UX sources; proprietary core/engine and source-runtime integration excluded |
+| AI Video Editor / Pipeline / Watch Video / VideoDB | lawful local media analysis/edit/export planning only; no protected-content, render, upload or service action |
+| Anthropic Cybersecurity Skills (community) | defensive standards mapping, threat modelling and secure-control review only; no offensive/security-execution capability |
+| Anthropic Skills / Addy Osmani skills / WordPress skills | future document, API/UI/testing and site-workflow skill contracts; source/licence/action gates apply individually |
+| Composio / Stagehand / LangChain Community / MCP sources | future individual connector, browser, retrieval and tool contracts; no blanket OAuth, server or tool enablement |
+| MetaGPT / Microsoft AutoGen / Pydantic AI | optional bounded role-event and typed production-agent contracts under Jinwoo state/policy ownership |
+| Scientific Agent Skills | lawful scientific research, reproducibility and database-boundary planning only |
+| Open-AutoGLM | queued separate Android-companion screen/device-action design; no desktop V1 device control |
+| Awesome MCP / 500 AI Agents Projects | reference-only catalogues; every downstream source needs a new individual review |
+| EnvAgent | sandbox/runtime-bug capability intake pending an exact source URL and licence |
 | Jinwoo Native Control & Audit Review | active local invariant review that cannot enable adapters or tools |
 | Jinwoo mission engine | source of truth for policy, approvals, mission state and audit logs |
 
@@ -370,8 +386,9 @@ inside that hierarchy, not fifteen replacement commander departments.
 | 02 — complete | AG2, OpenHands, Firecrawl, Firecrawl Web-Agent, Crawl4AI | typed dry-run contracts plus Tank no-fetch planning gate; all upstream execution disabled; Firecrawl needs an AGPL-3.0 compatibility decision |
 | 03 — complete | Mem0, OpenClaw, TruffleHog, Gitleaks, Jinwoo Native control/audit review | typed dry-run contracts plus Greed no-scan preflight and active zero-side-effect native control review; all external execution disabled; TruffleHog needs an AGPL-3.0 compatibility decision |
 | 04 — complete | Goose, Orkas, Bytebot, OpenDesktop, Hermes Agent, OpenAgent, IRIS-GO, IRIS-Mini, IRIS-Zero, Zoey, IRIS-AI and IRIS-X | typed advanced-skill capability contracts and source-gate review; all external execution disabled; Bytebot is archived-upstream; IRIS-GO/Mini/Zero need licence decisions; IRIS-AI/X are reference-only |
+| 05 — complete | Lawful media, defensive security, document/research, engineering, connector/MCP, browser, orchestration, science, Android and source-intake lanes | typed specialist-skill contracts; all external execution disabled; CapCut patcher excluded; source/licence/reference/queued boundaries are individually enforced |
 
-A Batch 01/02/03/04 dry run may represent up to 450 logical agents but caps runtime
+A Batch 01/02/03/04/05 dry run may represent up to 450 logical agents but caps runtime
 planning at three Planner/Executor/Verifier workers. It never starts an
 upstream framework, network crawl, shell, browser, container, code patch,
 secret scan, messaging gateway, or tool action. Tank's Batch 02 source-plan
@@ -379,10 +396,11 @@ gate validates at most ten explicit public HTTPS domain targets without opening 
 or resolving DNS; future retrieval remains separately approval-, policy-,
 licence- and limit-gated. Batch 03's native control review verifies capacity,
 external-runtime locks, licence gates, read-only workspace state and audit
-availability without changing any execution state. Batch 04 expands the visible
-capability catalogue only: no CLI, desktop/container controller, browser,
-voice/vision capture, provider, MCP server, agent loop or mobile runtime is
-activated by a Batch 04 plan.
+availability without changing any execution state. Batches 04 and 05 expand the
+visible capability catalogue only: no CLI, desktop/container controller, browser,
+voice/vision capture, provider, MCP server, agent loop, media processor or mobile
+runtime is activated by a dry-run plan. Batch 05 does not change the three-phase
+V1 delivery hierarchy.
 
 ---
 
@@ -747,8 +765,10 @@ Tank no-fetch public-web research planner with explicit HTTPS target validation,
 Controlled Batch 03 registry/dry-run contracts for Mem0, OpenClaw, TruffleHog and Gitleaks; TruffleHog remains licence-review-required
 Controlled Batch 04 advanced-skill registry/dry-run contracts for Goose, Orkas, Bytebot, OpenDesktop, Hermes Agent, OpenAgent, IRIS-GO, IRIS-Mini, IRIS-Zero and Zoey; all remain non-executing
 IRIS-AI and IRIS-X registered as reference-only UX sources; their proprietary core/engine is not copied, linked, installed or invoked
+Controlled Batch 05 specialist-skill registry/dry-run contracts for lawful media, defensive security, documents/research, engineering, connectors/MCP, browser, multi-agent, science and Android-companion lanes; all external execution remains disabled
+CapCut patcher explicitly excluded; Anthropic Skills, WordPress prototypes and Official MCP Servers remain licence-gated; Awesome MCP / 500 project catalogues remain reference-only; EnvAgent source intake awaits an exact URL
 Greed no-scan secret-review preflight that requires a selected workspace/authorisation but reads no files or Git history
-Jinwoo Native Control & Audit Review with zero-side-effect local invariant checks, Batch 04 source-gate verification and aggregate-only audit records
+Jinwoo Native Control & Audit Review with zero-side-effect local invariant checks, Batch 04/05 source-gate verification and aggregate-only audit records
 Whitespace-only API input rejection and hardened regular-file workspace reads
 Docker Compose foundation
 Electron shell foundation
@@ -772,8 +792,10 @@ Add Claude, GLM and HF live-provider integration tests with user-owned keys
 Add approved Igris workspace write/patch tools after the read-only guard review
 Implement Tank approved retrieval/source citation flow after the no-fetch gate, including runtime DNS/SSRF checks and source/rate/depth/size limits
 Add local vector retrieval and Memory Vault search
-Complete individual activation reviews before enabling any Batch 01/02/03/04 external runtime; decide Firecrawl and TruffleHog AGPL-3.0 compatibility before any related code, service, binary or container work; resolve IRIS-GO/Mini/Zero licence evidence before any source use; keep Bytebot archived-upstream and IRIS-AI/X reference-only; keep Mem0 optional until “memo API” is explicitly confirmed
-Design computer-use activation separately for Goose, Bytebot, OpenDesktop, Hermes Agent, OpenAgent and any CLI/desktop/voice/vision lane: disposable sandbox, no host credentials/capture by default, visible per-step preview, per-action approval, audit, timeout and rollback
+Complete individual activation reviews before enabling any Batch 01/02/03/04/05 external runtime; decide Firecrawl and TruffleHog AGPL-3.0 compatibility before any related code, service, binary or container work; resolve IRIS-GO/Mini/Zero, Anthropic Skills, WordPress prototypes and Official MCP licence evidence before source use; keep Bytebot archived-upstream and IRIS-AI/X, Awesome MCP and 500-project catalogues reference-only; keep Mem0 optional until “memo API” is explicitly confirmed
+Design computer-use and external-tool activation separately for Goose, Bytebot, OpenDesktop, Hermes Agent, OpenAgent, Composio, Stagehand, LangChain Community, MCP, Open-AutoGLM and any CLI/desktop/browser/mobile/voice/vision lane: disposable sandbox, no host credentials/capture by default, visible per-step preview, per-action approval, audit, timeout and rollback
+Implement lawful local media workflows only after a user-authorised media root, model/dependency licence review, no-download/no-upload default, retention plan and per-edit/render/export approval; retain cybersecurity skills for defensive authorised guidance only
+Obtain the exact EnvAgent GitHub URL and licence before selecting it for source review or sandbox integration
 Add Electron packaging and Windows installer
 Add Rust/Go sidecars only after profiling
 ```
@@ -795,3 +817,6 @@ Add Rust/Go sidecars only after profiling
    `.git` and real `.env` files.
 5. Do not paste API keys into chat. They will be entered only through local
    secure configuration.
+6. Share the exact GitHub URL for the intended **EnvAgent** project. Multiple
+   unrelated repositories use that name, so no source will be guessed or added
+   until its licence and security model are reviewed.

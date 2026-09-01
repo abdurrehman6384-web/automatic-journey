@@ -55,14 +55,14 @@ export interface ProviderStatus {
 export interface FrameworkStatus {
   id: string
   label: string
-  runtime: 'builtin' | 'python' | 'typescript-mcp' | 'typescript-service' | 'container-sidecar' | 'go-cli' | 'go-service' | 'rust-cli' | 'desktop-client' | 'mobile-client'
-  category: 'orchestration' | 'workflow' | 'coding' | 'research' | 'web-collection' | 'memory' | 'automation' | 'security' | 'governance' | 'computer-use' | 'reference'
+  runtime: 'builtin' | 'python' | 'typescript-mcp' | 'typescript-service' | 'container-sidecar' | 'go-cli' | 'go-service' | 'rust-cli' | 'desktop-client' | 'mobile-client' | 'skill-catalog'
+  category: 'orchestration' | 'workflow' | 'coding' | 'research' | 'web-collection' | 'memory' | 'automation' | 'security' | 'governance' | 'computer-use' | 'reference' | 'media'
   integrationBatch: number
   ownerCommander: string
   license: string
   sourceUrl?: string
   state: 'canonical' | 'not-installed' | 'detected' | 'reference-only'
-  implementationStatus: 'active' | 'contract-ready' | 'license-review-required' | 'reference-only' | 'archived-upstream' | 'queued'
+  implementationStatus: 'active' | 'contract-ready' | 'license-review-required' | 'source-review-required' | 'reference-only' | 'archived-upstream' | 'queued'
   executionEnabled: boolean
   capabilities?: string[]
   activationBoundary?: 'read-only' | 'approval-required' | 'sandboxed' | 'reference-only'

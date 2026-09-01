@@ -4,7 +4,7 @@ Jinwoo's local mission engine remains the one canonical orchestrator. An
 installed package or sidecar never receives a mission automatically and cannot
 bypass the policy, approval, workspace, or audit boundaries owned by Jinwoo.
 
-Batches 01–04 contain owner-requested integration lanes. Their adapter
+Batches 01–05 contain owner-requested integration lanes. Their adapter
 contracts are real and testable now; upstream runtimes remain non-executable
 until a version-pinned, local compatibility and licence review is complete.
 """
@@ -32,11 +32,11 @@ class FrameworkAdapter:
     label: str
     runtime: Literal[
         "builtin", "python", "typescript-mcp", "typescript-service", "container-sidecar", "go-cli", "go-service",
-        "rust-cli", "desktop-client", "mobile-client",
+        "rust-cli", "desktop-client", "mobile-client", "skill-catalog",
     ]
     category: Literal[
         "orchestration", "workflow", "coding", "research", "web-collection", "memory", "automation", "security",
-        "governance", "computer-use", "reference",
+        "governance", "computer-use", "reference", "media",
     ]
     integration_batch: int
     owner_commander: str
@@ -47,7 +47,7 @@ class FrameworkAdapter:
     activation_boundary: Literal["read-only", "approval-required", "sandboxed", "reference-only"] = "approval-required"
     native_adapter: bool = False
     implementation_status: Literal[
-        "active", "contract-ready", "license-review-required", "reference-only", "archived-upstream", "queued",
+        "active", "contract-ready", "license-review-required", "source-review-required", "reference-only", "archived-upstream", "queued",
     ] = "contract-ready"
     guardrails: tuple[str, ...] = ()
     python_module: str | None = None
@@ -98,6 +98,8 @@ class FrameworkAdapter:
 
         if self.implementation_status == "license-review-required":
             readiness = "licence review is required before upstream activation"
+        elif self.implementation_status == "source-review-required":
+            readiness = "an exact upstream source and licence review are required before any adapter work"
         elif self.implementation_status == "reference-only":
             readiness = "source reuse and runtime activation are prohibited"
         elif self.implementation_status == "archived-upstream":
@@ -134,6 +136,14 @@ class FrameworkAdapter:
             policy_outcome: Literal["safe-plan", "approval-required", "blocked"] = "blocked"
             summary = "The request is blocked by Jinwoo policy; no framework plan or external runtime was started."
             steps = ["Keep the request out of every integration runtime.", "Explain the safety boundary to the user."]
+        elif self.implementation_status == "source-review-required":
+            policy_outcome = "approval-required" if decision.requires_approval else "safe-plan"
+            summary = "A source-intake boundary was prepared. No upstream repository, runtime, tool or capability has been selected or invoked."
+            steps = [
+                "Obtain the exact upstream URL, immutable version and licence before any source or adapter review.",
+                "Do not infer a repository from a product name or install an unreviewed package, skill pack, plugin or service.",
+                "Keep the requested capability inside Jinwoo policy, workspace, approval and audit boundaries after source verification.",
+            ]
         elif self.implementation_status == "reference-only":
             policy_outcome = "approval-required" if decision.requires_approval else "safe-plan"
             summary = (
@@ -622,6 +632,379 @@ class FrameworkRegistry:
                 guardrails=(
                     "Do not copy, link, bundle, install or invoke proprietary engine, mobile execution or commercial-only functionality.",
                     "Treat the public UI shell as reference-only for this project unless a separate compatible-source decision is approved.",
+                ),
+            ),
+            # Owner-requested specialist skills and toolkits batch 5. These are
+            # source-reviewed capability contracts, not installed skill packs or
+            # executable tool grants. CapCut-Patcher is deliberately excluded: no
+            # DRM, licence-bypass or password-protected patcher is a Jinwoo lane.
+            FrameworkAdapter(
+                id="ai-video-editor",
+                label="AI Video Editor (MartinDelophy)",
+                runtime="desktop-client",
+                category="media",
+                integration_batch=5,
+                owner_commander="Tusk",
+                license="MIT",
+                source_url="https://github.com/MartinDelophy/ai-video-editor",
+                purpose="Reserved for lawful local timeline-edit, caption and voiceover workflow proposals.",
+                capabilities=("Timeline-edit plans", "Caption/voiceover workflow review", "Local media-pipeline design"),
+                activation_boundary="sandboxed",
+                guardrails=(
+                    "Use only user-owned or explicitly authorised local media; do not download, stream, rip or process protected content.",
+                    "Do not invoke an editor, render, model download, media tool, file write or upload without a separate visible approval.",
+                ),
+            ),
+            FrameworkAdapter(
+                id="ai-video-editor-pipeline",
+                label="AI Video Editor Pipeline (mazsola2k)",
+                runtime="python",
+                category="media",
+                integration_batch=5,
+                owner_commander="Tusk",
+                license="MIT",
+                source_url="https://github.com/mazsola2k/ai-video-editor",
+                purpose="Reserved for lawful vision-assisted edit, timeline and export-pipeline proposals.",
+                capabilities=("Vision-assisted edit plans", "Timeline/pipeline review", "Export-boundary design"),
+                activation_boundary="sandboxed",
+                guardrails=(
+                    "Use only authorised local media and do not run a render, DaVinci integration, external model or filesystem action in a dry run.",
+                    "Do not upload or publish to YouTube, Instagram, Facebook or any third-party service without a separate explicit approval.",
+                ),
+            ),
+            FrameworkAdapter(
+                id="watch-video-skill",
+                label="Watch Video Skill",
+                runtime="skill-catalog",
+                category="media",
+                integration_batch=5,
+                owner_commander="Tusk",
+                license="MIT",
+                source_url="https://github.com/Newuxtreme/watch-video-skill",
+                purpose="Reserved for user-authorised local video-analysis, feedback and transcript workflow proposals.",
+                capabilities=("Local video-analysis plans", "Visual-feedback outlines", "Transcript/frame workflow review"),
+                activation_boundary="sandboxed",
+                guardrails=(
+                    "Do not fetch, download or copy videos from URLs or platforms; analyse only a user-supplied, authorised local file after approval.",
+                    "Do not invoke ffmpeg, Whisper, yt-dlp, a model, a browser or a filesystem write from this dry run.",
+                ),
+            ),
+            FrameworkAdapter(
+                id="videodb-skills",
+                label="VideoDB Skills",
+                runtime="python",
+                category="media",
+                integration_batch=5,
+                owner_commander="Tusk",
+                license="MIT",
+                source_url="https://github.com/video-db/skills",
+                purpose="Reserved for video ingest, understanding, search, edit and stream capability-contract review.",
+                capabilities=("Video workflow contracts", "Search/edit pipeline review", "Retention and stream boundary"),
+                activation_boundary="sandboxed",
+                guardrails=(
+                    "Do not start a VideoDB service, send an API key, ingest media, stream video or connect to a hosted account.",
+                    "Any future media retention, edit, export or sharing step must use user-authorised content and a separate approval.",
+                ),
+            ),
+            FrameworkAdapter(
+                id="anthropic-cybersecurity-skills",
+                label="Anthropic Cybersecurity Skills (community)",
+                runtime="skill-catalog",
+                category="security",
+                integration_batch=5,
+                owner_commander="Greed",
+                license="Apache-2.0",
+                source_url="https://github.com/mukul975/Anthropic-Cybersecurity-Skills",
+                purpose="Reserved for defensive standards mapping, threat modelling and secure-configuration review proposals.",
+                capabilities=("Defensive standards mapping", "Threat-model outlines", "Security-control review"),
+                activation_boundary="read-only",
+                guardrails=(
+                    "Use only defensive governance, mitigation, secure configuration and authorised posture-review guidance.",
+                    "Do not enable target enumeration, scanning, exploitation, malware, persistence, credential access, phishing, evasion or exfiltration.",
+                ),
+            ),
+            FrameworkAdapter(
+                id="anthropic-skills",
+                label="Anthropic Skills",
+                runtime="skill-catalog",
+                category="workflow",
+                integration_batch=5,
+                owner_commander="Jima",
+                license="Unverified repository licence; third-party notices include GPL-3.0 components",
+                source_url="https://github.com/anthropics/skills",
+                purpose="Reserved for document, spreadsheet and repeatable-workflow capability review pending a component-level licence decision.",
+                capabilities=("Document-workflow review", "Spreadsheet/report planning", "Dynamic-skill boundary"),
+                activation_boundary="approval-required",
+                implementation_status="license-review-required",
+                guardrails=(
+                    "Do not copy, install, bundle or execute skill scripts or third-party components until a component-level licence review is complete.",
+                    "Document, PDF, DOCX or XLSX generation remains a proposal until file creation, retention and user approval are separately designed.",
+                ),
+            ),
+            FrameworkAdapter(
+                id="ai-research-skills",
+                label="AI Research SKILLs",
+                runtime="skill-catalog",
+                category="research",
+                integration_batch=5,
+                owner_commander="Blades",
+                license="MIT",
+                source_url="https://github.com/Orchestra-Research/AI-Research-SKILLs",
+                purpose="Reserved for reproducible AI research, evaluation, infrastructure and paper-writing workflow proposals.",
+                capabilities=("Research-plan design", "Evaluation workflow review", "Paper/artifact outlines"),
+                activation_boundary="sandboxed",
+                guardrails=(
+                    "Do not launch training, distributed infrastructure, model downloads, remote datasets, experiments or provider calls in a dry run.",
+                    "Require source attribution, local-retention decisions and approval before any later research execution or file production.",
+                ),
+            ),
+            FrameworkAdapter(
+                id="addy-osmani-agent-skills",
+                label="Addy Osmani Agent Skills",
+                runtime="skill-catalog",
+                category="coding",
+                integration_batch=5,
+                owner_commander="Igris",
+                license="MIT",
+                source_url="https://github.com/addyosmani/agent-skills",
+                purpose="Reserved for API design, UI engineering and testing-pipeline capability proposals.",
+                capabilities=("API-design review", "UI-engineering plans", "Testing-pipeline proposals"),
+                activation_boundary="sandboxed",
+                guardrails=(
+                    "Do not install or execute a skill, hook, script, plugin or IDE integration from this lane.",
+                    "Keep code changes, tests, commands, dependencies and files inside Igris's future approval-gated sandbox path.",
+                ),
+            ),
+            FrameworkAdapter(
+                id="wordpress-agent-skills",
+                label="WordPress Agent Skill Prototypes",
+                runtime="typescript-mcp",
+                category="coding",
+                integration_batch=5,
+                owner_commander="Igris",
+                license="Unverified — no repository LICENSE file at review; upstream labels these as beta prototypes",
+                source_url="https://github.com/Automattic/wordpress-agent-skills",
+                purpose="Reserved for WordPress theme/site and IDE/MCP workflow review pending licence and deployment review.",
+                capabilities=("WordPress site-plan review", "IDE/MCP boundary", "Skill-distribution review"),
+                activation_boundary="sandboxed",
+                implementation_status="license-review-required",
+                guardrails=(
+                    "Do not install a plugin, start WordPress Studio/CLI/MCP, create a site or execute an IDE tool from this lane.",
+                    "Do not share, sync, deploy or publish a site; future local preview and delivery actions need separate explicit approval.",
+                ),
+            ),
+            FrameworkAdapter(
+                id="composio",
+                label="Composio",
+                runtime="python",
+                category="automation",
+                integration_batch=5,
+                owner_commander="Fang",
+                license="MIT",
+                source_url="https://github.com/ComposioHQ/composio",
+                purpose="Reserved for explicit connector, tool-search, authentication and workbench policy-contract review.",
+                capabilities=("Connector-policy design", "OAuth boundary review", "External-action allowlists"),
+                activation_boundary="approval-required",
+                guardrails=(
+                    "Do not install a toolkit, authenticate an account, request OAuth, store a token or discover/activate an external connector.",
+                    "Future GitHub, Slack, Jira, Notion, Gmail, Salesforce or other service actions need an individual allowlist and per-action approval.",
+                ),
+            ),
+            FrameworkAdapter(
+                id="stagehand",
+                label="Stagehand",
+                runtime="typescript-service",
+                category="automation",
+                integration_batch=5,
+                owner_commander="Nox",
+                license="MIT",
+                source_url="https://github.com/browserbase/stagehand",
+                purpose="Reserved for approval-bound browser-agent capability planning.",
+                capabilities=("Browser workflow plans", "Page-action preview", "Web automation boundary"),
+                activation_boundary="sandboxed",
+                guardrails=(
+                    "Do not launch a browser, fetch a URL, use cookies, access a logged-in session, fill a form or transmit workspace data.",
+                    "Future browsing requires the Tank public-target gate plus exact target/action preview, SSRF controls and per-action approval.",
+                ),
+            ),
+            FrameworkAdapter(
+                id="langchain-community",
+                label="LangChain Community Tools",
+                runtime="python",
+                category="workflow",
+                integration_batch=5,
+                owner_commander="Fang",
+                license="MIT",
+                source_url="https://github.com/langchain-ai/langchain",
+                python_module="langchain_community",
+                purpose="Reserved for tool, retrieval and structured-workflow interface review.",
+                capabilities=("Tool-interface review", "Retrieval boundary design", "Structured-workflow contracts"),
+                activation_boundary="sandboxed",
+                guardrails=(
+                    "Do not import or invoke a community tool, search service, retriever, calculator, filesystem or network integration from this lane.",
+                    "Every future tool needs an individual source, privacy, workspace, network and approval review rather than a blanket enablement.",
+                ),
+            ),
+            FrameworkAdapter(
+                id="official-mcp-servers",
+                label="Official MCP Servers",
+                runtime="typescript-mcp",
+                category="automation",
+                integration_batch=5,
+                owner_commander="Fang",
+                license="Mixed Apache-2.0/MIT code transition; CC-BY-4.0 documentation",
+                source_url="https://github.com/modelcontextprotocol/servers",
+                purpose="Reserved for individual MCP capability-manifest and server-boundary review.",
+                capabilities=("MCP capability manifests", "Server allowlist design", "Data-boundary review"),
+                activation_boundary="sandboxed",
+                implementation_status="license-review-required",
+                guardrails=(
+                    "Do not install, configure, start or connect any MCP server, including filesystem, database, search, fetch or browser capabilities.",
+                    "Each future MCP server needs its own version, licence, transport, data scope, network policy, workspace confinement and approval review.",
+                ),
+            ),
+            FrameworkAdapter(
+                id="awesome-mcp-servers",
+                label="Awesome MCP Servers",
+                runtime="skill-catalog",
+                category="reference",
+                integration_batch=5,
+                owner_commander="Fang",
+                license="MIT list; every listed third-party MCP server needs its own review",
+                source_url="https://github.com/punkpeye/awesome-mcp-servers",
+                purpose="Reference-only catalogue for future individual MCP source intake.",
+                capabilities=("MCP discovery reference", "Individual-source intake", "Capability comparison"),
+                activation_boundary="reference-only",
+                implementation_status="reference-only",
+                guardrails=(
+                    "Do not treat inclusion in a community list as trust, a licence grant or permission to install a server.",
+                    "No Docker, filesystem, Spotify, Figma, crypto, browser or other listed integration is enabled from this reference.",
+                ),
+            ),
+            FrameworkAdapter(
+                id="metagpt",
+                label="MetaGPT",
+                runtime="python",
+                category="orchestration",
+                integration_batch=5,
+                owner_commander="Beru",
+                license="MIT",
+                source_url="https://github.com/geekan/MetaGPT",
+                python_module="metagpt",
+                purpose="Reserved for product-manager, architect and QA collaboration-pattern review.",
+                capabilities=("Role-collaboration plans", "Software-company workflow review", "Artifact handoff design"),
+                activation_boundary="sandboxed",
+                guardrails=(
+                    "Beru and Jinwoo retain the single mission state machine; do not create an autonomous software company or background worker loop.",
+                    "Do not start agents, providers, tools, file writes, commands or project generation without separate approval-gated implementation.",
+                ),
+            ),
+            FrameworkAdapter(
+                id="autogen",
+                label="Microsoft AutoGen",
+                runtime="python",
+                category="orchestration",
+                integration_batch=5,
+                owner_commander="Bellion",
+                license="MIT for code; CC-BY-4.0 for documentation",
+                source_url="https://github.com/microsoft/autogen",
+                python_module="autogen",
+                purpose="Reserved for event-driven and conversational multi-agent flow contract review.",
+                capabilities=("Event-driven flow plans", "Conversational handoff review", "Typed agent-contract design"),
+                activation_boundary="sandboxed",
+                guardrails=(
+                    "Bellion and Jinwoo retain routing, policy, provider choice, workspace confinement and approvals; do not start an independent agent conversation loop.",
+                    "Do not activate model clients, tools, code execution or event listeners from this dry run.",
+                ),
+            ),
+            FrameworkAdapter(
+                id="pydantic-ai",
+                label="Pydantic AI",
+                runtime="python",
+                category="workflow",
+                integration_batch=5,
+                owner_commander="Igris",
+                license="MIT",
+                source_url="https://github.com/pydantic/pydantic-ai",
+                python_module="pydantic_ai",
+                purpose="Reserved for typed production-agent, structured-output and evaluation-contract review.",
+                capabilities=("Typed agent contracts", "Structured-output review", "Evaluation boundary design"),
+                activation_boundary="sandboxed",
+                guardrails=(
+                    "Do not install a model provider, start a tool, generate a file or make a network call from this lane.",
+                    "Future use must preserve FastAPI schemas, local-provider preference, cloud consent and Jinwoo approval/audit ownership.",
+                ),
+            ),
+            FrameworkAdapter(
+                id="scientific-agent-skills",
+                label="Scientific Agent Skills",
+                runtime="skill-catalog",
+                category="research",
+                integration_batch=5,
+                owner_commander="Tank",
+                license="MIT",
+                source_url="https://github.com/K-Dense-AI/scientific-agent-skills",
+                purpose="Reserved for reproducible scientific literature, data-analysis and database-access planning.",
+                capabilities=("Scientific research plans", "Reproducibility checklists", "Database-access boundary review"),
+                activation_boundary="sandboxed",
+                guardrails=(
+                    "Do not connect to a scientific database, upload data, run wet-lab or computational experiment, or provide unauthorised access from this lane.",
+                    "Future research must use lawful sources, attribution, approval, local retention controls and applicable safety review.",
+                ),
+            ),
+            FrameworkAdapter(
+                id="open-autoglm",
+                label="Open-AutoGLM",
+                runtime="python",
+                category="computer-use",
+                integration_batch=5,
+                owner_commander="Nox",
+                license="Apache-2.0",
+                source_url="https://github.com/zai-org/Open-AutoGLM",
+                python_module="phone_agent",
+                purpose="Reserved for a separate future Android companion screen-understanding and phone-action design phase.",
+                capabilities=("Mobile screen-understanding plans", "Device-action preview", "Android permission-model review"),
+                activation_boundary="sandboxed",
+                implementation_status="queued",
+                guardrails=(
+                    "This is outside desktop V1: do not install a phone agent, connect a device, enable Accessibility, capture a screen or perform mobile input.",
+                    "Any future Android action needs device-local consent, exact action preview, per-action approval and a separate companion-app safety design.",
+                ),
+            ),
+            FrameworkAdapter(
+                id="500-ai-agent-projects",
+                label="500 AI Agents Projects",
+                runtime="skill-catalog",
+                category="reference",
+                integration_batch=5,
+                owner_commander="Ashborn",
+                license="MIT catalogue; linked projects require individual source review",
+                source_url="https://github.com/ashishpatel26/500-AI-Agents-Projects",
+                purpose="Reference-only catalogue for use-case comparison and future individually reviewed blueprint intake.",
+                capabilities=("Use-case reference", "Framework comparison", "Blueprint-intake review"),
+                activation_boundary="reference-only",
+                implementation_status="reference-only",
+                guardrails=(
+                    "Do not clone, install, execute or inherit permissions from any linked project in the catalogue.",
+                    "Every selected example must pass independent licence, dependency, privacy, tool and approval review before any implementation work.",
+                ),
+            ),
+            FrameworkAdapter(
+                id="envagent-source-intake",
+                label="EnvAgent (source intake pending)",
+                runtime="skill-catalog",
+                category="coding",
+                integration_batch=5,
+                owner_commander="Igris",
+                license="Unverified — exact GitHub source and licence required",
+                source_url=None,
+                purpose="Records the requested secure sandbox, runtime-bug review and code-execution capability without selecting an ambiguous upstream project.",
+                capabilities=("Sandbox architecture request", "Runtime-bug review plan", "Test-isolation design"),
+                activation_boundary="sandboxed",
+                implementation_status="source-review-required",
+                guardrails=(
+                    "Do not infer an EnvAgent repository from its name or install any package, container or code runner before the owner supplies an exact source URL.",
+                    "Any later code execution must use a separately reviewed disposable sandbox with no host credentials, network or workspace write access by default.",
                 ),
             ),
             FrameworkAdapter(

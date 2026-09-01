@@ -23,9 +23,20 @@ _BATCH_FOUR_IDS = {
     "goose", "orkas", "bytebot", "open-desktop", "hermes-agent", "openagent", "iris-go", "iris-mini", "iris-zero", "zoey",
     "iris-ai", "iris-x",
 }
-_LICENSE_REVIEW_IDS = {"firecrawl", "trufflehog", "iris-go", "iris-mini", "iris-zero"}
-_REFERENCE_ONLY_IDS = {"iris-ai", "iris-x"}
+_BATCH_FIVE_IDS = {
+    "ai-video-editor", "ai-video-editor-pipeline", "watch-video-skill", "videodb-skills", "anthropic-cybersecurity-skills",
+    "anthropic-skills", "ai-research-skills", "addy-osmani-agent-skills", "wordpress-agent-skills", "composio", "stagehand",
+    "langchain-community", "official-mcp-servers", "awesome-mcp-servers", "metagpt", "autogen", "pydantic-ai",
+    "scientific-agent-skills", "open-autoglm", "500-ai-agent-projects", "envagent-source-intake",
+}
+_LICENSE_REVIEW_IDS = {
+    "firecrawl", "trufflehog", "iris-go", "iris-mini", "iris-zero", "anthropic-skills", "wordpress-agent-skills",
+    "official-mcp-servers",
+}
+_REFERENCE_ONLY_IDS = {"iris-ai", "iris-x", "awesome-mcp-servers", "500-ai-agent-projects"}
 _ARCHIVED_UPSTREAM_IDS = {"bytebot"}
+_QUEUED_IDS = {"open-autoglm"}
+_SOURCE_REVIEW_IDS = {"envagent-source-intake"}
 
 
 def build_control_review(
@@ -42,9 +53,12 @@ def build_control_review(
     external_adapters = [framework for framework in framework_statuses if framework.state.value != "canonical"]
     batch_three = [by_id[framework_id] for framework_id in _BATCH_THREE_IDS if framework_id in by_id]
     batch_four = [by_id[framework_id] for framework_id in _BATCH_FOUR_IDS if framework_id in by_id]
+    batch_five = [by_id[framework_id] for framework_id in _BATCH_FIVE_IDS if framework_id in by_id]
     licence_gates = [by_id[framework_id] for framework_id in _LICENSE_REVIEW_IDS if framework_id in by_id]
     reference_only = [by_id[framework_id] for framework_id in _REFERENCE_ONLY_IDS if framework_id in by_id]
     archived_upstream = [by_id[framework_id] for framework_id in _ARCHIVED_UPSTREAM_IDS if framework_id in by_id]
+    queued = [by_id[framework_id] for framework_id in _QUEUED_IDS if framework_id in by_id]
+    source_review = [by_id[framework_id] for framework_id in _SOURCE_REVIEW_IDS if framework_id in by_id]
 
     checks = [
         ControlReviewCheck(
@@ -94,6 +108,15 @@ def build_control_review(
             detail="All 12 owner-requested advanced skill lanes are registered, bounded and non-executing.",
         ),
         ControlReviewCheck(
+            id="batch-five-specialist-skills",
+            label="Batch 05 specialist skill inventory",
+            passed=(
+                len(batch_five) == len(_BATCH_FIVE_IDS)
+                and all(framework.integration_batch == 5 and not framework.execution_enabled for framework in batch_five)
+            ),
+            detail="All 21 owner-requested specialist skill/toolkit lanes are registered as bounded, non-executing capabilities.",
+        ),
+        ControlReviewCheck(
             id="restricted-source-gates",
             label="Restricted source and licence gates",
             passed=(
@@ -114,10 +137,20 @@ def build_control_review(
                     framework.implementation_status == "archived-upstream" and not framework.execution_enabled
                     for framework in archived_upstream
                 )
+                and len(queued) == len(_QUEUED_IDS)
+                and all(
+                    framework.implementation_status == "queued" and not framework.execution_enabled
+                    for framework in queued
+                )
+                and len(source_review) == len(_SOURCE_REVIEW_IDS)
+                and all(
+                    framework.implementation_status == "source-review-required" and not framework.execution_enabled
+                    for framework in source_review
+                )
             ),
             detail=(
-                "Firecrawl, TruffleHog, IRIS-GO, IRIS-Mini and IRIS-Zero stay licence-review-required; "
-                "IRIS-AI and IRIS-X stay reference-only; Bytebot stays archived-upstream."
+                "Licence gates remain on Firecrawl, TruffleHog, IRIS-GO/Mini/Zero, Anthropic Skills, WordPress skills and MCP Servers; "
+                "reference-only, archived, queued-mobile and source-intake boundaries remain locked."
             ),
         ),
         ControlReviewCheck(
