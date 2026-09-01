@@ -7,7 +7,14 @@ from enum import Enum
 from typing import Literal
 from uuid import uuid4
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
+
+
+def _require_non_blank(value: str) -> str:
+    """Reject whitespace-only input at every API boundary that carries text."""
+    if not value.strip():
+        raise ValueError("Provide non-blank text.")
+    return value
 
 
 class SafetyLevel(str, Enum):
@@ -57,8 +64,8 @@ class FrameworkStatus(BaseModel):
 
     id: str
     label: str
-    runtime: Literal["builtin", "python", "typescript-mcp", "typescript-service", "container-sidecar"]
-    category: Literal["orchestration", "workflow", "coding", "research", "web-collection"]
+    runtime: Literal["builtin", "python", "typescript-mcp", "typescript-service", "container-sidecar", "go-cli"]
+    category: Literal["orchestration", "workflow", "coding", "research", "web-collection", "memory", "automation", "security", "governance"]
     integration_batch: int
     owner_commander: str
     license: str
@@ -73,6 +80,11 @@ class FrameworkDryRunRequest(BaseModel):
     prompt: str = Field(min_length=2, max_length=8_000)
     requested_agents: int = Field(default=3, ge=1, le=450)
 
+    @field_validator("prompt")
+    @classmethod
+    def prompt_is_not_blank(cls, value: str) -> str:
+        return _require_non_blank(value)
+
 
 class FrameworkDryRun(BaseModel):
     framework_id: str
@@ -86,6 +98,21 @@ class FrameworkDryRun(BaseModel):
     next_steps: list[str]
 
 
+class ControlReviewCheck(BaseModel):
+    id: str
+    label: str
+    passed: bool
+    detail: str
+
+
+class ControlReview(BaseModel):
+    reviewed_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    all_passed: bool
+    external_runtime_invoked: bool = False
+    summary: str
+    checks: list[ControlReviewCheck]
+
+
 class WorkerSpec(BaseModel):
     id: Literal["planner", "executor", "verifier"]
     name: str
@@ -95,6 +122,11 @@ class WorkerSpec(BaseModel):
 class MissionRequest(BaseModel):
     prompt: str = Field(min_length=2, max_length=8_000)
     preferred_provider: str | None = Field(default=None, max_length=64)
+
+    @field_validator("prompt")
+    @classmethod
+    def prompt_is_not_blank(cls, value: str) -> str:
+        return _require_non_blank(value)
 
 
 class Mission(BaseModel):
@@ -114,11 +146,21 @@ class Mission(BaseModel):
 class ApprovalRequest(BaseModel):
     approved_by: str = Field(default="local-user", min_length=1, max_length=120)
 
+    @field_validator("approved_by")
+    @classmethod
+    def actor_is_not_blank(cls, value: str) -> str:
+        return _require_non_blank(value)
+
 
 class MemoryCreateRequest(BaseModel):
     content: str = Field(min_length=2, max_length=2_000)
     kind: Literal["preference", "project", "note", "reminder"] = "note"
     consent: bool = False
+
+    @field_validator("content")
+    @classmethod
+    def content_is_not_blank(cls, value: str) -> str:
+        return _require_non_blank(value)
 
 
 class MemoryItem(BaseModel):
@@ -132,6 +174,11 @@ class MemoryUpdateRequest(BaseModel):
     content: str = Field(min_length=2, max_length=2_000)
     kind: Literal["preference", "project", "note", "reminder"] = "note"
     consent: bool = False
+
+    @field_validator("content")
+    @classmethod
+    def content_is_not_blank(cls, value: str) -> str:
+        return _require_non_blank(value)
 
 
 class AuditEvent(BaseModel):
@@ -184,6 +231,11 @@ class ResearchPlanRequest(BaseModel):
     targets: list[str] = Field(default_factory=list, max_length=10)
     confirm_public_sources: bool = False
 
+    @field_validator("topic")
+    @classmethod
+    def topic_is_not_blank(cls, value: str) -> str:
+        return _require_non_blank(value)
+
 
 class ResearchTarget(BaseModel):
     url: str
@@ -200,10 +252,31 @@ class ResearchPlan(BaseModel):
     next_steps: list[str]
 
 
+class SecurityScanPlanRequest(BaseModel):
+    scanner_id: Literal["trufflehog", "gitleaks"] = "gitleaks"
+    confirm_authorized: bool = False
+
+
+class SecurityScanPlan(BaseModel):
+    scanner_id: Literal["trufflehog", "gitleaks"]
+    scanner_label: str
+    workspace_configured: bool
+    license_review_required: bool
+    external_scan_started: bool = False
+    requires_approval_for_scan: bool = True
+    safeguards: list[str]
+    next_steps: list[str]
+
+
 class ChatRequest(BaseModel):
     message: str = Field(min_length=1, max_length=8_000)
     preferred_provider: str | None = Field(default=None, max_length=64)
     allow_cloud: bool = False
+
+    @field_validator("message")
+    @classmethod
+    def message_is_not_blank(cls, value: str) -> str:
+        return _require_non_blank(value)
 
 
 class ChatResponse(BaseModel):

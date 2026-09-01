@@ -3,15 +3,17 @@ import type { FormEvent } from 'react'
 import { ArmyHQ } from './components/ArmyHQ'
 import { AuditTrail } from './components/AuditTrail'
 import { ChatPanel } from './components/ChatPanel'
+import { ControlReviewPanel } from './components/ControlReviewPanel'
 import { FrameworkPanel } from './components/FrameworkPanel'
 import { MemoryVault } from './components/MemoryVault'
 import { MissionPanel } from './components/MissionPanel'
 import { ProviderPanel } from './components/ProviderPanel'
 import { ResearchPanel } from './components/ResearchPanel'
+import { SecurityScanPanel } from './components/SecurityScanPanel'
 import { WorkspacePanel } from './components/WorkspacePanel'
 import { commanders, buildArmyStats, defaultFrameworks, defaultProviders } from './data/army'
 import { buildMission, isBlockedPrompt } from './lib/mission'
-import type { AuditEvent, ChatMessage, Commander, FrameworkDryRun, FrameworkStatus, MemoryItem, MemoryKind, Mission, ProviderStatus, ResearchPlan, WorkspaceAnalysis, WorkspaceEntry, WorkspaceStatus } from './types/army'
+import type { AuditEvent, ChatMessage, Commander, ControlReview, FrameworkDryRun, FrameworkStatus, MemoryItem, MemoryKind, Mission, ProviderStatus, ResearchPlan, SecurityScanPlan, WorkspaceAnalysis, WorkspaceEntry, WorkspaceStatus } from './types/army'
 
 const starterPrompts = [
   'Analyze my project structure and suggest a clean architecture.',
@@ -43,6 +45,32 @@ interface ApiFrameworkDryRun {
   external_runtime_invoked: boolean
   requires_approval: boolean
   summary: string
+  next_steps: string[]
+}
+
+interface ApiControlReviewCheck {
+  id: string
+  label: string
+  passed: boolean
+  detail: string
+}
+
+interface ApiControlReview {
+  reviewed_at: string
+  all_passed: boolean
+  external_runtime_invoked: boolean
+  summary: string
+  checks: ApiControlReviewCheck[]
+}
+
+interface ApiSecurityScanPlan {
+  scanner_id: SecurityScanPlan['scannerId']
+  scanner_label: string
+  workspace_configured: boolean
+  license_review_required: boolean
+  external_scan_started: boolean
+  requires_approval_for_scan: boolean
+  safeguards: string[]
   next_steps: string[]
 }
 
@@ -194,6 +222,25 @@ const frameworkFromApi = (framework: ApiFrameworkStatus): FrameworkStatus => ({
   detail: framework.detail,
 })
 
+const controlReviewFromApi = (review: ApiControlReview): ControlReview => ({
+  reviewedAt: review.reviewed_at,
+  allPassed: review.all_passed,
+  externalRuntimeInvoked: review.external_runtime_invoked,
+  summary: review.summary,
+  checks: review.checks,
+})
+
+const securityScanPlanFromApi = (plan: ApiSecurityScanPlan): SecurityScanPlan => ({
+  scannerId: plan.scanner_id,
+  scannerLabel: plan.scanner_label,
+  workspaceConfigured: plan.workspace_configured,
+  licenseReviewRequired: plan.license_review_required,
+  externalScanStarted: plan.external_scan_started,
+  requiresApprovalForScan: plan.requires_approval_for_scan,
+  safeguards: plan.safeguards,
+  nextSteps: plan.next_steps,
+})
+
 const researchPlanFromApi = (plan: ApiResearchPlan): ResearchPlan => ({
   frameworkId: plan.framework_id,
   topic: plan.topic,
@@ -219,8 +266,14 @@ const missionFromApi = (mission: ApiMission): Mission => ({
 })
 
 const errorDetail = (payload: unknown, fallback: string) => {
-  if (typeof payload === 'object' && payload !== null && 'detail' in payload && typeof payload.detail === 'string') {
-    return payload.detail
+  if (typeof payload !== 'object' || payload === null || !('detail' in payload)) return fallback
+  const detail = payload.detail
+  if (typeof detail === 'string') return detail
+  if (Array.isArray(detail)) {
+    const firstMessage = detail.find((item): item is { msg: string } => (
+      typeof item === 'object' && item !== null && 'msg' in item && typeof item.msg === 'string'
+    ))
+    if (firstMessage) return firstMessage.msg
   }
   return fallback
 }
@@ -236,6 +289,10 @@ function App() {
   const [frameworkBusy, setFrameworkBusy] = useState(false)
   const [researchPlan, setResearchPlan] = useState<ResearchPlan | null>(null)
   const [researchBusy, setResearchBusy] = useState(false)
+  const [controlReview, setControlReview] = useState<ControlReview | null>(null)
+  const [controlReviewBusy, setControlReviewBusy] = useState(false)
+  const [securityScanPlan, setSecurityScanPlan] = useState<SecurityScanPlan | null>(null)
+  const [securityScanBusy, setSecurityScanBusy] = useState(false)
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
     { id: 'welcome', role: 'assistant', content: 'I am Jinwoo. Ask for a safe explanation, draft, or plan. Use the command bar above to turn work into a visible Army mission.', provider: 'Jinwoo local interface', localOnly: true },
   ])
@@ -288,6 +345,54 @@ function App() {
     }
   }
 
+  const runControlReview = async (): Promise<boolean> => {
+    setControlReviewBusy(true)
+    try {
+      const response = await fetch('/api/control/review', { method: 'POST' })
+      const payload = await response.json() as ApiControlReview | { detail?: string }
+      if (!response.ok || !('all_passed' in payload)) {
+        setNotice(errorDetail(payload, 'The local control review could not be completed.'))
+        return false
+      }
+      const result = controlReviewFromApi(payload)
+      setControlReview(result)
+      void loadAudit()
+      setNotice(result.allPassed ? 'Native control review passed. No optional runtime was invoked.' : 'Native control review found an item that needs attention. No optional runtime was invoked.')
+      return true
+    } catch {
+      setNotice('The local control review is unavailable because the backend is offline.')
+      return false
+    } finally {
+      setControlReviewBusy(false)
+    }
+  }
+
+  const createSecurityScanPlan = async (scannerId: SecurityScanPlan['scannerId'], confirmAuthorized: boolean): Promise<boolean> => {
+    setSecurityScanBusy(true)
+    try {
+      const response = await fetch('/api/security/scan-plan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ scanner_id: scannerId, confirm_authorized: confirmAuthorized }),
+      })
+      const payload = await response.json() as ApiSecurityScanPlan | { detail?: string }
+      if (!response.ok || !('scanner_id' in payload)) {
+        setNotice(errorDetail(payload, 'Greed could not prepare that no-scan security plan.'))
+        return false
+      }
+      const result = securityScanPlanFromApi(payload)
+      setSecurityScanPlan(result)
+      void loadAudit()
+      setNotice(`Greed prepared a ${result.scannerLabel} boundary without reading a file or starting a scanner.`)
+      return true
+    } catch {
+      setNotice('The security planner is unavailable because the local backend is offline.')
+      return false
+    } finally {
+      setSecurityScanBusy(false)
+    }
+  }
+
   const createResearchPlan = async (frameworkId: ResearchPlan['frameworkId'], topic: string, targets: string[], confirmPublicSources: boolean): Promise<boolean> => {
     setResearchBusy(true)
     try {
@@ -332,6 +437,7 @@ function App() {
       if (!nextStatus.configured) {
         setWorkspaceEntries([])
         setWorkspaceAnalysis(null)
+        setSecurityScanPlan(null)
       } else {
         void browseWorkspace('.')
       }
@@ -376,6 +482,7 @@ function App() {
       setWorkspaceStatus(workspaceStatusFromApi(payload))
       setWorkspaceEntries([])
       setWorkspaceAnalysis(null)
+      setSecurityScanPlan(null)
       void loadAudit()
       setNotice('Workspace selected. Igris can now run read-only diagnostics inside this folder only.')
       return true
@@ -398,6 +505,7 @@ function App() {
       setWorkspaceStatus({ configured: false, readOnly: true, detail: 'No workspace selected. Igris has no file access until you select a project folder.' })
       setWorkspaceEntries([])
       setWorkspaceAnalysis(null)
+      setSecurityScanPlan(null)
       void loadAudit()
       setNotice('Workspace boundary cleared. Igris no longer has project-file access.')
     } catch {
@@ -738,7 +846,9 @@ function App() {
           <div className="settings-layout">
             <div className="settings-main-stack">
               <WorkspacePanel status={workspaceStatus} entries={workspaceEntries} analysis={workspaceAnalysis} busy={workspaceBusy} onSelect={selectWorkspace} onClear={clearWorkspace} onBrowse={browseWorkspace} onAnalyze={analyzeWorkspaceFile} />
-              <section className="panel settings-card"><p className="eyebrow">ROUTING POLICY</p><h2>Local first, cloud by choice.</h2><p>Ollama and LM Studio can power local runs. Claude, GLM and Hugging Face adapters remain disabled until their keys are stored outside the browser bundle.</p><div className="settings-list"><span>Python FastAPI orchestration</span><span>TypeScript command dashboard</span><span>Optional Rust / Go sidecars after profiling</span><span>SQLite + local vector-memory foundation</span><span>Framework adapters remain policy-gated</span></div></section>
+              <section className="panel settings-card"><p className="eyebrow">ROUTING POLICY</p><h2>Local first, cloud by choice.</h2><p>Ollama and LM Studio can power local runs. Claude, GLM and Hugging Face adapters remain disabled until their keys are stored outside the browser bundle. Optional framework lanes stay under Jinwoo control.</p><div className="settings-list"><span>Python FastAPI orchestration</span><span>TypeScript command dashboard</span><span>Optional Rust / Go sidecars after profiling</span><span>SQLite + local vector-memory foundation</span><span>Framework adapters remain policy-gated</span></div></section>
+              <SecurityScanPanel workspace={workspaceStatus} plan={securityScanPlan} busy={securityScanBusy} onPlan={createSecurityScanPlan} />
+              <ControlReviewPanel review={controlReview} busy={controlReviewBusy} onRun={runControlReview} />
             </div>
             <aside className="side-stack"><ProviderPanel providers={providers} /><FrameworkPanel frameworks={frameworks} dryRun={frameworkDryRun} busy={frameworkBusy} onDryRun={runFrameworkDryRun} /></aside>
           </div>

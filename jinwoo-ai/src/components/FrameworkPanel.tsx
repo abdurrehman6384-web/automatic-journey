@@ -12,6 +12,7 @@ interface FrameworkPanelProps {
 const runtimeIcon = (runtime: FrameworkStatus['runtime']) => {
   if (runtime === 'builtin') return '♛'
   if (runtime === 'container-sidecar') return '▣'
+  if (runtime === 'go-cli') return '⌁'
   if (runtime === 'typescript-mcp' || runtime === 'typescript-service') return '⌘'
   return '◈'
 }
@@ -51,7 +52,9 @@ export function FrameworkPanel({ frameworks, dryRun, busy, onDryRun }: Framework
               <strong>{framework.label}</strong>
               <p>{framework.detail}</p>
               <small className="framework-meta">{framework.integrationBatch ? `Batch ${framework.integrationBatch}` : 'Core'} · {framework.ownerCommander} · {framework.implementationStatus.replaceAll('-', ' ')} · {framework.license}{framework.sourceUrl ? <> · <a href={framework.sourceUrl} target="_blank" rel="noreferrer">Source</a></> : null}</small>
-              {framework.integrationBatch > 0 && framework.implementationStatus !== 'queued' && <button className="framework-review-button" type="button" onClick={() => setSelectedId(framework.id)} disabled={busy}>Dry-run plan</button>}
+              {framework.id === 'jinwoo-native-control-audit'
+                ? <small className="framework-review-button">Use the local control review below.</small>
+                : framework.integrationBatch > 0 && framework.implementationStatus !== 'queued' && <button className="framework-review-button" type="button" onClick={() => setSelectedId(framework.id)} disabled={busy}>Dry-run plan</button>}
             </div>
             <span className={`framework-state framework-state--${framework.state}`}>
               {framework.executionEnabled ? 'active' : framework.state.replace('-', ' ')}

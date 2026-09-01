@@ -4,9 +4,9 @@ Jinwoo's local mission engine remains the one canonical orchestrator. An
 installed package or sidecar never receives a mission automatically and cannot
 bypass the policy, approval, workspace, or audit boundaries owned by Jinwoo.
 
-Batches 01 and 02 contain owner-requested integrations. Their adapter contracts
-are real and testable now; their upstream runtimes remain non-executable until
-a version-pinned, local compatibility and licence review is complete.
+Batches 01–03 contain owner-requested integration lanes. Their adapter
+contracts are real and testable now; upstream runtimes remain non-executable
+until a version-pinned, local compatibility and licence review is complete.
 """
 
 from __future__ import annotations
@@ -30,13 +30,14 @@ class FrameworkAdapter:
 
     id: str
     label: str
-    runtime: Literal["builtin", "python", "typescript-mcp", "typescript-service", "container-sidecar"]
-    category: Literal["orchestration", "workflow", "coding", "research", "web-collection"]
+    runtime: Literal["builtin", "python", "typescript-mcp", "typescript-service", "container-sidecar", "go-cli"]
+    category: Literal["orchestration", "workflow", "coding", "research", "web-collection", "memory", "automation", "security", "governance"]
     integration_batch: int
     owner_commander: str
     license: str
     source_url: str | None
     purpose: str
+    native_adapter: bool = False
     implementation_status: Literal["active", "contract-ready", "license-review-required", "queued"] = "contract-ready"
     guardrails: tuple[str, ...] = ()
     python_module: str | None = None
@@ -44,7 +45,7 @@ class FrameworkAdapter:
 
     @property
     def is_native(self) -> bool:
-        return self.id == "jinwoo-native"
+        return self.native_adapter
 
     def is_detected(self) -> bool:
         try:
@@ -67,8 +68,12 @@ class FrameworkAdapter:
                 source_url=self.source_url,
                 state=FrameworkState.CANONICAL,
                 implementation_status=self.implementation_status,
-                execution_enabled=True,
-                detail="Canonical local mission engine; policy, approval, workspace and audit controls stay here.",
+                execution_enabled=self.implementation_status == "active",
+                detail=(
+                    "Canonical local mission engine; policy, approval, workspace and audit controls stay here."
+                    if self.id == "jinwoo-native"
+                    else "Active native control-plane review; it cannot enable adapters or execute external tools."
+                ),
             )
 
         detected = self.is_detected()
@@ -160,6 +165,7 @@ class FrameworkRegistry:
                 license="Original project code",
                 source_url=None,
                 purpose="Visible Planner, Executor and Verifier mission flow.",
+                native_adapter=True,
                 implementation_status="active",
             ),
             # Owner-requested integration batch 1 (listed order).
@@ -302,6 +308,88 @@ class FrameworkRegistry:
                 guardrails=(
                     "No URL is fetched in a dry run; authenticated, private and localhost targets stay disallowed.",
                     "Future collection must use strict domain, rate, size and citation limits.",
+                ),
+            ),
+            # Owner-requested final integration batch (listed order).
+            FrameworkAdapter(
+                id="mem0",
+                label="Mem0",
+                runtime="python",
+                category="memory",
+                integration_batch=3,
+                owner_commander="Jinwoo",
+                license="Apache-2.0",
+                source_url="https://github.com/mem0ai/mem0",
+                python_module="mem0",
+                purpose="Reserved for separately consented, optional memory interoperability; local SQLite remains authoritative.",
+                guardrails=(
+                    "Do not treat the owner's ambiguous memo API as confirmed Mem0 integration.",
+                    "Never sync memory content, identifiers or provider credentials without renewed, per-operation consent.",
+                ),
+            ),
+            FrameworkAdapter(
+                id="openclaw",
+                label="OpenClaw",
+                runtime="typescript-service",
+                category="automation",
+                integration_batch=3,
+                owner_commander="Nox",
+                license="MIT",
+                source_url="https://github.com/openclaw/openclaw",
+                executable="openclaw",
+                purpose="Reserved for a future isolated local automation gateway under Jinwoo mission control.",
+                guardrails=(
+                    "Do not start messaging channels, pairing, schedules, skills, browser access or shell tools in a dry run.",
+                    "Future delivery and tool actions must remain locally isolated and require a visible Jinwoo approval.",
+                ),
+            ),
+            FrameworkAdapter(
+                id="trufflehog",
+                label="TruffleHog",
+                runtime="go-cli",
+                category="security",
+                integration_batch=3,
+                owner_commander="Greed",
+                license="AGPL-3.0",
+                source_url="https://github.com/trufflesecurity/trufflehog",
+                executable="trufflehog",
+                purpose="Reserved for bounded, local secret-exposure review after a separate licence decision.",
+                implementation_status="license-review-required",
+                guardrails=(
+                    "Do not read files, scan Git history, verify credentials or contact a provider in a dry run.",
+                    "Future findings must be masked, local-only and confined to the selected workspace after explicit approval.",
+                ),
+            ),
+            FrameworkAdapter(
+                id="gitleaks",
+                label="Gitleaks",
+                runtime="go-cli",
+                category="security",
+                integration_batch=3,
+                owner_commander="Greed",
+                license="MIT",
+                source_url="https://github.com/gitleaks/gitleaks",
+                executable="gitleaks",
+                purpose="Reserved for bounded local secret-scanner proposals and redacted security reporting.",
+                guardrails=(
+                    "Do not read workspace files or Git history and do not expose any candidate secret in a dry run.",
+                    "Future scans need explicit approval, a selected workspace boundary and redacted local findings only.",
+                ),
+            ),
+            FrameworkAdapter(
+                id="jinwoo-native-control-audit",
+                label="Jinwoo Native Control & Audit Review",
+                runtime="builtin",
+                category="governance",
+                integration_batch=3,
+                owner_commander="Jinwoo",
+                license="Original project code",
+                source_url=None,
+                purpose="Active zero-side-effect local review of capacity, adapter, licence, workspace and audit boundaries.",
+                native_adapter=True,
+                implementation_status="active",
+                guardrails=(
+                    "The review reports local control-plane state only and cannot enable adapters or execute tools.",
                 ),
             ),
         )

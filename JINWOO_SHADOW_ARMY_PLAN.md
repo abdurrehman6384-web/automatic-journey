@@ -303,11 +303,18 @@ machine.
 
 ```text
 Jinwoo Native Mission Engine
-├── Swarms adapter        → bounded hierarchical worker/specialist patterns
-├── Agency-Swarm adapter  → organisation-style handoffs where compatible
-├── Ruflo bridge          → optional TypeScript/MCP meta-harness integration
-├── LangGraph adapter     → checkpointed state/workflow primitives
-└── CrewAI adapter        → bounded role-based crew patterns
+├── Swarms adapter                 → bounded hierarchical worker/specialist patterns
+├── Agency-Swarm adapter           → organisation-style handoffs where compatible
+├── Ruflo bridge                   → optional TypeScript/MCP meta-harness integration
+├── LangGraph adapter              → checkpointed state/workflow primitives
+├── CrewAI adapter                 → bounded role-based crew patterns
+├── AG2 adapter                    → policy-mediated multi-agent handoffs
+├── OpenHands adapter              → future isolated coding-task proposals
+├── Firecrawl / Web-Agent / Crawl4AI → future approved public-web research lanes
+├── Mem0 adapter                   → separately consented optional memory interoperability
+├── OpenClaw adapter               → future isolated local automation gateway
+├── TruffleHog / Gitleaks          → future bounded local secret-review lanes
+└── Native Control & Audit Review  → active zero-side-effect local invariant review
 ```
 
 ### Framework responsibilities
@@ -319,6 +326,13 @@ Jinwoo Native Mission Engine
 | Ruflo | optional MCP/developer swarm, adaptive memory and evaluation bridge |
 | LangGraph | optional checkpointed workflow/state graph adapter |
 | CrewAI | optional bounded role-based crew adapter |
+| AG2 | optional policy-mediated multi-agent handoff adapter |
+| OpenHands | optional isolated coding-task proposal/sandbox review adapter |
+| Firecrawl / Firecrawl Web-Agent / Crawl4AI | optional approval-bound public-web research/collection adapters |
+| Mem0 | optional separately consented memory-interoperability adapter; does not confirm “memo API” |
+| OpenClaw | optional isolated local automation gateway adapter |
+| TruffleHog / Gitleaks | optional bounded local secret-exposure review adapters |
+| Jinwoo Native Control & Audit Review | active local invariant review that cannot enable adapters or tools |
 | Jinwoo mission engine | source of truth for policy, approvals, mission state and audit logs |
 
 Rules:
@@ -339,14 +353,17 @@ inside that hierarchy, not fifteen replacement commander departments.
 |---:|---|---|
 | 01 — complete | Swarms, Agency-Swarm, Ruflo, LangGraph, CrewAI | typed, policy-gated dry-run contracts; upstream execution disabled |
 | 02 — complete | AG2, OpenHands, Firecrawl, Firecrawl Web-Agent, Crawl4AI | typed dry-run contracts plus Tank no-fetch planning gate; all upstream execution disabled; Firecrawl needs an AGPL-3.0 compatibility decision |
-| 03 — only on final instruction | Mem0, OpenClaw, TruffleHog, Gitleaks, Jinwoo Native control/audit review | queued for supply-chain and safety review |
+| 03 — complete | Mem0, OpenClaw, TruffleHog, Gitleaks, Jinwoo Native control/audit review | typed dry-run contracts plus Greed no-scan preflight and active zero-side-effect native control review; all external execution disabled; TruffleHog needs an AGPL-3.0 compatibility decision |
 
-A Batch 01/02 dry run may represent up to 450 logical agents but caps runtime
+A Batch 01/02/03 dry run may represent up to 450 logical agents but caps runtime
 planning at three Planner/Executor/Verifier workers. It never starts an
-upstream framework, network crawl, shell, browser, container, code patch, or
-tool action. Tank's Batch 02 source-plan gate validates at most ten explicit
-public HTTPS targets without opening a URL or resolving DNS; future retrieval
-remains separately approval-, policy-, licence- and limit-gated.
+upstream framework, network crawl, shell, browser, container, code patch,
+secret scan, messaging gateway, or tool action. Tank's Batch 02 source-plan
+gate validates at most ten explicit public HTTPS domain targets without opening a URL
+or resolving DNS; future retrieval remains separately approval-, policy-,
+licence- and limit-gated. Batch 03's native control review verifies capacity,
+external-runtime locks, licence gates, read-only workspace state and audit
+availability without changing any execution state.
 
 ---
 
@@ -369,7 +386,7 @@ Local Providers or Optional Cloud Providers
 | Claude API | complex planning, coding, verification, long documents and tool-use reasoning |
 | GLM / Z.ai API | general/coding alternative and configurable fallback |
 | Hugging Face API | hosted inference, embeddings, reranking and approved model experiments |
-| Mem0 API | optional cloud memory sync if “memo API” means Mem0 |
+| Mem0 API | optional separately consented memory interoperability only if the owner confirms “memo API” means Mem0 |
 | OpenAI/Groq/Gemini/OpenRouter/DeepSeek | optional adapters, not a separate app rewrite |
 
 ### Provider router rules
@@ -391,7 +408,7 @@ Local coding draft      → Ollama / LM Studio
 Hard architecture task  → Claude, only if cloud use is enabled
 Coding fallback         → GLM
 Document retrieval      → local HF embeddings / LanceDB
-Long-term memory        → SQLite first, Mem0 only if enabled
+Long-term memory        → SQLite source of truth; Mem0 only after explicit identity confirmation and renewed per-item consent
 ```
 
 ### API security
@@ -708,6 +725,10 @@ Provider registry/adapters for local and cloud routes
 Controlled Batch 01 framework registry/dry-run contracts for Swarms, Agency-Swarm, Ruflo, LangGraph and CrewAI
 Controlled Batch 02 registry/dry-run contracts for AG2, OpenHands, Firecrawl, Firecrawl Web-Agent and Crawl4AI; Firecrawl remains licence-review-required
 Tank no-fetch public-web research planner with explicit HTTPS target validation, no DNS/network/browser access and metadata-only audit records
+Controlled Batch 03 registry/dry-run contracts for Mem0, OpenClaw, TruffleHog and Gitleaks; TruffleHog remains licence-review-required
+Greed no-scan secret-review preflight that requires a selected workspace/authorisation but reads no files or Git history
+Jinwoo Native Control & Audit Review with zero-side-effect local invariant checks and aggregate-only audit records
+Whitespace-only API input rejection and hardened regular-file workspace reads
 Docker Compose foundation
 Electron shell foundation
 Automated backend tests
@@ -716,7 +737,7 @@ Automated backend tests
 The UI and backend now use the final hierarchy: **45 sub-departments, 450
 logical agents and 1,350 logical worker slots**. Framework presence is visible
 in Settings, but optional adapters remain non-executable until their individual
-review and policy-gated implementation. Tank's visible source-plan gate is no-fetch only; it cannot activate a crawler or browser runtime.
+review and policy-gated implementation. Tank's visible source-plan gate is no-fetch only; it cannot activate a crawler or browser runtime. Jinwoo's native control review cannot enable an adapter, alter policy, scan a workspace or invoke a tool.
 
 ---
 
@@ -730,7 +751,7 @@ Add Claude, GLM and HF live-provider integration tests with user-owned keys
 Add approved Igris workspace write/patch tools after the read-only guard review
 Implement Tank approved retrieval/source citation flow after the no-fetch gate, including runtime DNS/SSRF checks and source/rate/depth/size limits
 Add local vector retrieval and Memory Vault search
-Complete individual activation reviews before enabling any Batch 01/02 runtime; decide Firecrawl AGPL-3.0 compatibility before any Firecrawl code, service or container work; Batch 03 remains queued until explicitly requested
+Complete individual activation reviews before enabling any Batch 01/02/03 external runtime; decide Firecrawl and TruffleHog AGPL-3.0 compatibility before any related code, service, binary or container work; keep Mem0 optional until “memo API” is explicitly confirmed
 Add Electron packaging and Windows installer
 Add Rust/Go sidecars only after profiling
 ```

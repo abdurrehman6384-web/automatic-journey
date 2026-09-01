@@ -14,9 +14,12 @@ An original, local-first desktop assistant foundation for the **Jinwoo AI / Shad
 - redacted local audit trail for mission routing, approvals, completion and Memory Vault changes;
 - Igris Workspace Guard: user-selected, read-only folder listing and bounded source diagnostics with path-escape protection;
 - provider registry for Ollama, LM Studio, Claude, GLM/Z.ai, Hugging Face and optional Mem0;
-- controlled Batch 01 + Batch 02 adapter registry for Swarms, Agency-Swarm, Ruflo, LangGraph, CrewAI, AG2, OpenHands, Firecrawl, Firecrawl Web-Agent and Crawl4AI; each is policy-gated and cannot execute an upstream runtime in V1;
+- controlled Batch 01–03 adapter registry for Swarms, Agency-Swarm, Ruflo, LangGraph, CrewAI, AG2, OpenHands, Firecrawl, Firecrawl Web-Agent, Crawl4AI, Mem0, OpenClaw, TruffleHog and Gitleaks; each external lane is policy-gated and cannot execute an upstream runtime in V1;
 - Tank's no-fetch Research Gate for validating explicit public HTTPS source plans without opening a URL, starting a browser or calling a crawler;
-- unit tests for routing, policy, local memory, workspace confinement, framework boundaries and no-fetch research validation;
+- Greed's no-scan secret-review preflight for selected workspaces, with no file/history read, scanner launch or credential disclosure;
+- Jinwoo Native Control & Audit Review for zero-side-effect local checks of capacity, disabled runtimes, licence gates, workspace containment and audit availability;
+- API validation that rejects whitespace-only user text, plus hardened bounded regular-file reads for Igris workspace diagnostics;
+- unit tests for routing, policy, local memory, workspace confinement, framework boundaries, no-fetch research validation and native control review;
 - original code only. External source archives are references until their licence and intended merge path are reviewed.
 
 ## Security model
@@ -24,8 +27,10 @@ An original, local-first desktop assistant foundation for the **Jinwoo AI / Shad
 Jinwoo makes plans and drafts by default. Actions that may alter files, run a
 terminal command, install software, send/upload content or control a desktop
 must request explicit approval. The included backend intentionally has no raw
-shell execution endpoint or URL-fetch/crawler endpoint. The current Igris Workspace Guard is read-only and
-resolves every inspected path beneath the one folder selected by the user.
+shell execution endpoint, URL-fetch/crawler endpoint, secret-scanner endpoint,
+or external automation gateway. The current Igris Workspace Guard is read-only,
+uses bounded regular-file reads, and resolves every inspected path beneath the
+one folder selected by the user.
 
 ## Run the dashboard
 
@@ -77,24 +82,32 @@ to the browser.
 2. **LM Studio** — optional local OpenAI-compatible endpoint.
 3. **Claude / GLM / Hugging Face** — optional cloud adapters after local secure
    configuration.
-4. **Mem0** — optional remote memory sync; SQLite is always the local fallback.
+4. **Mem0** — separately consented optional memory-interoperability lane; SQLite is always the local source of truth. The earlier ambiguous “memo API” is not assumed to mean Mem0.
 
 ## Orchestration integrations
 
 `/api/frameworks` reports the controlled integration boundary. Batch 01 contains
 Swarms, Agency-Swarm, Ruflo, LangGraph and CrewAI; Batch 02 contains AG2,
-OpenHands, Firecrawl, Firecrawl Web-Agent and Crawl4AI. Their adapters can
-prepare a bounded, policy-screened dry run through
+OpenHands, Firecrawl, Firecrawl Web-Agent and Crawl4AI; Batch 03 contains Mem0,
+OpenClaw, TruffleHog, Gitleaks and Jinwoo Native Control & Audit Review. External
+adapters can prepare a bounded, policy-screened dry run through
 `POST /api/frameworks/{id}/dry-run`, but no upstream runtime is invoked or
 enabled in V1.
+
+`POST /api/control/review` runs the final native lane: a zero-side-effect local
+control check that cannot enable a runtime, scan files or modify policy.
+`POST /api/security/scan-plan` requires a selected workspace and explicit
+authorisation, but creates only a no-scan preflight — it cannot read files or
+Git history, invoke a scanner, verify a credential or expose a finding.
 
 For web research lanes, `POST /api/research/plan` only validates a user-visible,
 no-fetch plan: it does not resolve DNS, open a URL, launch a browser or call a
 crawler. It accepts only public HTTPS domain targets and requires a separate
-approved retrieval implementation later. Firecrawl is explicitly blocked from activation
-pending an AGPL-3.0 compatibility decision. See
+approved retrieval implementation later. Firecrawl and TruffleHog are explicitly
+blocked from activation pending AGPL-3.0 compatibility decisions. See
 [`docs/INTEGRATION_BATCH_01.md`](docs/INTEGRATION_BATCH_01.md),
-[`docs/INTEGRATION_BATCH_02.md`](docs/INTEGRATION_BATCH_02.md), and
+[`docs/INTEGRATION_BATCH_02.md`](docs/INTEGRATION_BATCH_02.md),
+[`docs/INTEGRATION_BATCH_03.md`](docs/INTEGRATION_BATCH_03.md), and
 [`docs/FRAMEWORK_ADAPTERS.md`](docs/FRAMEWORK_ADAPTERS.md) before enabling any
 adapter.
 

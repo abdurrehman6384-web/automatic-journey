@@ -46,4 +46,4 @@ None of these checks is complete merely because a record appears in the registry
 
 - No crawling, searching, browser automation, browser profile access, URL fetch, DNS lookup, upload, external model request, container launch, terminal command, code patch, git operation or package installation.
 - No Firecrawl distribution or integration while the AGPL decision is unresolved.
-- No Batch 03 implementation. The remaining queued review lane is Mem0, OpenClaw, TruffleHog, Gitleaks, and Jinwoo Native control/audit review; it starts only after explicit owner instruction.
+- Batch 03 is now registered as the final controlled-contract lane. See [`INTEGRATION_BATCH_03.md`](INTEGRATION_BATCH_03.md); it still does not enable an upstream package, gateway or scanner runtime.

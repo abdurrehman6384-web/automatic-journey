@@ -7,9 +7,12 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from app.army import army_summary, build_mission, needs_approval, select_commander
+from app.control import build_control_review
+from app.frameworks import frameworks
 from app.memory import LocalMemoryStore
 from app.policy import ActionClass, classify_action
 from app.providers import ProviderError, ProviderGateway
+from app.schemas import WorkspaceStatus
 from app.settings import Settings
 
 
@@ -48,6 +51,22 @@ class PolicyTests(unittest.TestCase):
         self.assertEqual(classify_action("Bypass password on this laptop").action_class, ActionClass.BLOCKED)
 
 
+class ControlReviewTests(unittest.TestCase):
+    def test_review_flags_an_external_runtime_regression(self) -> None:
+        statuses = [
+            status.model_copy(update={"execution_enabled": True}) if status.id == "gitleaks" else status
+            for status in frameworks.statuses()
+        ]
+        review = build_control_review(
+            framework_statuses=statuses,
+            workspace_status=WorkspaceStatus(configured=False, detail="No workspace selected."),
+            audit_available=True,
+        )
+        self.assertFalse(review.all_passed)
+        external_lock = next(check for check in review.checks if check.id == "external-runtime-lock")
+        self.assertFalse(external_lock.passed)
+
+
 class ProviderSafetyTests(unittest.TestCase):
     def test_cloud_provider_requires_per_request_approval(self) -> None:
         config = replace(Settings.from_env(), mode="live", claude_api_key="test-key", claude_model="test-model")
@@ -55,6 +74,12 @@ class ProviderSafetyTests(unittest.TestCase):
         with self.assertRaises(ProviderError):
             gateway._choose_provider("claude", allow_cloud=False)
         self.assertEqual(gateway._choose_provider("claude", allow_cloud=True), "claude")
+
+    def test_mem0_key_does_not_enable_or_mark_memory_sync_ready(self) -> None:
+        config = replace(Settings.from_env(), mode="live", mem0_api_key="test-memory-key")
+        mem0 = next(status for status in ProviderGateway(config).statuses() if status.id == "mem0")
+        self.assertEqual(mem0.state.value, "offline")
+        self.assertIn("disabled", mem0.detail)
 
 
 class MemoryTests(unittest.TestCase):

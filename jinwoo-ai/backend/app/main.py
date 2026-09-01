@@ -2,22 +2,27 @@
 
 from __future__ import annotations
 
+import sqlite3
+
 from fastapi import FastAPI, HTTPException, Query, status
 
 from .army import army_summary
 from .audit import AuditStore
+from .control import build_control_review
 from .frameworks import FrameworkNotFoundError, frameworks
 from .memory import LocalMemoryStore
 from .orchestration import MissionStore
 from .policy import ActionClass, classify_action
 from .providers import ProviderError, ProviderGateway
 from .research import ResearchPolicyError, build_research_plan
+from .security import SecurityPlanError, build_security_scan_plan
 from .sensitive import contains_sensitive_value
 from .schemas import (
     ApprovalRequest,
     AuditEvent,
     ChatRequest,
     ChatResponse,
+    ControlReview,
     FrameworkDryRun,
     FrameworkDryRunRequest,
     FrameworkStatus,
@@ -29,6 +34,8 @@ from .schemas import (
     ProviderStatus,
     ResearchPlan,
     ResearchPlanRequest,
+    SecurityScanPlan,
+    SecurityScanPlanRequest,
     WorkspaceAnalysis,
     WorkspaceAnalysisRequest,
     WorkspaceEntry,
@@ -85,6 +92,54 @@ async def dry_run_framework(framework_id: str, request: FrameworkDryRunRequest) 
         actor="local-user",
     )
     return result
+
+
+@app.post("/api/control/review", response_model=ControlReview)
+async def review_control_plane() -> ControlReview:
+    """Run the native aggregate control review without touching an upstream runtime."""
+    try:
+        audit.list(limit=1)
+        audit_available = True
+    except (OSError, ValueError, sqlite3.Error):  # surface a damaged local audit store, not hide it
+        audit_available = False
+    review = build_control_review(
+        framework_statuses=frameworks.statuses(),
+        workspace_status=workspace.status(),
+        audit_available=audit_available,
+    )
+    if audit_available:
+        try:
+            audit.record(
+                "control.review_completed",
+                f"Native control review completed: {sum(check.passed for check in review.checks)}/{len(review.checks)} checks passed; no optional runtime was invoked.",
+                actor="local-user",
+            )
+        except (OSError, sqlite3.Error):  # retain the report, but surface an audit persistence failure
+            review = build_control_review(
+                framework_statuses=frameworks.statuses(),
+                workspace_status=workspace.status(),
+                audit_available=False,
+            )
+    return review
+
+
+@app.post("/api/security/scan-plan", response_model=SecurityScanPlan)
+async def plan_security_scan(request: SecurityScanPlanRequest) -> SecurityScanPlan:
+    """Prepare a Greed no-scan preflight without reading workspace content."""
+    try:
+        plan = build_security_scan_plan(
+            scanner_id=request.scanner_id,
+            workspace_status=workspace.status(),
+            confirm_authorized=request.confirm_authorized,
+        )
+    except SecurityPlanError as error:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error)) from error
+    audit.record(
+        "security.scan_plan_created",
+        f"Greed prepared a no-scan {plan.scanner_label} plan for a selected workspace; no scanner runtime was invoked.",
+        actor="local-user",
+    )
+    return plan
 
 
 @app.post("/api/research/plan", response_model=ResearchPlan)

@@ -8,7 +8,9 @@ before any impactful developer tool is introduced.
 from __future__ import annotations
 
 import hashlib
+import os
 import sqlite3
+import stat
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -131,8 +133,12 @@ class WorkspaceStore:
         workspace, directory = self._resolve_child(relative_path)
         if not directory.is_dir():
             raise WorkspaceError("Choose a directory to inspect its files.")
+        try:
+            directory_entries = list(directory.iterdir())
+        except OSError as error:
+            raise WorkspaceError("Igris cannot read that folder inside the selected workspace.") from error
         entries: list[WorkspaceEntry] = []
-        for entry in sorted(directory.iterdir(), key=lambda item: (not item.is_dir(), item.name.casefold())):
+        for entry in sorted(directory_entries, key=lambda item: (not item.is_dir(), item.name.casefold())):
             if len(entries) >= _MAX_LIST_ENTRIES:
                 break
             try:
@@ -156,13 +162,35 @@ class WorkspaceStore:
 
     def analyze_text_file(self, relative_path: str) -> WorkspaceAnalysis:
         workspace, file_path = self._resolve_child(relative_path)
-        if not file_path.is_file():
-            raise WorkspaceError("Choose a text file inside the selected workspace.")
         if file_path.suffix.casefold() not in _TEXT_SUFFIXES:
             raise WorkspaceError("Igris read-only analysis supports common text and source files only.")
-        size_bytes = file_path.stat().st_size
-        with file_path.open("rb") as file:
-            raw = file.read(_MAX_ANALYSIS_BYTES + 1)
+
+        # Open the already-confined path without following a last-moment symlink
+        # on platforms that provide O_NOFOLLOW. O_NONBLOCK plus the regular-file
+        # check avoids hanging on a FIFO/device swapped in after path resolution.
+        flags = os.O_RDONLY
+        if hasattr(os, "O_NOFOLLOW"):
+            flags |= os.O_NOFOLLOW
+        if hasattr(os, "O_NONBLOCK"):
+            flags |= os.O_NONBLOCK
+        descriptor: int | None = None
+        try:
+            descriptor = os.open(file_path, flags)
+            metadata = os.fstat(descriptor)
+            if not stat.S_ISREG(metadata.st_mode):
+                raise WorkspaceError("Choose a regular text file inside the selected workspace.")
+            size_bytes = metadata.st_size
+            with os.fdopen(descriptor, "rb") as file:
+                descriptor = None
+                raw = file.read(_MAX_ANALYSIS_BYTES + 1)
+        except WorkspaceError:
+            raise
+        except OSError as error:
+            raise WorkspaceError("That file could not be read safely inside the selected workspace.") from error
+        finally:
+            if descriptor is not None:
+                os.close(descriptor)
+
         truncated = len(raw) > _MAX_ANALYSIS_BYTES
         raw = raw[:_MAX_ANALYSIS_BYTES]
         try:

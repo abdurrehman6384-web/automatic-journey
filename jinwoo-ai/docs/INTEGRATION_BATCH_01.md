@@ -73,7 +73,9 @@ no-fetch Tank planner and adapter-specific boundaries are documented in
 [`INTEGRATION_BATCH_02.md`](INTEGRATION_BATCH_02.md). Firecrawl remains blocked
 from activation pending an AGPL-3.0 compatibility decision.
 
-Only **Batch 03** remains queued: Mem0, OpenClaw, TruffleHog, Gitleaks, then a
-final review of the Jinwoo Native control/audit lane as the fifteenth integration
-lane. It starts only on a later explicit owner instruction. The same
+**Batch 03 is now registered as the final controlled, non-executing batch:**
+Mem0, OpenClaw, TruffleHog, Gitleaks, and the native Jinwoo control/audit lane.
+Its review pins and adapter-specific safeguards are documented in
+[`INTEGRATION_BATCH_03.md`](INTEGRATION_BATCH_03.md). TruffleHog remains blocked
+from activation pending an AGPL-3.0 compatibility decision. The same
 supply-chain and safety checklist applies before any runtime is enabled.

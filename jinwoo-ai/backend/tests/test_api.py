@@ -56,6 +56,7 @@ class ApiTests(unittest.TestCase):
             {
                 "jinwoo-native", "swarms", "agency-swarm", "ruflo", "langgraph", "crewai",
                 "ag2", "openhands", "firecrawl", "firecrawl-web-agent", "crawl4ai",
+                "mem0", "openclaw", "trufflehog", "gitleaks", "jinwoo-native-control-audit",
             },
         )
         self.assertTrue(frameworks["jinwoo-native"]["execution_enabled"])
@@ -70,6 +71,14 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(frameworks["firecrawl"]["implementation_status"], "license-review-required")
         self.assertEqual(frameworks["openhands"]["runtime"], "container-sidecar")
         self.assertEqual(frameworks["crawl4ai"]["category"], "web-collection")
+        for adapter in ("mem0", "openclaw", "trufflehog", "gitleaks"):
+            self.assertFalse(frameworks[adapter]["execution_enabled"])
+            self.assertEqual(frameworks[adapter]["integration_batch"], 3)
+        self.assertEqual(frameworks["trufflehog"]["implementation_status"], "license-review-required")
+        self.assertEqual(frameworks["gitleaks"]["runtime"], "go-cli")
+        self.assertEqual(frameworks["mem0"]["category"], "memory")
+        self.assertTrue(frameworks["jinwoo-native-control-audit"]["execution_enabled"])
+        self.assertEqual(frameworks["jinwoo-native-control-audit"]["state"], "canonical")
 
     def test_framework_dry_run_is_bounded_and_never_invokes_upstream_runtime(self) -> None:
         response = self.client.post(
@@ -101,6 +110,72 @@ class ApiTests(unittest.TestCase):
         self.assertIn("Never run shell commands", " ".join(response.json()["next_steps"]))
         self.assertEqual(crawl.status_code, 200)
         self.assertIn("No URL is fetched", " ".join(crawl.json()["next_steps"]))
+
+    def test_batch_three_dry_runs_remain_non_executing_and_expose_boundaries(self) -> None:
+        openclaw = self.client.post(
+            "/api/frameworks/openclaw/dry-run",
+            json={"prompt": "Prepare a local automation safety plan", "requested_agents": 120},
+        )
+        scanner = self.client.post(
+            "/api/frameworks/gitleaks/dry-run",
+            json={"prompt": "Prepare a bounded secret-scanner review", "requested_agents": 3},
+        )
+        mem0 = self.client.post(
+            "/api/frameworks/mem0/dry-run",
+            json={"prompt": "Prepare an optional memory-interoperability plan", "requested_agents": 3},
+        )
+        self.assertEqual(openclaw.status_code, 200)
+        self.assertFalse(openclaw.json()["external_runtime_invoked"])
+        self.assertIn("Do not start messaging channels", " ".join(openclaw.json()["next_steps"]))
+        self.assertEqual(scanner.status_code, 200)
+        self.assertFalse(scanner.json()["external_runtime_invoked"])
+        self.assertIn("Do not read workspace files", " ".join(scanner.json()["next_steps"]))
+        self.assertEqual(mem0.status_code, 200)
+        self.assertIn("ambiguous memo API", " ".join(mem0.json()["next_steps"]))
+
+    def test_native_control_review_reports_invariants_and_writes_redacted_metadata(self) -> None:
+        response = self.client.post("/api/control/review")
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertTrue(payload["all_passed"])
+        self.assertFalse(payload["external_runtime_invoked"])
+        self.assertEqual(len(payload["checks"]), 7)
+        self.assertTrue(all(check["passed"] for check in payload["checks"]))
+        self.assertIn("external runtime", payload["summary"].casefold())
+        audit = self.client.get("/api/audit").json()
+        self.assertIn("control.review_completed", {event["event_type"] for event in audit})
+        self.assertNotIn("https://", str(audit))
+
+    def test_security_scan_plan_requires_workspace_and_consent_without_reading_files(self) -> None:
+        missing_workspace = self.client.post(
+            "/api/security/scan-plan",
+            json={"scanner_id": "gitleaks", "confirm_authorized": True},
+        )
+        project = Path(self.temp_dir.name) / "security-project"
+        project.mkdir()
+        self.assertEqual(self.client.put("/api/workspace", json={"path": str(project)}).status_code, 200)
+        no_consent = self.client.post(
+            "/api/security/scan-plan",
+            json={"scanner_id": "gitleaks", "confirm_authorized": False},
+        )
+        gitleaks = self.client.post(
+            "/api/security/scan-plan",
+            json={"scanner_id": "gitleaks", "confirm_authorized": True},
+        )
+        trufflehog = self.client.post(
+            "/api/security/scan-plan",
+            json={"scanner_id": "trufflehog", "confirm_authorized": True},
+        )
+        self.assertEqual(missing_workspace.status_code, 400)
+        self.assertEqual(no_consent.status_code, 400)
+        self.assertEqual(gitleaks.status_code, 200)
+        self.assertFalse(gitleaks.json()["external_scan_started"])
+        self.assertTrue(gitleaks.json()["requires_approval_for_scan"])
+        self.assertEqual(trufflehog.status_code, 200)
+        self.assertTrue(trufflehog.json()["license_review_required"])
+        audit = self.client.get("/api/audit").json()
+        self.assertIn("security.scan_plan_created", {event["event_type"] for event in audit})
+        self.assertNotIn(str(project), str(audit))
 
     def test_research_plan_validates_public_targets_without_fetching_or_auditing_content(self) -> None:
         topic = "Compare privacy-first local embedding documentation"
@@ -159,6 +234,23 @@ class ApiTests(unittest.TestCase):
         self.assertTrue(chat.json()["local_only"])
         self.assertEqual(blocked.status_code, 400)
         self.assertEqual(sensitive.status_code, 400)
+
+    def test_api_rejects_whitespace_only_text_at_boundary(self) -> None:
+        blank_chat = self.client.post("/api/chat", json={"message": "   "})
+        blank_mission = self.client.post("/api/missions", json={"prompt": "   "})
+        blank_dry_run = self.client.post(
+            "/api/frameworks/ag2/dry-run",
+            json={"prompt": "   ", "requested_agents": 3},
+        )
+        blank_memory = self.client.post(
+            "/api/memories",
+            json={"content": "   ", "kind": "note", "consent": True},
+        )
+        blank_research = self.client.post("/api/research/plan", json={"topic": "   "})
+        mission = self.client.post("/api/missions", json={"prompt": "Analyze a safe document"}).json()
+        blank_actor = self.client.post(f"/api/missions/{mission['id']}/approve", json={"approved_by": "   "})
+        for response in (blank_chat, blank_mission, blank_dry_run, blank_memory, blank_research, blank_actor):
+            self.assertEqual(response.status_code, 422)
 
     def test_safe_analysis_creates_a_planned_mission(self) -> None:
         response = self.client.post("/api/missions", json={"prompt": "Analyze my React build error"})

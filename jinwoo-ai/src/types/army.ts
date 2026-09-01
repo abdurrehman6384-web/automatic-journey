@@ -55,8 +55,8 @@ export interface ProviderStatus {
 export interface FrameworkStatus {
   id: string
   label: string
-  runtime: 'builtin' | 'python' | 'typescript-mcp' | 'typescript-service' | 'container-sidecar'
-  category: 'orchestration' | 'workflow' | 'coding' | 'research' | 'web-collection'
+  runtime: 'builtin' | 'python' | 'typescript-mcp' | 'typescript-service' | 'container-sidecar' | 'go-cli'
+  category: 'orchestration' | 'workflow' | 'coding' | 'research' | 'web-collection' | 'memory' | 'automation' | 'security' | 'governance'
   integrationBatch: number
   ownerCommander: string
   license: string
@@ -76,6 +76,32 @@ export interface FrameworkDryRun {
   externalRuntimeInvoked: boolean
   requiresApproval: boolean
   summary: string
+  nextSteps: string[]
+}
+
+export interface ControlReviewCheck {
+  id: string
+  label: string
+  passed: boolean
+  detail: string
+}
+
+export interface ControlReview {
+  reviewedAt: string
+  allPassed: boolean
+  externalRuntimeInvoked: boolean
+  summary: string
+  checks: ControlReviewCheck[]
+}
+
+export interface SecurityScanPlan {
+  scannerId: 'trufflehog' | 'gitleaks'
+  scannerLabel: string
+  workspaceConfigured: boolean
+  licenseReviewRequired: boolean
+  externalScanStarted: boolean
+  requiresApprovalForScan: boolean
+  safeguards: string[]
   nextSteps: string[]
 }
 

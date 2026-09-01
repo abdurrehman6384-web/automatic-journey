@@ -24,16 +24,19 @@ This works without Docker, PostgreSQL, Redis, GPU hardware or cloud API keys.
 
 Jinwoo's native mission engine is the single canonical orchestrator in V1.
 Batch 01 registers Swarms, Agency-Swarm, Ruflo, LangGraph and CrewAI. Batch 02
-registers AG2, OpenHands, Firecrawl, Firecrawl Web-Agent and Crawl4AI. They can
-prepare a bounded, policy-screened dry run, but the backend will not install or
-execute an upstream runtime. OpenHands has no container/sandbox path yet.
-Firecrawl is marked `license-review-required` due to its AGPL-3.0 licence and
-must not be activated, bundled or copied without an explicit compatibility
-decision. Any future adapter must return proposed work through Jinwoo's policy,
-approval, workspace and audit boundaries. See
-[`FRAMEWORK_ADAPTERS.md`](FRAMEWORK_ADAPTERS.md),
-[`INTEGRATION_BATCH_01.md`](INTEGRATION_BATCH_01.md), and
-[`INTEGRATION_BATCH_02.md`](INTEGRATION_BATCH_02.md).
+registers AG2, OpenHands, Firecrawl, Firecrawl Web-Agent and Crawl4AI. Batch 03
+registers Mem0, OpenClaw, TruffleHog, Gitleaks and the native control/audit
+review. They can prepare bounded, policy-screened plans, but the backend will
+not install or execute an upstream runtime. OpenHands has no container/sandbox
+path; OpenClaw has no gateway/channel/skill path; secret scanners have no file
+or Git-history scan path. Firecrawl and TruffleHog are
+`license-review-required` due to their AGPL-3.0 licences and must not be
+activated, bundled or copied without explicit compatibility decisions. Any
+future adapter must return proposed work through Jinwoo's policy, approval,
+workspace and audit boundaries. See [`FRAMEWORK_ADAPTERS.md`](FRAMEWORK_ADAPTERS.md),
+[`INTEGRATION_BATCH_01.md`](INTEGRATION_BATCH_01.md),
+[`INTEGRATION_BATCH_02.md`](INTEGRATION_BATCH_02.md), and
+[`INTEGRATION_BATCH_03.md`](INTEGRATION_BATCH_03.md).
 
 ## Tank research gate
 
@@ -45,6 +48,23 @@ credential-like query strings. A future retrieval executor must revalidate the
 resolved connection target to prevent SSRF/rebinding, require visible approval,
 and enforce source/robots, rate, depth, response-size, domain, citation and
 local-retention limits.
+
+## Greed security gate
+
+Greed's `POST /api/security/scan-plan` is a no-scan preflight for Gitleaks or
+TruffleHog. It requires an explicit user-selected workspace and authorisation
+confirmation, then creates a plan without reading a file, Git history or key,
+starting a scanner, verifying a credential, or placing a finding in the audit
+trail. A later scan needs separate approval and strict redaction/retention
+controls.
+
+## Native control & audit review
+
+The final Jinwoo-native lane is a zero-side-effect `POST /api/control/review`
+report. It verifies capacity, native ownership, disabled external runtimes,
+final inventory, licence gates, read-only workspace status and local audit
+availability. It cannot enable a runtime or read workspace data; its audit
+entry contains aggregate metadata only.
 
 ## Why Rust and Go are not initial services
 
@@ -58,11 +78,15 @@ cost without making missions better.
 Igris can perform bounded, read-only diagnostics only after the user selects a
 project folder in Settings. The guard canonicalises the root and every requested
 child path, rejects path escapes and outside-root symlinks, lists at most 200
-entries, and only analyses common text/source files up to 500 KB. It has no
-write, delete, terminal or package-install capability.
+entries, and only analyses common regular text/source files up to 500 KB. It
+uses no-follow/non-blocking reads where supported and returns a safe error for
+special files or read races. It has no write, delete, terminal or package-install
+capability.
 
 ## Memory
 
-SQLite is a durable, local fallback. Vector retrieval can use LanceDB or
-ChromaDB later. If the requested "memo API" is Mem0, it becomes an opt-in sync
-adapter; it never replaces the user's ability to inspect and delete local data.
+SQLite is the durable, local source of truth. Vector retrieval can use LanceDB
+or ChromaDB later. Mem0 is a separately reviewed optional integration lane; the
+owner has not yet confirmed that their earlier ambiguous "memo API" means Mem0.
+Even if confirmed later, it must be opt-in per operation and never replace the
+user's ability to inspect, edit, delete and export local data.

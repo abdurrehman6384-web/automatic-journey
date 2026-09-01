@@ -40,19 +40,22 @@ class ProviderGateway:
             ProviderDefinition("claude", "Claude", "cloud", bool(self.config.claude_api_key and self.config.claude_model), "Anthropic Messages API adapter"),
             ProviderDefinition("glm", "GLM / Z.ai", "cloud", bool(self.config.glm_api_key and self.config.glm_base_url and self.config.glm_model), "Configurable GLM/OpenAI-compatible adapter"),
             ProviderDefinition("hugging-face", "Hugging Face", "cloud", bool(self.config.huggingface_api_key and self.config.huggingface_model), "Hosted inference / embeddings adapter"),
-            ProviderDefinition("mem0", "Mem0", "memory", bool(self.config.mem0_api_key), "Optional memory sync; SQLite remains local fallback"),
+            ProviderDefinition("mem0", "Mem0", "memory", bool(self.config.mem0_api_key), "Optional separately consented memory integration; SQLite remains local source of truth"),
         ]
         statuses: list[ProviderStatus] = []
         for item in definitions:
-            if item.configured:
+            # A configured Mem0 key is not activation. No sync executor exists
+            # until the owner confirms the intended memo API and grants renewed,
+            # item-level consent, so preserve SQLite as the visible local source.
+            if item.id == "mem0":
+                state = ProviderState.OFFLINE
+                detail = "Mem0 sync is disabled; local SQLite memory is the source of truth"
+            elif item.configured:
                 state = ProviderState.READY
                 detail = item.detail
             elif item.id == "ollama" and self.config.mode == "demo":
                 state = ProviderState.READY
                 detail = "Demo-safe local route; choose a model in Settings"
-            elif item.id == "mem0":
-                state = ProviderState.OFFLINE
-                detail = "Local SQLite memory fallback is active"
             else:
                 state = ProviderState.UNCONFIGURED
                 detail = f"{item.detail}; configuration required"
