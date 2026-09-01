@@ -58,9 +58,32 @@ class FrameworkStatus(BaseModel):
     id: str
     label: str
     runtime: Literal["builtin", "python", "typescript-mcp"]
+    category: Literal["orchestration", "workflow"]
+    integration_batch: int
+    owner_commander: str
+    license: str
+    source_url: str | None = None
     state: FrameworkState
+    implementation_status: Literal["active", "contract-ready", "queued"]
     execution_enabled: bool
     detail: str
+
+
+class FrameworkDryRunRequest(BaseModel):
+    prompt: str = Field(min_length=2, max_length=8_000)
+    requested_agents: int = Field(default=3, ge=1, le=450)
+
+
+class FrameworkDryRun(BaseModel):
+    framework_id: str
+    framework_label: str
+    policy_outcome: Literal["safe-plan", "approval-required", "blocked"]
+    requested_agents: int
+    bounded_runtime_workers: int
+    external_runtime_invoked: bool = False
+    requires_approval: bool
+    summary: str
+    next_steps: list[str]
 
 
 class WorkerSpec(BaseModel):
@@ -118,6 +141,41 @@ class AuditEvent(BaseModel):
     actor: str
     detail: str
     created_at: datetime
+
+
+class WorkspaceSelectionRequest(BaseModel):
+    path: str = Field(min_length=1, max_length=4_096)
+
+
+class WorkspaceStatus(BaseModel):
+    configured: bool
+    root_label: str | None = None
+    read_only: bool = True
+    detail: str
+
+
+class WorkspaceEntry(BaseModel):
+    name: str
+    relative_path: str
+    kind: Literal["file", "directory"]
+    size_bytes: int | None = None
+
+
+class WorkspaceAnalysisRequest(BaseModel):
+    relative_path: str = Field(min_length=1, max_length=4_096)
+
+
+class WorkspaceAnalysis(BaseModel):
+    relative_path: str
+    language: str
+    size_bytes: int
+    line_count: int
+    todo_count: int
+    fixme_count: int
+    import_count: int
+    symbol_count: int
+    sha256: str
+    truncated: bool
 
 
 class ChatRequest(BaseModel):

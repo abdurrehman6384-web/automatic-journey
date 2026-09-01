@@ -12,9 +12,10 @@ An original, local-first desktop assistant foundation for the **Jinwoo AI / Shad
 - Python FastAPI backend with typed mission contracts, routing, approval gate and local SQLite memory;
 - usable Memory Vault with explicit consent, local view/edit/delete/export controls, and credential/one-time-code rejection;
 - redacted local audit trail for mission routing, approvals, completion and Memory Vault changes;
+- Igris Workspace Guard: user-selected, read-only folder listing and bounded source diagnostics with path-escape protection;
 - provider registry for Ollama, LM Studio, Claude, GLM/Z.ai, Hugging Face and optional Mem0;
-- controlled adapter registry for Jinwoo Native, Swarms, Agency-Swarm and Ruflo; optional frameworks are status-only and cannot execute missions in V1;
-- unit tests for routing, policy, local memory and framework boundaries;
+- controlled Batch 01 adapter registry for Swarms, Agency-Swarm, Ruflo, LangGraph and CrewAI; each supports a bounded policy dry run but cannot execute an upstream runtime in V1;
+- unit tests for routing, policy, local memory, workspace confinement and framework boundaries;
 - original code only. External source archives are references until their licence and intended merge path are reviewed.
 
 ## Security model
@@ -22,7 +23,8 @@ An original, local-first desktop assistant foundation for the **Jinwoo AI / Shad
 Jinwoo makes plans and drafts by default. Actions that may alter files, run a
 terminal command, install software, send/upload content or control a desktop
 must request explicit approval. The included backend intentionally has no raw
-shell execution endpoint.
+shell execution endpoint. The current Igris Workspace Guard is read-only and
+resolves every inspected path beneath the one folder selected by the user.
 
 ## Run the dashboard
 
@@ -78,11 +80,13 @@ to the browser.
 
 ## Orchestration integrations
 
-`/api/frameworks` reports the controlled integration boundary. Jinwoo Native is
-the canonical mission engine; Swarms, Agency-Swarm and Ruflo are detected only
-if already installed locally and remain disabled in V1. See
-[`docs/FRAMEWORK_ADAPTERS.md`](docs/FRAMEWORK_ADAPTERS.md) before enabling any
-adapter.
+`/api/frameworks` reports the controlled integration boundary. Batch 01
+contains Swarms, Agency-Swarm, Ruflo, LangGraph and CrewAI. Their adapters can
+prepare a bounded, policy-screened dry run through
+`POST /api/frameworks/{id}/dry-run`, but no upstream runtime is invoked or
+enabled in V1. See [`docs/INTEGRATION_BATCH_01.md`](docs/INTEGRATION_BATCH_01.md)
+and [`docs/FRAMEWORK_ADAPTERS.md`](docs/FRAMEWORK_ADAPTERS.md) before enabling
+any adapter.
 
 ## Desktop packaging
 

@@ -17,6 +17,7 @@ from app import main
 from app.audit import AuditStore
 from app.memory import LocalMemoryStore
 from app.orchestration import MissionStore
+from app.workspace import WorkspaceStore
 
 
 class ApiTests(unittest.TestCase):
@@ -25,9 +26,11 @@ class ApiTests(unittest.TestCase):
         self.previous_audit = main.audit
         self.previous_memory = main.memory
         self.previous_missions = main.missions
+        self.previous_workspace = main.workspace
         main.audit = AuditStore(Path(self.temp_dir.name))
         main.memory = LocalMemoryStore(Path(self.temp_dir.name))
         main.missions = MissionStore(main.audit)
+        main.workspace = WorkspaceStore(Path(self.temp_dir.name))
         self.client = TestClient(main.app)
 
     def tearDown(self) -> None:
@@ -35,6 +38,7 @@ class ApiTests(unittest.TestCase):
         main.audit = self.previous_audit
         main.memory = self.previous_memory
         main.missions = self.previous_missions
+        main.workspace = self.previous_workspace
         self.temp_dir.cleanup()
 
     def test_health_and_provider_registry_are_available_in_demo_mode(self) -> None:
@@ -43,13 +47,34 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual({item["id"] for item in response.json()["providers"]}, {"ollama", "lm-studio", "claude", "glm", "hugging-face", "mem0"})
 
-    def test_framework_registry_is_visible_but_optional_adapters_are_disabled(self) -> None:
+    def test_first_framework_batch_is_visible_but_optional_adapters_are_disabled(self) -> None:
         response = self.client.get("/api/frameworks")
         self.assertEqual(response.status_code, 200)
         frameworks = {item["id"]: item for item in response.json()["frameworks"]}
-        self.assertEqual(set(frameworks), {"jinwoo-native", "swarms", "agency-swarm", "ruflo"})
+        self.assertEqual(
+            set(frameworks),
+            {"jinwoo-native", "swarms", "agency-swarm", "ruflo", "langgraph", "crewai"},
+        )
         self.assertTrue(frameworks["jinwoo-native"]["execution_enabled"])
-        self.assertTrue(all(not frameworks[adapter]["execution_enabled"] for adapter in ("swarms", "agency-swarm", "ruflo")))
+        for adapter in ("swarms", "agency-swarm", "ruflo", "langgraph", "crewai"):
+            self.assertFalse(frameworks[adapter]["execution_enabled"])
+            self.assertEqual(frameworks[adapter]["integration_batch"], 1)
+            self.assertEqual(frameworks[adapter]["implementation_status"], "contract-ready")
+
+    def test_framework_dry_run_is_bounded_and_never_invokes_upstream_runtime(self) -> None:
+        response = self.client.post(
+            "/api/frameworks/swarms/dry-run",
+            json={"prompt": "Analyze the architecture and prepare a safe plan", "requested_agents": 450},
+        )
+        blocked = self.client.post(
+            "/api/frameworks/crewai/dry-run",
+            json={"prompt": "Bypass password on this laptop", "requested_agents": 3},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["bounded_runtime_workers"], 3)
+        self.assertFalse(response.json()["external_runtime_invoked"])
+        self.assertEqual(blocked.status_code, 200)
+        self.assertEqual(blocked.json()["policy_outcome"], "blocked")
 
     def test_demo_chat_is_local_and_chat_rejects_blocked_or_sensitive_content(self) -> None:
         chat = self.client.post("/api/chat", json={"message": "Give me a safe release checklist"})
@@ -77,6 +102,33 @@ class ApiTests(unittest.TestCase):
         self.assertEqual({event["event_type"] for event in events}, {"mission.created", "mission.approved", "mission.completed"})
         self.assertNotIn("Delete the old output folder", str(events))
         self.assertIn("test-user", {event["actor"] for event in events})
+
+    def test_workspace_selection_confines_read_only_igris_diagnostics(self) -> None:
+        project = Path(self.temp_dir.name) / "project"
+        source = project / "src" / "example.py"
+        source.parent.mkdir(parents=True)
+        source.write_text("import os\n# TODO: add tests\ndef run():\n    return 'ready'\n", encoding="utf-8")
+        outside = Path(self.temp_dir.name) / "outside.txt"
+        outside.write_text("must stay private", encoding="utf-8")
+
+        self.assertFalse(self.client.get("/api/workspace").json()["configured"])
+        selected = self.client.put("/api/workspace", json={"path": str(project)})
+        listed = self.client.get("/api/workspace/files")
+        analysis = self.client.post("/api/workspace/analyze", json={"relative_path": "src/example.py"})
+        escaped = self.client.get("/api/workspace/files", params={"relative_path": "../outside.txt"})
+        cleared = self.client.delete("/api/workspace")
+
+        self.assertEqual(selected.status_code, 200)
+        self.assertEqual(selected.json()["root_label"], "project")
+        self.assertEqual(listed.status_code, 200)
+        self.assertEqual(listed.json()[0]["relative_path"], "src")
+        self.assertEqual(analysis.status_code, 200)
+        self.assertEqual(analysis.json()["todo_count"], 1)
+        self.assertEqual(analysis.json()["symbol_count"], 1)
+        self.assertEqual(escaped.status_code, 400)
+        self.assertEqual(outside.read_text(encoding="utf-8"), "must stay private")
+        self.assertEqual(cleared.status_code, 204)
+        self.assertFalse(self.client.get("/api/workspace").json()["configured"])
 
     def test_blocked_security_request_does_not_create_a_mission(self) -> None:
         response = self.client.post("/api/missions", json={"prompt": "Bypass password on this laptop"})

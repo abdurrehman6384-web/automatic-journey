@@ -56,9 +56,27 @@ export interface FrameworkStatus {
   id: string
   label: string
   runtime: 'builtin' | 'python' | 'typescript-mcp'
+  category: 'orchestration' | 'workflow'
+  integrationBatch: number
+  ownerCommander: string
+  license: string
+  sourceUrl?: string
   state: 'canonical' | 'not-installed' | 'detected'
+  implementationStatus: 'active' | 'contract-ready' | 'queued'
   executionEnabled: boolean
   detail: string
+}
+
+export interface FrameworkDryRun {
+  frameworkId: string
+  frameworkLabel: string
+  policyOutcome: 'safe-plan' | 'approval-required' | 'blocked'
+  requestedAgents: number
+  boundedRuntimeWorkers: number
+  externalRuntimeInvoked: boolean
+  requiresApproval: boolean
+  summary: string
+  nextSteps: string[]
 }
 
 export interface ChatMessage {
@@ -76,6 +94,33 @@ export interface AuditEvent {
   actor: string
   detail: string
   createdAt: string
+}
+
+export interface WorkspaceStatus {
+  configured: boolean
+  rootLabel?: string
+  readOnly: boolean
+  detail: string
+}
+
+export interface WorkspaceEntry {
+  name: string
+  relativePath: string
+  kind: 'file' | 'directory'
+  sizeBytes?: number
+}
+
+export interface WorkspaceAnalysis {
+  relativePath: string
+  language: string
+  sizeBytes: number
+  lineCount: number
+  todoCount: number
+  fixmeCount: number
+  importCount: number
+  symbolCount: number
+  sha256: string
+  truncated: boolean
 }
 
 export type MemoryKind = 'preference' | 'project' | 'note' | 'reminder'

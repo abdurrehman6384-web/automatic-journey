@@ -1,0 +1,193 @@
+"""Read-only, user-selected workspace boundary for safe Igris diagnostics.
+
+This module intentionally has no write, delete, rename, shell, package, or
+process-launch capability. It is a small foundation that proves path confinement
+before any impactful developer tool is introduced.
+"""
+
+from __future__ import annotations
+
+import hashlib
+import sqlite3
+from dataclasses import dataclass
+from pathlib import Path
+
+from .schemas import WorkspaceAnalysis, WorkspaceEntry, WorkspaceStatus
+
+
+class WorkspaceError(ValueError):
+    """A user-safe error for an invalid workspace or path boundary."""
+
+
+_TEXT_SUFFIXES = {
+    ".c", ".cc", ".cpp", ".cs", ".css", ".go", ".h", ".hpp", ".html",
+    ".java", ".js", ".json", ".jsx", ".kt", ".kts", ".md", ".mjs",
+    ".py", ".rb", ".rs", ".sh", ".sql", ".swift", ".toml", ".ts",
+    ".tsx", ".txt", ".xml", ".yaml", ".yml",
+}
+_LANGUAGE_BY_SUFFIX = {
+    ".py": "Python", ".ts": "TypeScript", ".tsx": "TypeScript React",
+    ".js": "JavaScript", ".jsx": "JavaScript React", ".json": "JSON",
+    ".md": "Markdown", ".html": "HTML", ".css": "CSS", ".java": "Java",
+    ".kt": "Kotlin", ".kts": "Kotlin", ".go": "Go", ".rs": "Rust",
+    ".sql": "SQL", ".yaml": "YAML", ".yml": "YAML", ".toml": "TOML",
+}
+_MAX_ANALYSIS_BYTES = 512_000
+_MAX_LIST_ENTRIES = 200
+
+
+@dataclass(frozen=True)
+class _Workspace:
+    root: Path
+
+
+class WorkspaceStore:
+    """Persists one deliberate local root and resolves every child beneath it."""
+
+    def __init__(self, data_dir: Path) -> None:
+        data_dir.mkdir(parents=True, exist_ok=True)
+        self.path = data_dir / "jinwoo.db"
+        self._init_db()
+
+    def _connect(self) -> sqlite3.Connection:
+        connection = sqlite3.connect(self.path)
+        connection.row_factory = sqlite3.Row
+        return connection
+
+    def _init_db(self) -> None:
+        with self._connect() as connection:
+            connection.execute(
+                """CREATE TABLE IF NOT EXISTS workspace_settings (
+                    singleton INTEGER PRIMARY KEY CHECK (singleton = 1),
+                    root_path TEXT NOT NULL
+                )"""
+            )
+
+    def select(self, raw_path: str) -> WorkspaceStatus:
+        try:
+            root = Path(raw_path).expanduser().resolve(strict=True)
+        except (OSError, RuntimeError) as error:
+            raise WorkspaceError("Choose an existing local folder as the workspace.") from error
+        if not root.is_dir():
+            raise WorkspaceError("Choose a folder, not a file, as the workspace.")
+        with self._connect() as connection:
+            connection.execute(
+                """INSERT INTO workspace_settings (singleton, root_path) VALUES (1, ?)
+                   ON CONFLICT(singleton) DO UPDATE SET root_path = excluded.root_path""",
+                (str(root),),
+            )
+        return WorkspaceStatus(
+            configured=True,
+            root_label=root.name or str(root),
+            detail="Selected workspace is restricted to read-only diagnostics until a future approved tool is added.",
+        )
+
+    def clear(self) -> bool:
+        with self._connect() as connection:
+            cursor = connection.execute("DELETE FROM workspace_settings WHERE singleton = 1")
+        return cursor.rowcount > 0
+
+    def status(self) -> WorkspaceStatus:
+        workspace = self._workspace()
+        if workspace is None:
+            return WorkspaceStatus(
+                configured=False,
+                detail="No workspace selected. Igris has no file access until you select a project folder.",
+            )
+        return WorkspaceStatus(
+            configured=True,
+            root_label=workspace.root.name or str(workspace.root),
+            detail="Read-only diagnostics are confined to the selected workspace.",
+        )
+
+    def _workspace(self) -> _Workspace | None:
+        with self._connect() as connection:
+            row = connection.execute("SELECT root_path FROM workspace_settings WHERE singleton = 1").fetchone()
+        if row is None:
+            return None
+        try:
+            root = Path(row["root_path"]).resolve(strict=True)
+        except (OSError, RuntimeError):
+            return None
+        if not root.is_dir():
+            return None
+        return _Workspace(root=root)
+
+    def _resolve_child(self, relative_path: str) -> tuple[_Workspace, Path]:
+        workspace = self._workspace()
+        if workspace is None:
+            raise WorkspaceError("Select a workspace before using Igris diagnostics.")
+        candidate = Path(relative_path)
+        if candidate.is_absolute():
+            raise WorkspaceError("Use a path relative to the selected workspace.")
+        try:
+            resolved = (workspace.root / candidate).resolve(strict=True)
+            resolved.relative_to(workspace.root)
+        except (OSError, RuntimeError, ValueError) as error:
+            raise WorkspaceError("That path is outside the selected workspace or no longer exists.") from error
+        return workspace, resolved
+
+    def list_entries(self, relative_path: str = ".") -> list[WorkspaceEntry]:
+        workspace, directory = self._resolve_child(relative_path)
+        if not directory.is_dir():
+            raise WorkspaceError("Choose a directory to inspect its files.")
+        entries: list[WorkspaceEntry] = []
+        for entry in sorted(directory.iterdir(), key=lambda item: (not item.is_dir(), item.name.casefold())):
+            if len(entries) >= _MAX_LIST_ENTRIES:
+                break
+            try:
+                resolved = entry.resolve(strict=True)
+                relative = resolved.relative_to(workspace.root)
+            except (OSError, RuntimeError, ValueError):
+                # Do not surface a symlink that escapes the selected root.
+                continue
+            if resolved.is_dir():
+                entries.append(WorkspaceEntry(name=entry.name, relative_path=relative.as_posix(), kind="directory"))
+            elif resolved.is_file():
+                entries.append(
+                    WorkspaceEntry(
+                        name=entry.name,
+                        relative_path=relative.as_posix(),
+                        kind="file",
+                        size_bytes=resolved.stat().st_size,
+                    )
+                )
+        return entries
+
+    def analyze_text_file(self, relative_path: str) -> WorkspaceAnalysis:
+        workspace, file_path = self._resolve_child(relative_path)
+        if not file_path.is_file():
+            raise WorkspaceError("Choose a text file inside the selected workspace.")
+        if file_path.suffix.casefold() not in _TEXT_SUFFIXES:
+            raise WorkspaceError("Igris read-only analysis supports common text and source files only.")
+        size_bytes = file_path.stat().st_size
+        with file_path.open("rb") as file:
+            raw = file.read(_MAX_ANALYSIS_BYTES + 1)
+        truncated = len(raw) > _MAX_ANALYSIS_BYTES
+        raw = raw[:_MAX_ANALYSIS_BYTES]
+        try:
+            text = raw.decode("utf-8")
+        except UnicodeDecodeError:
+            text = raw.decode("utf-8", errors="replace")
+        lines = text.splitlines()
+        normalized = text.casefold()
+        import_count = sum(
+            line.lstrip().startswith(("import ", "from ", "require(", "use "))
+            for line in lines
+        )
+        symbol_count = sum(
+            line.lstrip().startswith(("def ", "class ", "function ", "export ", "fun ", "struct ", "interface "))
+            for line in lines
+        )
+        return WorkspaceAnalysis(
+            relative_path=file_path.relative_to(workspace.root).as_posix(),
+            language=_LANGUAGE_BY_SUFFIX.get(file_path.suffix.casefold(), "Text"),
+            size_bytes=size_bytes,
+            line_count=len(lines),
+            todo_count=normalized.count("todo"),
+            fixme_count=normalized.count("fixme"),
+            import_count=import_count,
+            symbol_count=symbol_count,
+            sha256=hashlib.sha256(raw).hexdigest(),
+            truncated=truncated,
+        )

@@ -7,9 +7,10 @@ import { FrameworkPanel } from './components/FrameworkPanel'
 import { MemoryVault } from './components/MemoryVault'
 import { MissionPanel } from './components/MissionPanel'
 import { ProviderPanel } from './components/ProviderPanel'
+import { WorkspacePanel } from './components/WorkspacePanel'
 import { commanders, buildArmyStats, defaultFrameworks, defaultProviders } from './data/army'
 import { buildMission, isBlockedPrompt } from './lib/mission'
-import type { AuditEvent, ChatMessage, Commander, FrameworkStatus, MemoryItem, MemoryKind, Mission, ProviderStatus } from './types/army'
+import type { AuditEvent, ChatMessage, Commander, FrameworkDryRun, FrameworkStatus, MemoryItem, MemoryKind, Mission, ProviderStatus, WorkspaceAnalysis, WorkspaceEntry, WorkspaceStatus } from './types/army'
 
 const starterPrompts = [
   'Analyze my project structure and suggest a clean architecture.',
@@ -21,9 +22,27 @@ interface ApiFrameworkStatus {
   id: string
   label: string
   runtime: FrameworkStatus['runtime']
+  category: FrameworkStatus['category']
+  integration_batch: number
+  owner_commander: string
+  license: string
+  source_url?: string
   state: FrameworkStatus['state']
+  implementation_status: FrameworkStatus['implementationStatus']
   execution_enabled: boolean
   detail: string
+}
+
+interface ApiFrameworkDryRun {
+  framework_id: string
+  framework_label: string
+  policy_outcome: FrameworkDryRun['policyOutcome']
+  requested_agents: number
+  bounded_runtime_workers: number
+  external_runtime_invoked: boolean
+  requires_approval: boolean
+  summary: string
+  next_steps: string[]
 }
 
 interface ApiMemoryItem {
@@ -48,6 +67,33 @@ interface ApiAuditEvent {
   created_at: string
 }
 
+interface ApiWorkspaceStatus {
+  configured: boolean
+  root_label?: string
+  read_only: boolean
+  detail: string
+}
+
+interface ApiWorkspaceEntry {
+  name: string
+  relative_path: string
+  kind: WorkspaceEntry['kind']
+  size_bytes?: number
+}
+
+interface ApiWorkspaceAnalysis {
+  relative_path: string
+  language: string
+  size_bytes: number
+  line_count: number
+  todo_count: number
+  fixme_count: number
+  import_count: number
+  symbol_count: number
+  sha256: string
+  truncated: boolean
+}
+
 interface ApiMission {
   id: string
   prompt: string
@@ -61,6 +107,45 @@ interface ApiMission {
   workers: Mission['workers']
   result?: string
 }
+
+const frameworkDryRunFromApi = (result: ApiFrameworkDryRun): FrameworkDryRun => ({
+  frameworkId: result.framework_id,
+  frameworkLabel: result.framework_label,
+  policyOutcome: result.policy_outcome,
+  requestedAgents: result.requested_agents,
+  boundedRuntimeWorkers: result.bounded_runtime_workers,
+  externalRuntimeInvoked: result.external_runtime_invoked,
+  requiresApproval: result.requires_approval,
+  summary: result.summary,
+  nextSteps: result.next_steps,
+})
+
+const workspaceStatusFromApi = (workspace: ApiWorkspaceStatus): WorkspaceStatus => ({
+  configured: workspace.configured,
+  rootLabel: workspace.root_label,
+  readOnly: workspace.read_only,
+  detail: workspace.detail,
+})
+
+const workspaceEntryFromApi = (entry: ApiWorkspaceEntry): WorkspaceEntry => ({
+  name: entry.name,
+  relativePath: entry.relative_path,
+  kind: entry.kind,
+  sizeBytes: entry.size_bytes,
+})
+
+const workspaceAnalysisFromApi = (analysis: ApiWorkspaceAnalysis): WorkspaceAnalysis => ({
+  relativePath: analysis.relative_path,
+  language: analysis.language,
+  sizeBytes: analysis.size_bytes,
+  lineCount: analysis.line_count,
+  todoCount: analysis.todo_count,
+  fixmeCount: analysis.fixme_count,
+  importCount: analysis.import_count,
+  symbolCount: analysis.symbol_count,
+  sha256: analysis.sha256,
+  truncated: analysis.truncated,
+})
 
 const auditFromApi = (event: ApiAuditEvent): AuditEvent => ({
   id: event.id,
@@ -82,7 +167,13 @@ const frameworkFromApi = (framework: ApiFrameworkStatus): FrameworkStatus => ({
   id: framework.id,
   label: framework.label,
   runtime: framework.runtime,
+  category: framework.category,
+  integrationBatch: framework.integration_batch,
+  ownerCommander: framework.owner_commander,
+  license: framework.license,
+  sourceUrl: framework.source_url,
   state: framework.state,
+  implementationStatus: framework.implementation_status,
   executionEnabled: framework.execution_enabled,
   detail: framework.detail,
 })
@@ -115,11 +206,17 @@ function App() {
   const [prompt, setPrompt] = useState('')
   const [providers, setProviders] = useState<ProviderStatus[]>(defaultProviders)
   const [frameworks, setFrameworks] = useState<FrameworkStatus[]>(defaultFrameworks)
+  const [frameworkDryRun, setFrameworkDryRun] = useState<FrameworkDryRun | null>(null)
+  const [frameworkBusy, setFrameworkBusy] = useState(false)
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
     { id: 'welcome', role: 'assistant', content: 'I am Jinwoo. Ask for a safe explanation, draft, or plan. Use the command bar above to turn work into a visible Army mission.', provider: 'Jinwoo local interface', localOnly: true },
   ])
   const [chatBusy, setChatBusy] = useState(false)
   const [auditEvents, setAuditEvents] = useState<AuditEvent[]>([])
+  const [workspaceStatus, setWorkspaceStatus] = useState<WorkspaceStatus>({ configured: false, readOnly: true, detail: 'No workspace selected. Igris has no file access until you select a project folder.' })
+  const [workspaceEntries, setWorkspaceEntries] = useState<WorkspaceEntry[]>([])
+  const [workspaceAnalysis, setWorkspaceAnalysis] = useState<WorkspaceAnalysis | null>(null)
+  const [workspaceBusy, setWorkspaceBusy] = useState(false)
   const [memories, setMemories] = useState<MemoryItem[]>([])
   const [memoryAvailable, setMemoryAvailable] = useState(false)
   const [memoryBusy, setMemoryBusy] = useState(false)
@@ -134,6 +231,142 @@ function App() {
       if (response.ok && Array.isArray(payload)) setAuditEvents(payload.map(auditFromApi))
     } catch {
       // The dashboard remains usable before the local API is available.
+    }
+  }
+
+  const runFrameworkDryRun = async (frameworkId: string, prompt: string, requestedAgents: number): Promise<boolean> => {
+    setFrameworkBusy(true)
+    try {
+      const response = await fetch(`/api/frameworks/${frameworkId}/dry-run`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt, requested_agents: requestedAgents }),
+      })
+      const payload = await response.json() as ApiFrameworkDryRun | { detail?: string }
+      if (!response.ok || !('framework_id' in payload)) {
+        setNotice(errorDetail(payload, 'The framework dry run could not be prepared.'))
+        return false
+      }
+      const result = frameworkDryRunFromApi(payload)
+      setFrameworkDryRun(result)
+      void loadAudit()
+      setNotice(`${result.frameworkLabel} prepared a ${result.policyOutcome} without invoking an upstream runtime.`)
+      return true
+    } catch {
+      setNotice('The framework dry run is unavailable because the local backend is offline.')
+      return false
+    } finally {
+      setFrameworkBusy(false)
+    }
+  }
+
+  const loadWorkspace = async (announce = false): Promise<WorkspaceStatus | null> => {
+    try {
+      const response = await fetch('/api/workspace')
+      const payload = await response.json() as ApiWorkspaceStatus | { detail?: string }
+      if (!response.ok || !('configured' in payload)) {
+        if (announce) setNotice(errorDetail(payload, 'Workspace status is unavailable.'))
+        return null
+      }
+      const nextStatus = workspaceStatusFromApi(payload)
+      setWorkspaceStatus(nextStatus)
+      if (!nextStatus.configured) {
+        setWorkspaceEntries([])
+        setWorkspaceAnalysis(null)
+      } else {
+        void browseWorkspace('.')
+      }
+      if (announce) setNotice(nextStatus.detail)
+      return nextStatus
+    } catch {
+      if (announce) setNotice('Workspace controls are unavailable. Start the local Python backend to use them.')
+      return null
+    }
+  }
+
+  const browseWorkspace = async (relativePath: string) => {
+    setWorkspaceBusy(true)
+    try {
+      const response = await fetch(`/api/workspace/files?relative_path=${encodeURIComponent(relativePath)}`)
+      const payload = await response.json() as ApiWorkspaceEntry[] | { detail?: string }
+      if (!response.ok || !Array.isArray(payload)) {
+        setNotice(errorDetail(payload, 'Workspace files could not be listed.'))
+        return
+      }
+      setWorkspaceEntries(payload.map(workspaceEntryFromApi))
+    } catch {
+      setNotice('Workspace files could not be listed because the local backend is unavailable.')
+    } finally {
+      setWorkspaceBusy(false)
+    }
+  }
+
+  const selectWorkspace = async (path: string): Promise<boolean> => {
+    setWorkspaceBusy(true)
+    try {
+      const response = await fetch('/api/workspace', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path }),
+      })
+      const payload = await response.json() as ApiWorkspaceStatus | { detail?: string }
+      if (!response.ok || !('configured' in payload)) {
+        setNotice(errorDetail(payload, 'Workspace could not be selected.'))
+        return false
+      }
+      setWorkspaceStatus(workspaceStatusFromApi(payload))
+      setWorkspaceEntries([])
+      setWorkspaceAnalysis(null)
+      void loadAudit()
+      setNotice('Workspace selected. Igris can now run read-only diagnostics inside this folder only.')
+      return true
+    } catch {
+      setNotice('Workspace could not be selected because the local backend is unavailable.')
+      return false
+    } finally {
+      setWorkspaceBusy(false)
+    }
+  }
+
+  const clearWorkspace = async () => {
+    setWorkspaceBusy(true)
+    try {
+      const response = await fetch('/api/workspace', { method: 'DELETE' })
+      if (!response.ok) {
+        setNotice('Workspace boundary could not be cleared.')
+        return
+      }
+      setWorkspaceStatus({ configured: false, readOnly: true, detail: 'No workspace selected. Igris has no file access until you select a project folder.' })
+      setWorkspaceEntries([])
+      setWorkspaceAnalysis(null)
+      void loadAudit()
+      setNotice('Workspace boundary cleared. Igris no longer has project-file access.')
+    } catch {
+      setNotice('Workspace boundary could not be cleared because the local backend is unavailable.')
+    } finally {
+      setWorkspaceBusy(false)
+    }
+  }
+
+  const analyzeWorkspaceFile = async (relativePath: string) => {
+    setWorkspaceBusy(true)
+    try {
+      const response = await fetch('/api/workspace/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ relative_path: relativePath }),
+      })
+      const payload = await response.json() as ApiWorkspaceAnalysis | { detail?: string }
+      if (!response.ok || !('sha256' in payload)) {
+        setNotice(errorDetail(payload, 'Igris could not analyse that file.'))
+        return
+      }
+      setWorkspaceAnalysis(workspaceAnalysisFromApi(payload))
+      setNotice('Igris completed a read-only local source diagnostic. No file was changed.')
+    } catch {
+      setNotice('Igris diagnostics are unavailable because the local backend is unavailable.')
+    } finally {
+      setWorkspaceBusy(false)
     }
   }
 
@@ -233,6 +466,7 @@ function App() {
   useEffect(() => {
     void loadMemories()
     void loadAudit()
+    void loadWorkspace()
   }, [])
 
   useEffect(() => {
@@ -440,8 +674,11 @@ function App() {
 
         {activeView === 'settings' && (
           <div className="settings-layout">
-            <aside className="side-stack"><ProviderPanel providers={providers} /><FrameworkPanel frameworks={frameworks} /></aside>
-            <section className="panel settings-card"><p className="eyebrow">ROUTING POLICY</p><h2>Local first, cloud by choice.</h2><p>Ollama and LM Studio can power local runs. Claude, GLM and Hugging Face adapters remain disabled until their keys are stored outside the browser bundle.</p><div className="settings-list"><span>Python FastAPI orchestration</span><span>TypeScript command dashboard</span><span>Optional Rust / Go sidecars after profiling</span><span>SQLite + local vector-memory foundation</span><span>Framework adapters remain policy-gated</span></div></section>
+            <div className="settings-main-stack">
+              <WorkspacePanel status={workspaceStatus} entries={workspaceEntries} analysis={workspaceAnalysis} busy={workspaceBusy} onSelect={selectWorkspace} onClear={clearWorkspace} onBrowse={browseWorkspace} onAnalyze={analyzeWorkspaceFile} />
+              <section className="panel settings-card"><p className="eyebrow">ROUTING POLICY</p><h2>Local first, cloud by choice.</h2><p>Ollama and LM Studio can power local runs. Claude, GLM and Hugging Face adapters remain disabled until their keys are stored outside the browser bundle.</p><div className="settings-list"><span>Python FastAPI orchestration</span><span>TypeScript command dashboard</span><span>Optional Rust / Go sidecars after profiling</span><span>SQLite + local vector-memory foundation</span><span>Framework adapters remain policy-gated</span></div></section>
+            </div>
+            <aside className="side-stack"><ProviderPanel providers={providers} /><FrameworkPanel frameworks={frameworks} dryRun={frameworkDryRun} busy={frameworkBusy} onDryRun={runFrameworkDryRun} /></aside>
           </div>
         )}
       </main>

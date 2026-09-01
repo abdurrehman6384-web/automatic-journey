@@ -2,45 +2,62 @@
 
 Jinwoo's **native mission engine is canonical**. It owns mission routing,
 Planner → Executor → Verifier roles, policy classification, approval gates,
-workspace boundaries, and the future audit record.
+workspace boundaries, and the local audit record.
 
-Swarms, Agency-Swarm, and Ruflo are intentionally represented as optional
-adapters rather than independent always-on orchestrators. This avoids three
-competing control loops and preserves the local-first safety model.
+External frameworks are integration lanes rather than independent always-on
+orchestrators. This prevents competing agent loops and preserves the
+local-first safety model.
 
-## V1 behaviour
+## Batch 01: contract-ready, non-executable adapters
 
-`GET /api/frameworks` is a read-only registry endpoint. It reports:
+The first owner-requested batch is now registered:
 
-- **Jinwoo Native Engine** as the active canonical engine;
-- **Swarms** only if its Python module is already installed locally;
-- **Agency-Swarm** only if its Python module is already installed locally;
-- **Ruflo** only if its local CLI is already available on `PATH`.
+| Adapter | Intended later use | Current safe capability |
+|---|---|---|
+| Swarms | Bounded hierarchical workers/specialists | Policy-screened dry run only |
+| Agency-Swarm | Organisation-style hand-offs | Policy-screened dry run only |
+| Ruflo | Local TypeScript/MCP developer harness | Policy-screened dry run only |
+| LangGraph | Checkpointed state/workflow primitives | Policy-screened dry run only |
+| CrewAI | Bounded role-based crews | Policy-screened dry run only |
 
-Detection is not activation. All three optional adapters have
-`execution_enabled: false` in V1. The application does not install, invoke,
-or send a mission to them automatically.
+`GET /api/frameworks` shows package/CLI discovery and the contract state.
+`POST /api/frameworks/{framework_id}/dry-run` produces a typed plan without
+importing, starting, downloading, or calling an upstream framework.
+
+A dry run accepts at most 450 **logical** agent requests, then caps the actual
+proposal at three runtime workers: Planner, Executor and Verifier. It carries
+out no tool action and records only redacted metadata in the local audit trail.
+
+## Why detection is not activation
+
+An installed package or CLI must never silently alter Jinwoo's autonomy,
+privacy, network behavior or tool access. Therefore all external adapters have
+`execution_enabled: false`, even when detected on the local machine.
 
 ## Required activation gate for a later phase
 
-An adapter can be made executable only after all of the following are reviewed
+An adapter can become executable only after all of the following are reviewed
 and implemented:
 
-1. Pin a compatible version and review its licence and provider requirements.
-2. Implement one narrow adapter contract with typed input/output.
-3. Route every proposed action back through Jinwoo policy and user approval.
-4. Restrict every file/tool operation to the user-selected workspace.
-5. Record hand-offs, inputs, outputs, errors, and approval decisions in the
-   local audit trail.
-6. Add offline/no-key tests and a rollback path.
+1. Pin a compatible version/commit and preserve licence/NOTICE requirements.
+2. Review telemetry, network and provider defaults; turn off unapproved routes.
+3. Implement one narrow adapter contract with typed input/output.
+4. Route every proposed action back through Jinwoo policy and user approval.
+5. Restrict every file/tool operation to the user-selected workspace.
+6. Record hand-offs, inputs, redacted outputs, errors and approval decisions in
+   the local audit trail.
+7. Add offline/no-key tests, bounded timeout/concurrency/token budgets and a
+   rollback/disable path.
 
-### Intended responsibility boundaries
+### Boundary that never moves
 
-| Integration | Intended later use | Boundary that remains with Jinwoo |
-|---|---|---|
-| Swarms | Selected hierarchical worker/specialist patterns | Mission lifecycle, policy, approval, audit |
-| Agency-Swarm | Compatible role/organisation hand-offs | Mission lifecycle, policy, approval, audit |
-| Ruflo | Optional local TypeScript/MCP developer-harness bridge | Mission lifecycle, policy, approval, audit |
+| Concern | Owner |
+|---|---|
+| Mission state and queue | Jinwoo Native Engine |
+| Policy classification and hard blocks | Jinwoo Native Engine |
+| Approval cards for impactful actions | Jinwoo Native Engine |
+| Workspace/path confinement | Igris Workspace Guard under Jinwoo policy |
+| Audit log and memory privacy | Jinwoo Native Engine |
 
-This status-first boundary is deliberate: package presence must never silently
-change the product's autonomy or privacy posture.
+See [`INTEGRATION_BATCH_01.md`](INTEGRATION_BATCH_01.md) for the reviewed
+upstream reference pins, licences and the next two owner-requested batches.

@@ -2,23 +2,44 @@
 
 from __future__ import annotations
 
-from fastapi import FastAPI, HTTPException, status
+from fastapi import FastAPI, HTTPException, Query, status
 
 from .army import army_summary
 from .audit import AuditStore
-from .frameworks import frameworks
+from .frameworks import FrameworkNotFoundError, frameworks
 from .memory import LocalMemoryStore
 from .orchestration import MissionStore
 from .policy import ActionClass, classify_action
 from .providers import ProviderError, ProviderGateway
 from .sensitive import contains_sensitive_value
-from .schemas import ApprovalRequest, AuditEvent, ChatRequest, ChatResponse, FrameworkStatus, MemoryCreateRequest, MemoryItem, MemoryUpdateRequest, Mission, MissionRequest, ProviderStatus
+from .schemas import (
+    ApprovalRequest,
+    AuditEvent,
+    ChatRequest,
+    ChatResponse,
+    FrameworkDryRun,
+    FrameworkDryRunRequest,
+    FrameworkStatus,
+    MemoryCreateRequest,
+    MemoryItem,
+    MemoryUpdateRequest,
+    Mission,
+    MissionRequest,
+    ProviderStatus,
+    WorkspaceAnalysis,
+    WorkspaceAnalysisRequest,
+    WorkspaceEntry,
+    WorkspaceSelectionRequest,
+    WorkspaceStatus,
+)
 from .settings import settings
+from .workspace import WorkspaceError, WorkspaceStore
 
 app = FastAPI(title="Jinwoo AI Local API", version="0.1.0")
 audit = AuditStore(settings.data_dir)
 missions = MissionStore(audit)
 memory = LocalMemoryStore(settings.data_dir)
+workspace = WorkspaceStore(settings.data_dir)
 providers = ProviderGateway(settings)
 
 
@@ -43,10 +64,67 @@ async def get_frameworks() -> dict[str, list[FrameworkStatus]]:
     return {"frameworks": frameworks.statuses()}
 
 
+@app.post("/api/frameworks/{framework_id}/dry-run", response_model=FrameworkDryRun)
+async def dry_run_framework(framework_id: str, request: FrameworkDryRunRequest) -> FrameworkDryRun:
+    """Prepare a bounded adapter plan; no upstream framework is invoked."""
+    if contains_sensitive_value(request.prompt):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Credentials and one-time codes cannot be sent to an integration dry run.",
+        )
+    try:
+        result = frameworks.dry_run(framework_id, request.prompt, request.requested_agents)
+    except FrameworkNotFoundError as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Unknown framework adapter") from error
+    audit.record(
+        "integration.dry_run",
+        f"{result.framework_label} prepared a {result.policy_outcome} with {result.bounded_runtime_workers} bounded workers; no upstream runtime was invoked.",
+        actor="local-user",
+    )
+    return result
+
+
 @app.get("/api/audit", response_model=list[AuditEvent])
 async def list_audit_events() -> list[AuditEvent]:
     """Return redacted local mission decisions in newest-first order."""
     return audit.list()
+
+
+@app.get("/api/workspace", response_model=WorkspaceStatus)
+async def get_workspace() -> WorkspaceStatus:
+    return workspace.status()
+
+
+@app.put("/api/workspace", response_model=WorkspaceStatus)
+async def select_workspace(request: WorkspaceSelectionRequest) -> WorkspaceStatus:
+    try:
+        selected = workspace.select(request.path)
+    except WorkspaceError as error:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error)) from error
+    audit.record("workspace.selected", "A user-selected workspace is available for read-only diagnostics.", actor="local-user")
+    return selected
+
+
+@app.delete("/api/workspace", status_code=status.HTTP_204_NO_CONTENT)
+async def clear_workspace() -> None:
+    if workspace.clear():
+        audit.record("workspace.cleared", "The selected workspace boundary was cleared.", actor="local-user")
+
+
+@app.get("/api/workspace/files", response_model=list[WorkspaceEntry])
+async def list_workspace_files(relative_path: str = Query(default=".", min_length=1, max_length=4_096)) -> list[WorkspaceEntry]:
+    try:
+        return workspace.list_entries(relative_path)
+    except WorkspaceError as error:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error)) from error
+
+
+@app.post("/api/workspace/analyze", response_model=WorkspaceAnalysis)
+async def analyze_workspace_file(request: WorkspaceAnalysisRequest) -> WorkspaceAnalysis:
+    try:
+        return workspace.analyze_text_file(request.relative_path)
+    except WorkspaceError as error:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error)) from error
 
 
 @app.post("/api/chat", response_model=ChatResponse)

@@ -23,11 +23,12 @@ This works without Docker, PostgreSQL, Redis, GPU hardware or cloud API keys.
 ## Multi-agent framework boundary
 
 Jinwoo's native mission engine is the single canonical orchestrator in V1.
-Swarms, Agency-Swarm and Ruflo are optional, status-only adapters: the backend
-can report whether they are present locally but will not install or execute
-them. Any future adapter must return proposed work through Jinwoo's policy,
-approval, workspace and audit boundaries. See
-[`FRAMEWORK_ADAPTERS.md`](FRAMEWORK_ADAPTERS.md).
+Batch 01 registers Swarms, Agency-Swarm, Ruflo, LangGraph and CrewAI as
+contract-ready adapters. They can prepare a bounded, policy-screened dry run,
+but the backend will not install or execute an upstream runtime. Any future
+adapter must return proposed work through Jinwoo's policy, approval, workspace
+and audit boundaries. See [`FRAMEWORK_ADAPTERS.md`](FRAMEWORK_ADAPTERS.md) and
+[`INTEGRATION_BATCH_01.md`](INTEGRATION_BATCH_01.md).
 
 ## Why Rust and Go are not initial services
 
@@ -35,6 +36,14 @@ Python is the main orchestrator. Rust and Go are excellent later sidecars for a
 measured hot path — e.g. high-speed indexing or a bounded concurrent service —
 but adding them before profiling would create extra IPC, packaging and debugging
 cost without making missions better.
+
+## Workspace guard
+
+Igris can perform bounded, read-only diagnostics only after the user selects a
+project folder in Settings. The guard canonicalises the root and every requested
+child path, rejects path escapes and outside-root symlinks, lists at most 200
+entries, and only analyses common text/source files up to 500 KB. It has no
+write, delete, terminal or package-install capability.
 
 ## Memory
 

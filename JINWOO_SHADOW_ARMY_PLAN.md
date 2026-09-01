@@ -303,18 +303,22 @@ machine.
 
 ```text
 Jinwoo Native Mission Engine
-├── Swarms adapter        → hierarchical worker/specialist patterns
+├── Swarms adapter        → bounded hierarchical worker/specialist patterns
 ├── Agency-Swarm adapter  → organisation-style handoffs where compatible
-└── Ruflo bridge          → optional TypeScript/MCP meta-harness integration
+├── Ruflo bridge          → optional TypeScript/MCP meta-harness integration
+├── LangGraph adapter     → checkpointed state/workflow primitives
+└── CrewAI adapter        → bounded role-based crew patterns
 ```
 
 ### Framework responsibilities
 
 | Framework | Jinwoo role |
 |---|---|
-| Swarms | optional worker-swarm patterns for selected multi-agent missions |
+| Swarms | optional bounded worker-swarm patterns for selected multi-agent missions |
 | Agency-Swarm | optional role/organisation handoff adapter |
 | Ruflo | optional MCP/developer swarm, adaptive memory and evaluation bridge |
+| LangGraph | optional checkpointed workflow/state graph adapter |
+| CrewAI | optional bounded role-based crew adapter |
 | Jinwoo mission engine | source of truth for policy, approvals, mission state and audit logs |
 
 Rules:
@@ -325,6 +329,21 @@ Rules:
   memory, queues or worker state.
 - V1 starts with Jinwoo’s native deterministic mission engine; framework
   adapters are added one by one after a working baseline.
+
+### Owner-requested integration batches
+
+The named commander hierarchy remains unchanged. These are **integration lanes**
+inside that hierarchy, not fifteen replacement commander departments.
+
+| Batch | Scope | Current state |
+|---:|---|---|
+| 01 — now | Swarms, Agency-Swarm, Ruflo, LangGraph, CrewAI | typed, policy-gated dry-run contracts; upstream execution disabled |
+| 02 — on next instruction | AG2, OpenHands, Firecrawl, Firecrawl Web-Agent, Crawl4AI | queued for supply-chain and safety review |
+| 03 — on final instruction | Mem0, OpenClaw, TruffleHog, Gitleaks, Jinwoo Native control/audit review | queued for supply-chain and safety review |
+
+A Batch 01 dry run may represent up to 450 logical agents but caps runtime
+planning at three Planner/Executor/Verifier workers. It never starts an
+upstream framework, network crawl, shell, or tool action.
 
 ---
 
@@ -679,10 +698,11 @@ Python FastAPI local backend
 Mission routing and worker contracts
 Approval gate and blocked-action policy
 Redacted local audit events for mission and memory decisions
+Igris Workspace Guard with user-selected, read-only bounded diagnostics
 SQLite consent-based memory with view, edit, delete and local JSON export controls
 Credential and one-time-code rejection before memory storage
 Provider registry/adapters for local and cloud routes
-Controlled framework-status registry for Jinwoo Native, Swarms, Agency-Swarm and Ruflo
+Controlled Batch 01 framework registry/dry-run contracts for Swarms, Agency-Swarm, Ruflo, LangGraph and CrewAI
 Docker Compose foundation
 Electron shell foundation
 Automated backend tests
@@ -702,10 +722,10 @@ Merge custom workspace source once it is available locally
 Build provider Settings UI and OS secure keychain storage
 Connect one real local provider first: Ollama or LM Studio
 Add Claude, GLM and HF live-provider integration tests with user-owned keys
-Implement Igris workspace tools behind the approval gate
+Add approved Igris workspace write/patch tools after the read-only guard review
 Implement Tank approved research/source citation flow
 Add local vector retrieval and Memory Vault search
-Implement reviewed, version-pinned framework execution adapters one at a time: Swarms, Agency-Swarm, Ruflo
+Complete Batch 01 activation review before enabling any of Swarms, Agency-Swarm, Ruflo, LangGraph or CrewAI; then implement Batch 02 and Batch 03 one reviewed adapter at a time
 Add Electron packaging and Windows installer
 Add Rust/Go sidecars only after profiling
 ```
