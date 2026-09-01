@@ -12,7 +12,9 @@ interface FrameworkPanelProps {
 const runtimeIcon = (runtime: FrameworkStatus['runtime']) => {
   if (runtime === 'builtin') return '♛'
   if (runtime === 'container-sidecar') return '▣'
-  if (runtime === 'go-cli') return '⌁'
+  if (runtime === 'desktop-client') return '▤'
+  if (runtime === 'mobile-client') return '▯'
+  if (runtime === 'go-cli' || runtime === 'go-service' || runtime === 'rust-cli') return '⌁'
   if (runtime === 'typescript-mcp' || runtime === 'typescript-service') return '⌘'
   return '◈'
 }
@@ -39,28 +41,40 @@ export function FrameworkPanel({ frameworks, dryRun, busy, onDryRun }: Framework
     <section className="panel framework-panel" aria-labelledby="frameworks-title">
       <div className="panel-heading">
         <div>
-          <p className="eyebrow">ORCHESTRATION ADAPTERS</p>
+          <p className="eyebrow">ADAPTERS & ADVANCED SKILLS</p>
           <h2 id="frameworks-title">Framework boundaries</h2>
         </div>
         <span className="subtle-badge">CONTROLLED</span>
       </div>
       <div className="framework-list">
-        {frameworks.map((framework) => (
-          <div className="framework-row" key={framework.id}>
-            <span className={`framework-mark framework-mark--${framework.runtime}`}>{runtimeIcon(framework.runtime)}</span>
-            <div>
-              <strong>{framework.label}</strong>
-              <p>{framework.detail}</p>
-              <small className="framework-meta">{framework.integrationBatch ? `Batch ${framework.integrationBatch}` : 'Core'} · {framework.ownerCommander} · {framework.implementationStatus.replaceAll('-', ' ')} · {framework.license}{framework.sourceUrl ? <> · <a href={framework.sourceUrl} target="_blank" rel="noreferrer">Source</a></> : null}</small>
-              {framework.id === 'jinwoo-native-control-audit'
-                ? <small className="framework-review-button">Use the local control review below.</small>
-                : framework.integrationBatch > 0 && framework.implementationStatus !== 'queued' && <button className="framework-review-button" type="button" onClick={() => setSelectedId(framework.id)} disabled={busy}>Dry-run plan</button>}
+        {frameworks.map((framework) => {
+          const referenceOnly = framework.implementationStatus === 'reference-only'
+          const reviewLabel = referenceOnly ? 'Review boundary' : 'Dry-run plan'
+          const stateLabel = framework.executionEnabled
+            ? 'active'
+            : framework.state === 'reference-only'
+              ? 'reference only'
+              : framework.implementationStatus === 'archived-upstream'
+                ? 'archived upstream'
+                : framework.state.replace('-', ' ')
+          return (
+            <div className="framework-row" key={framework.id}>
+              <span className={`framework-mark framework-mark--${framework.runtime}`}>{runtimeIcon(framework.runtime)}</span>
+              <div>
+                <strong>{framework.label}</strong>
+                <p>{framework.detail}</p>
+                {framework.capabilities?.length ? <div className="framework-capabilities" aria-label={`${framework.label} capabilities`}>{framework.capabilities.map((capability) => <span key={capability}>{capability}</span>)}</div> : null}
+                <small className="framework-meta">{framework.integrationBatch ? `Batch ${framework.integrationBatch}` : 'Core'} · {framework.ownerCommander} · {framework.implementationStatus.replaceAll('-', ' ')}{framework.capabilities?.length && framework.activationBoundary ? <> · {framework.activationBoundary.replaceAll('-', ' ')}</> : null} · {framework.license}{framework.sourceUrl ? <> · <a href={framework.sourceUrl} target="_blank" rel="noreferrer">Source</a></> : null}</small>
+                {framework.id === 'jinwoo-native-control-audit'
+                  ? <small className="framework-review-button">Use the local control review below.</small>
+                  : framework.integrationBatch > 0 && framework.implementationStatus !== 'queued' && <button className="framework-review-button" type="button" onClick={() => setSelectedId(framework.id)} disabled={busy}>{reviewLabel}</button>}
+              </div>
+              <span className={`framework-state framework-state--${framework.state}`}>
+                {stateLabel}
+              </span>
             </div>
-            <span className={`framework-state framework-state--${framework.state}`}>
-              {framework.executionEnabled ? 'active' : framework.state.replace('-', ' ')}
-            </span>
-          </div>
-        ))}
+          )
+        })}
       </div>
       {selected && (
         <form className="framework-dry-run" onSubmit={submitDryRun}>

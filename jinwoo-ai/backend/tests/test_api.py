@@ -57,6 +57,8 @@ class ApiTests(unittest.TestCase):
                 "jinwoo-native", "swarms", "agency-swarm", "ruflo", "langgraph", "crewai",
                 "ag2", "openhands", "firecrawl", "firecrawl-web-agent", "crawl4ai",
                 "mem0", "openclaw", "trufflehog", "gitleaks", "jinwoo-native-control-audit",
+                "goose", "orkas", "bytebot", "open-desktop", "hermes-agent", "openagent", "iris-go", "iris-mini",
+                "iris-zero", "zoey", "iris-ai", "iris-x",
             },
         )
         self.assertTrue(frameworks["jinwoo-native"]["execution_enabled"])
@@ -77,6 +79,23 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(frameworks["trufflehog"]["implementation_status"], "license-review-required")
         self.assertEqual(frameworks["gitleaks"]["runtime"], "go-cli")
         self.assertEqual(frameworks["mem0"]["category"], "memory")
+        batch_four = (
+            "goose", "orkas", "bytebot", "open-desktop", "hermes-agent", "openagent", "iris-go", "iris-mini",
+            "iris-zero", "zoey", "iris-ai", "iris-x",
+        )
+        for adapter in batch_four:
+            self.assertFalse(frameworks[adapter]["execution_enabled"])
+            self.assertEqual(frameworks[adapter]["integration_batch"], 4)
+            self.assertTrue(frameworks[adapter]["capabilities"])
+        self.assertEqual(frameworks["goose"]["runtime"], "rust-cli")
+        self.assertEqual(frameworks["openagent"]["runtime"], "go-service")
+        self.assertEqual(frameworks["bytebot"]["implementation_status"], "archived-upstream")
+        self.assertEqual(frameworks["iris-go"]["implementation_status"], "license-review-required")
+        self.assertEqual(frameworks["iris-mini"]["implementation_status"], "license-review-required")
+        self.assertEqual(frameworks["iris-zero"]["implementation_status"], "license-review-required")
+        self.assertEqual(frameworks["iris-ai"]["implementation_status"], "reference-only")
+        self.assertEqual(frameworks["iris-ai"]["state"], "reference-only")
+        self.assertEqual(frameworks["iris-x"]["activation_boundary"], "reference-only")
         self.assertTrue(frameworks["jinwoo-native-control-audit"]["execution_enabled"])
         self.assertEqual(frameworks["jinwoo-native-control-audit"]["state"], "canonical")
 
@@ -133,13 +152,38 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(mem0.status_code, 200)
         self.assertIn("ambiguous memo API", " ".join(mem0.json()["next_steps"]))
 
+    def test_batch_four_skill_dry_runs_remain_non_executing_and_references_stay_reference_only(self) -> None:
+        goose = self.client.post(
+            "/api/frameworks/goose/dry-run",
+            json={"prompt": "Prepare a safe coding-task review", "requested_agents": 450},
+        )
+        desktop = self.client.post(
+            "/api/frameworks/open-desktop/dry-run",
+            json={"prompt": "Prepare a desktop automation boundary", "requested_agents": 3},
+        )
+        reference = self.client.post(
+            "/api/frameworks/iris-ai/dry-run",
+            json={"prompt": "Review public desktop UX capabilities", "requested_agents": 3},
+        )
+        self.assertEqual(goose.status_code, 200)
+        self.assertEqual(goose.json()["bounded_runtime_workers"], 3)
+        self.assertFalse(goose.json()["external_runtime_invoked"])
+        self.assertIn("disposable sandbox", " ".join(goose.json()["next_steps"]).casefold())
+        self.assertEqual(desktop.status_code, 200)
+        self.assertFalse(desktop.json()["external_runtime_invoked"])
+        self.assertIn("screen, microphone", " ".join(desktop.json()["next_steps"]).casefold())
+        self.assertEqual(reference.status_code, 200)
+        self.assertFalse(reference.json()["external_runtime_invoked"])
+        self.assertIn("reference-only", reference.json()["summary"])
+        self.assertIn("Do not copy", " ".join(reference.json()["next_steps"]))
+
     def test_native_control_review_reports_invariants_and_writes_redacted_metadata(self) -> None:
         response = self.client.post("/api/control/review")
         self.assertEqual(response.status_code, 200)
         payload = response.json()
         self.assertTrue(payload["all_passed"])
         self.assertFalse(payload["external_runtime_invoked"])
-        self.assertEqual(len(payload["checks"]), 7)
+        self.assertEqual(len(payload["checks"]), 8)
         self.assertTrue(all(check["passed"] for check in payload["checks"]))
         self.assertIn("external runtime", payload["summary"].casefold())
         audit = self.client.get("/api/audit").json()

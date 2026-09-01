@@ -33,6 +33,8 @@ interface ApiFrameworkStatus {
   state: FrameworkStatus['state']
   implementation_status: FrameworkStatus['implementationStatus']
   execution_enabled: boolean
+  capabilities?: string[]
+  activation_boundary?: FrameworkStatus['activationBoundary']
   detail: string
 }
 
@@ -219,6 +221,8 @@ const frameworkFromApi = (framework: ApiFrameworkStatus): FrameworkStatus => ({
   state: framework.state,
   implementationStatus: framework.implementation_status,
   executionEnabled: framework.execution_enabled,
+  capabilities: framework.capabilities,
+  activationBoundary: framework.activation_boundary,
   detail: framework.detail,
 })
 

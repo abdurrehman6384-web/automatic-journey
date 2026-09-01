@@ -46,4 +46,5 @@ None of these checks is complete merely because a record appears in the registry
 
 - No crawling, searching, browser automation, browser profile access, URL fetch, DNS lookup, upload, external model request, container launch, terminal command, code patch, git operation or package installation.
 - No Firecrawl distribution or integration while the AGPL decision is unresolved.
-- Batch 03 is now registered as the final controlled-contract lane. See [`INTEGRATION_BATCH_03.md`](INTEGRATION_BATCH_03.md); it still does not enable an upstream package, gateway or scanner runtime.
+- Batch 03 is registered as a controlled-contract lane. See [`INTEGRATION_BATCH_03.md`](INTEGRATION_BATCH_03.md); it still does not enable an upstream package, gateway or scanner runtime.
+- Batch 04 adds controlled advanced-skill lanes. See [`INTEGRATION_BATCH_04.md`](INTEGRATION_BATCH_04.md); it does not enable a CLI, agent loop, container, browser, desktop controller, voice/vision route or mobile runtime.

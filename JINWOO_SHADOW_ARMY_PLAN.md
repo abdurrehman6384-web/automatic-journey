@@ -297,8 +297,8 @@ Developer profile
 
 ## 9. Multi-Agent Framework Strategy
 
-The requested frameworks are included, but they will not all execute the same
-mission at the same time. One mission must have one canonical, auditable state
+The requested frameworks and advanced-skill source lanes are included, but they
+will not all execute the same mission at the same time. One mission must have one canonical, auditable state
 machine.
 
 ```text
@@ -314,7 +314,14 @@ Jinwoo Native Mission Engine
 ├── Mem0 adapter                   → separately consented optional memory interoperability
 ├── OpenClaw adapter               → future isolated local automation gateway
 ├── TruffleHog / Gitleaks          → future bounded local secret-review lanes
-└── Native Control & Audit Review  → active zero-side-effect local invariant review
+├── Goose                           → future sandboxed coding / MCP / evaluation lane
+├── Orkas                           → future bounded desktop team-routing and skill-review lane
+├── Bytebot / OpenDesktop           → future isolated computer-use lanes, never host control by default
+├── Hermes Agent / OpenAgent         → future bounded skill, MCP, RAG and tool-contract lanes
+├── IRIS-GO / Mini / Zero            → licence-gated local workflow / CLI capability references
+├── Zoey                             → future privacy-first Rust local-agent capability lane
+├── IRIS-AI / IRIS-X                 → proprietary-core / dual-licence reference-only UX sources
+└── Native Control & Audit Review    → active zero-side-effect local invariant review
 ```
 
 ### Framework responsibilities
@@ -332,6 +339,14 @@ Jinwoo Native Mission Engine
 | Mem0 | optional separately consented memory-interoperability adapter; does not confirm “memo API” |
 | OpenClaw | optional isolated local automation gateway adapter |
 | TruffleHog / Gitleaks | optional bounded local secret-exposure review adapters |
+| Goose | optional sandboxed coding-agent, MCP/ACP and evaluation-contract adapter |
+| Orkas | optional bounded desktop team-routing, reflection and skill-crystallisation adapter |
+| Bytebot / OpenDesktop | optional isolated computer-use capability adapters; no host input/capture/control by default |
+| Hermes Agent | optional skill, local-state, MCP and coding-workflow adapter |
+| OpenAgent | optional RAG, tool-routing and assistant capability-contract adapter |
+| IRIS-GO / IRIS-Mini / IRIS-Zero | licence-gated capability references; no source or runtime use pending individual licence decisions |
+| Zoey | optional privacy-first Rust local-agent capability adapter |
+| IRIS-AI / IRIS-X | reference-only UX sources; proprietary core/engine and source-runtime integration excluded |
 | Jinwoo Native Control & Audit Review | active local invariant review that cannot enable adapters or tools |
 | Jinwoo mission engine | source of truth for policy, approvals, mission state and audit logs |
 
@@ -354,8 +369,9 @@ inside that hierarchy, not fifteen replacement commander departments.
 | 01 — complete | Swarms, Agency-Swarm, Ruflo, LangGraph, CrewAI | typed, policy-gated dry-run contracts; upstream execution disabled |
 | 02 — complete | AG2, OpenHands, Firecrawl, Firecrawl Web-Agent, Crawl4AI | typed dry-run contracts plus Tank no-fetch planning gate; all upstream execution disabled; Firecrawl needs an AGPL-3.0 compatibility decision |
 | 03 — complete | Mem0, OpenClaw, TruffleHog, Gitleaks, Jinwoo Native control/audit review | typed dry-run contracts plus Greed no-scan preflight and active zero-side-effect native control review; all external execution disabled; TruffleHog needs an AGPL-3.0 compatibility decision |
+| 04 — complete | Goose, Orkas, Bytebot, OpenDesktop, Hermes Agent, OpenAgent, IRIS-GO, IRIS-Mini, IRIS-Zero, Zoey, IRIS-AI and IRIS-X | typed advanced-skill capability contracts and source-gate review; all external execution disabled; Bytebot is archived-upstream; IRIS-GO/Mini/Zero need licence decisions; IRIS-AI/X are reference-only |
 
-A Batch 01/02/03 dry run may represent up to 450 logical agents but caps runtime
+A Batch 01/02/03/04 dry run may represent up to 450 logical agents but caps runtime
 planning at three Planner/Executor/Verifier workers. It never starts an
 upstream framework, network crawl, shell, browser, container, code patch,
 secret scan, messaging gateway, or tool action. Tank's Batch 02 source-plan
@@ -363,7 +379,10 @@ gate validates at most ten explicit public HTTPS domain targets without opening 
 or resolving DNS; future retrieval remains separately approval-, policy-,
 licence- and limit-gated. Batch 03's native control review verifies capacity,
 external-runtime locks, licence gates, read-only workspace state and audit
-availability without changing any execution state.
+availability without changing any execution state. Batch 04 expands the visible
+capability catalogue only: no CLI, desktop/container controller, browser,
+voice/vision capture, provider, MCP server, agent loop or mobile runtime is
+activated by a Batch 04 plan.
 
 ---
 
@@ -726,8 +745,10 @@ Controlled Batch 01 framework registry/dry-run contracts for Swarms, Agency-Swar
 Controlled Batch 02 registry/dry-run contracts for AG2, OpenHands, Firecrawl, Firecrawl Web-Agent and Crawl4AI; Firecrawl remains licence-review-required
 Tank no-fetch public-web research planner with explicit HTTPS target validation, no DNS/network/browser access and metadata-only audit records
 Controlled Batch 03 registry/dry-run contracts for Mem0, OpenClaw, TruffleHog and Gitleaks; TruffleHog remains licence-review-required
+Controlled Batch 04 advanced-skill registry/dry-run contracts for Goose, Orkas, Bytebot, OpenDesktop, Hermes Agent, OpenAgent, IRIS-GO, IRIS-Mini, IRIS-Zero and Zoey; all remain non-executing
+IRIS-AI and IRIS-X registered as reference-only UX sources; their proprietary core/engine is not copied, linked, installed or invoked
 Greed no-scan secret-review preflight that requires a selected workspace/authorisation but reads no files or Git history
-Jinwoo Native Control & Audit Review with zero-side-effect local invariant checks and aggregate-only audit records
+Jinwoo Native Control & Audit Review with zero-side-effect local invariant checks, Batch 04 source-gate verification and aggregate-only audit records
 Whitespace-only API input rejection and hardened regular-file workspace reads
 Docker Compose foundation
 Electron shell foundation
@@ -751,7 +772,8 @@ Add Claude, GLM and HF live-provider integration tests with user-owned keys
 Add approved Igris workspace write/patch tools after the read-only guard review
 Implement Tank approved retrieval/source citation flow after the no-fetch gate, including runtime DNS/SSRF checks and source/rate/depth/size limits
 Add local vector retrieval and Memory Vault search
-Complete individual activation reviews before enabling any Batch 01/02/03 external runtime; decide Firecrawl and TruffleHog AGPL-3.0 compatibility before any related code, service, binary or container work; keep Mem0 optional until “memo API” is explicitly confirmed
+Complete individual activation reviews before enabling any Batch 01/02/03/04 external runtime; decide Firecrawl and TruffleHog AGPL-3.0 compatibility before any related code, service, binary or container work; resolve IRIS-GO/Mini/Zero licence evidence before any source use; keep Bytebot archived-upstream and IRIS-AI/X reference-only; keep Mem0 optional until “memo API” is explicitly confirmed
+Design computer-use activation separately for Goose, Bytebot, OpenDesktop, Hermes Agent, OpenAgent and any CLI/desktop/voice/vision lane: disposable sandbox, no host credentials/capture by default, visible per-step preview, per-action approval, audit, timeout and rollback
 Add Electron packaging and Windows installer
 Add Rust/Go sidecars only after profiling
 ```

@@ -1,4 +1,4 @@
-"""Zero-side-effect native control-plane review for the final integration lane.
+"""Zero-side-effect native control-plane review for all controlled integration lanes.
 
 The review is intentionally local and descriptive: it validates Jinwoo's own
 invariants and reports whether any registry state needs attention. It never
@@ -19,7 +19,13 @@ _EXPECTED_CAPACITY = {
     "worker_slots": 1_350,
 }
 _BATCH_THREE_IDS = {"mem0", "openclaw", "trufflehog", "gitleaks", "jinwoo-native-control-audit"}
-_LICENSE_REVIEW_IDS = {"firecrawl", "trufflehog"}
+_BATCH_FOUR_IDS = {
+    "goose", "orkas", "bytebot", "open-desktop", "hermes-agent", "openagent", "iris-go", "iris-mini", "iris-zero", "zoey",
+    "iris-ai", "iris-x",
+}
+_LICENSE_REVIEW_IDS = {"firecrawl", "trufflehog", "iris-go", "iris-mini", "iris-zero"}
+_REFERENCE_ONLY_IDS = {"iris-ai", "iris-x"}
+_ARCHIVED_UPSTREAM_IDS = {"bytebot"}
 
 
 def build_control_review(
@@ -35,7 +41,10 @@ def build_control_review(
     canonical_ids = {framework.id for framework in framework_statuses if framework.state.value == "canonical"}
     external_adapters = [framework for framework in framework_statuses if framework.state.value != "canonical"]
     batch_three = [by_id[framework_id] for framework_id in _BATCH_THREE_IDS if framework_id in by_id]
+    batch_four = [by_id[framework_id] for framework_id in _BATCH_FOUR_IDS if framework_id in by_id]
     licence_gates = [by_id[framework_id] for framework_id in _LICENSE_REVIEW_IDS if framework_id in by_id]
+    reference_only = [by_id[framework_id] for framework_id in _REFERENCE_ONLY_IDS if framework_id in by_id]
+    archived_upstream = [by_id[framework_id] for framework_id in _ARCHIVED_UPSTREAM_IDS if framework_id in by_id]
 
     checks = [
         ControlReviewCheck(
@@ -68,24 +77,48 @@ def build_control_review(
         ),
         ControlReviewCheck(
             id="batch-three-registry",
-            label="Final integration inventory",
+            label="Batch 03 integration inventory",
             passed=(
                 len(batch_three) == len(_BATCH_THREE_IDS)
                 and all(framework.integration_batch == 3 for framework in batch_three)
             ),
-            detail="Mem0, OpenClaw, TruffleHog, Gitleaks and the native control/audit lane are present in the final controlled batch.",
+            detail="Mem0, OpenClaw, TruffleHog, Gitleaks and the native control/audit lane remain present and controlled.",
         ),
         ControlReviewCheck(
-            id="copyleft-licence-gates",
-            label="Copyleft licence gates",
+            id="batch-four-advanced-skills",
+            label="Batch 04 advanced skill inventory",
+            passed=(
+                len(batch_four) == len(_BATCH_FOUR_IDS)
+                and all(framework.integration_batch == 4 and not framework.execution_enabled for framework in batch_four)
+            ),
+            detail="All 12 owner-requested advanced skill lanes are registered, bounded and non-executing.",
+        ),
+        ControlReviewCheck(
+            id="restricted-source-gates",
+            label="Restricted source and licence gates",
             passed=(
                 len(licence_gates) == len(_LICENSE_REVIEW_IDS)
                 and all(
                     framework.implementation_status == "license-review-required" and not framework.execution_enabled
                     for framework in licence_gates
                 )
+                and len(reference_only) == len(_REFERENCE_ONLY_IDS)
+                and all(
+                    framework.implementation_status == "reference-only"
+                    and framework.state.value == "reference-only"
+                    and not framework.execution_enabled
+                    for framework in reference_only
+                )
+                and len(archived_upstream) == len(_ARCHIVED_UPSTREAM_IDS)
+                and all(
+                    framework.implementation_status == "archived-upstream" and not framework.execution_enabled
+                    for framework in archived_upstream
+                )
             ),
-            detail="Firecrawl and TruffleHog remain licence-review-required and cannot be activated by this review.",
+            detail=(
+                "Firecrawl, TruffleHog, IRIS-GO, IRIS-Mini and IRIS-Zero stay licence-review-required; "
+                "IRIS-AI and IRIS-X stay reference-only; Bytebot stays archived-upstream."
+            ),
         ),
         ControlReviewCheck(
             id="workspace-read-only",

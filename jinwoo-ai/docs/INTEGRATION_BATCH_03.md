@@ -1,6 +1,6 @@
-# Controlled Integration Batch 03 — Final Lane
+# Controlled Integration Batch 03 — Memory, Automation and Security Lanes
 
-**Status:** the final requested adapter contracts and Jinwoo-native control review are implemented. No Batch 03 upstream package, binary, source file, container, service, gateway, messaging channel, scanner, browser, credential verifier, or cloud route is installed or executed by Jinwoo.
+**Status:** the requested Batch 03 adapter contracts and Jinwoo-native control review are implemented. No Batch 03 upstream package, binary, source file, container, service, gateway, messaging channel, scanner, browser, credential verifier, or cloud route is installed or executed by Jinwoo.
 
 This completes the owner's staged **contract** inventory. It does not activate an upstream runtime. Jinwoo remains the sole canonical mission engine and retains policy, approval, workspace, privacy and audit ownership.
 
@@ -49,7 +49,7 @@ TruffleHog is marked `license-review-required` because its reviewed project is A
 1. Final Army capacity: 15 commanders, 45 sub-departments, 450 logical agents and 1,350 derived worker slots.
 2. Canonical Jinwoo mission ownership and native control-review availability.
 3. The lock that keeps every external adapter disabled.
-4. Presence of all five final Batch 03 lanes.
+4. Presence of all five Batch 03 lanes.
 5. The Firecrawl and TruffleHog licence gates.
 6. Igris's read-only workspace boundary.
 7. Local audit-store availability.
@@ -73,6 +73,11 @@ No checkbox below is implicitly satisfied by the contract registry.
 | Gitleaks | Pin/review the binary/config; use only an approved selected workspace, read-only scan mode, redacted local findings, timeout/size/history limits and explicit scan approval. No CI upload, remote baseline or automatic remediation. |
 | Jinwoo Native Control & Audit Review | Keep its invariant tests passing; preserve metadata-only audit events; do not let a review toggle execution, alter policy or substitute for user approval. |
 
-## Final boundary
+## Continuing boundary
 
-All three requested batches are now registered as controlled contracts. The next implementation work is **individual activation only after explicit owner approval and review evidence**; there is no fourth automatic batch. In particular, Firecrawl and TruffleHog remain stopped at their AGPL licence gates.
+Batches 01–03 remain controlled contracts. The subsequently owner-requested
+Batch 04 advanced-skill catalogue is documented in
+[`INTEGRATION_BATCH_04.md`](INTEGRATION_BATCH_04.md) and remains non-executing.
+Any implementation work is **individual activation only after explicit owner
+approval and review evidence**. In particular, Firecrawl and TruffleHog remain
+stopped at their AGPL licence gates.

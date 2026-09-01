@@ -55,15 +55,17 @@ export interface ProviderStatus {
 export interface FrameworkStatus {
   id: string
   label: string
-  runtime: 'builtin' | 'python' | 'typescript-mcp' | 'typescript-service' | 'container-sidecar' | 'go-cli'
-  category: 'orchestration' | 'workflow' | 'coding' | 'research' | 'web-collection' | 'memory' | 'automation' | 'security' | 'governance'
+  runtime: 'builtin' | 'python' | 'typescript-mcp' | 'typescript-service' | 'container-sidecar' | 'go-cli' | 'go-service' | 'rust-cli' | 'desktop-client' | 'mobile-client'
+  category: 'orchestration' | 'workflow' | 'coding' | 'research' | 'web-collection' | 'memory' | 'automation' | 'security' | 'governance' | 'computer-use' | 'reference'
   integrationBatch: number
   ownerCommander: string
   license: string
   sourceUrl?: string
-  state: 'canonical' | 'not-installed' | 'detected'
-  implementationStatus: 'active' | 'contract-ready' | 'license-review-required' | 'queued'
+  state: 'canonical' | 'not-installed' | 'detected' | 'reference-only'
+  implementationStatus: 'active' | 'contract-ready' | 'license-review-required' | 'reference-only' | 'archived-upstream' | 'queued'
   executionEnabled: boolean
+  capabilities?: string[]
+  activationBoundary?: 'read-only' | 'approval-required' | 'sandboxed' | 'reference-only'
   detail: string
 }
 

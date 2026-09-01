@@ -57,22 +57,33 @@ class FrameworkState(str, Enum):
     CANONICAL = "canonical"
     NOT_INSTALLED = "not-installed"
     DETECTED = "detected"
+    REFERENCE_ONLY = "reference-only"
 
 
 class FrameworkStatus(BaseModel):
-    """Read-only status for an orchestration integration boundary."""
+    """Read-only status for a controlled framework or advanced-skill boundary."""
 
     id: str
     label: str
-    runtime: Literal["builtin", "python", "typescript-mcp", "typescript-service", "container-sidecar", "go-cli"]
-    category: Literal["orchestration", "workflow", "coding", "research", "web-collection", "memory", "automation", "security", "governance"]
+    runtime: Literal[
+        "builtin", "python", "typescript-mcp", "typescript-service", "container-sidecar", "go-cli", "go-service",
+        "rust-cli", "desktop-client", "mobile-client",
+    ]
+    category: Literal[
+        "orchestration", "workflow", "coding", "research", "web-collection", "memory", "automation", "security",
+        "governance", "computer-use", "reference",
+    ]
     integration_batch: int
     owner_commander: str
     license: str
     source_url: str | None = None
     state: FrameworkState
-    implementation_status: Literal["active", "contract-ready", "license-review-required", "queued"]
+    implementation_status: Literal[
+        "active", "contract-ready", "license-review-required", "reference-only", "archived-upstream", "queued",
+    ]
     execution_enabled: bool
+    capabilities: list[str] = Field(default_factory=list, max_length=8)
+    activation_boundary: Literal["read-only", "approval-required", "sandboxed", "reference-only"] = "approval-required"
     detail: str
 
 
