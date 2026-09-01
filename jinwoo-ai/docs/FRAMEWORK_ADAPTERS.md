@@ -62,6 +62,11 @@ authorise a network, shell, browser, desktop or mobile action.
 | 06 | Barehands Gesture Interface | Nox | Future local hand-gesture, spatial-board and accessibility patterns | **AGPL licence review required**; no webcam/CDN/state/localhost/gesture action route |
 | 06 | Ultron Orb UI (Sagar Builds) | Tusk | Independently designed orb, HUD and optional gesture UX patterns | Bounded visual/interaction review only; no upstream source/camera/device/control route |
 | 06 | Physical Cutter / Robotics Safety Intake | Nox | Physical-device safety and operator-consent concept | **Source/machine safety review required**; no controller, hardware or physical-action route |
+| 07 | Agent Swarm | Bellion | Deliverable-driven specialist collaboration patterns | Native topology reference only; no upstream server/frontend/memory/runtime |
+| 07 | ROMA | Ashborn | Recursive task-tree, planner/executor/verifier patterns | **Licence review required**; no MCP/Docker/toolkit/model/background execution |
+| 07 | Open Multi-Agent | Bellion | Dynamic DAG, budget, recovery and governance patterns | Native topology reference only; no Node service/provider/tool/runtime |
+| 07 | Awesome Agent Orchestration | Kaisel | Orchestration discovery and comparison catalogue | **Reference only**; every listed downstream source needs individual review |
+| 07 | Microsoft Agent Framework | Jinwoo | Typed workflow, middleware and human-in-loop patterns | Native topology reference only; no hosted workflow/provider/tool/persistence |
 
 `GET /api/frameworks` exposes each record's runtime/category, discovery state,
 licence, source URL, owner, capability tags, activation boundary and contract
@@ -74,6 +79,14 @@ proposal at three runtime workers: Planner, Executor and Verifier. It carries
 out no tool action and records only redacted outcome metadata in the local audit
 trail. A `reference-only` record produces a review that explicitly forbids
 source/code/runtime use.
+
+Batch 07 also provides a separate native Shadow Army planning surface:
+`GET /api/shadow-army/overview`, `GET /api/shadow-army/plans`, and
+`POST /api/shadow-army/plans`. It represents up to 450 logical seats and a
+visible Planner → Executor → Verifier graph, returns at most ten representative
+seats, caps a proposed runtime at three roles, and always reports zero started
+workers and `external_runtime_invoked: false`. It never imports any registered
+external framework. See [`INTEGRATION_BATCH_07.md`](INTEGRATION_BATCH_07.md).
 
 ## Native safety gates
 
@@ -103,9 +116,9 @@ rate/depth/size/domain limits, and retain cited data locally.
 `POST /api/control/review` and its Settings panel provide a zero-side-effect
 local review. It makes no network request, file read, tool call or
 execution-state change. It verifies final Army capacity, native ownership,
-external-runtime locks, Batch 03, Batch 04, Batch 05 and Batch 06 inventories,
-restricted source/licence/review gates, read-only Workspace Guard and audit
-availability.
+external-runtime locks, Batch 03, Batch 04, Batch 05, Batch 06 and Batch 07
+inventories, restricted source/licence/review gates, read-only Workspace Guard
+and audit availability.
 
 ## Why detection is not activation
 
@@ -117,14 +130,15 @@ The following restrictions are specifically enforced in the registry:
 
 - **Licence-review-required:** Firecrawl, TruffleHog, IRIS-GO, IRIS-Mini,
   IRIS-Zero, Anthropic Skills, WordPress Agent Skill Prototypes, Official MCP
-  Servers and Barehands cannot be copied, bundled, linked, installed or run
-  until their individual licence/component/deployment decision is documented.
+  Servers, Barehands and ROMA cannot be copied, bundled, linked, installed or
+  run until their individual licence/component/deployment decision is documented.
   Barehands additionally needs an AGPL-3.0 compatibility decision before any
   source, derivative, service or runtime is considered.
 - **Archived upstream:** Bytebot cannot be adopted until a maintained source,
   security and support review passes.
-- **Reference-only:** IRIS-AI, IRIS-X, Awesome MCP Servers and 500 AI Agents
-  Projects cannot be used as source/runtime integrations. Their downstream or
+- **Reference-only:** IRIS-AI, IRIS-X, Awesome MCP Servers, 500 AI Agents
+  Projects and Awesome Agent Orchestration cannot be used as source/runtime
+  integrations. Their downstream or
   proprietary sources need their own review; any Jinwoo feature must be
   independently designed.
 - **Source-review-required:** EnvAgent and the Physical Cutter / Robotics Safety
@@ -195,6 +209,7 @@ See [`INTEGRATION_BATCH_01.md`](INTEGRATION_BATCH_01.md),
 [`INTEGRATION_BATCH_02.md`](INTEGRATION_BATCH_02.md),
 [`INTEGRATION_BATCH_03.md`](INTEGRATION_BATCH_03.md),
 [`INTEGRATION_BATCH_04.md`](INTEGRATION_BATCH_04.md),
-[`INTEGRATION_BATCH_05.md`](INTEGRATION_BATCH_05.md), and
-[`INTEGRATION_BATCH_06.md`](INTEGRATION_BATCH_06.md) for the source-review
+[`INTEGRATION_BATCH_05.md`](INTEGRATION_BATCH_05.md),
+[`INTEGRATION_BATCH_06.md`](INTEGRATION_BATCH_06.md), and
+[`INTEGRATION_BATCH_07.md`](INTEGRATION_BATCH_07.md) for the source-review
 records and adapter-specific activation requirements.

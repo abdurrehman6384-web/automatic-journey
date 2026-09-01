@@ -12,10 +12,11 @@ import { MissionPanel } from './components/MissionPanel'
 import { ProviderPanel } from './components/ProviderPanel'
 import { ResearchPanel } from './components/ResearchPanel'
 import { SecurityScanPanel } from './components/SecurityScanPanel'
+import { ShadowArmyCore } from './components/ShadowArmyCore'
 import { WorkspacePanel } from './components/WorkspacePanel'
 import { commanders, buildArmyStats, defaultFrameworks, defaultProviders } from './data/army'
 import { buildMission, isBlockedPrompt } from './lib/mission'
-import type { AuditEvent, ChatMessage, Commander, ControlReview, FrameworkDryRun, FrameworkStatus, MemoryItem, MemoryKind, Mission, ProviderStatus, ResearchPlan, SecurityScanPlan, WorkspaceAnalysis, WorkspaceEntry, WorkspaceStatus } from './types/army'
+import type { AuditEvent, ChatMessage, Commander, ControlReview, CoordinationPattern, FrameworkDryRun, FrameworkStatus, MemoryItem, MemoryKind, Mission, ProviderStatus, ResearchPlan, SecurityScanPlan, ShadowArmyOverview, ShadowArmyPlan, WorkspaceAnalysis, WorkspaceEntry, WorkspaceStatus } from './types/army'
 
 const starterPrompts = [
   'Analyze my project structure and suggest a clean architecture.',
@@ -23,7 +24,7 @@ const starterPrompts = [
   'Write a safe release checklist for this desktop application.',
 ]
 
-type ViewId = 'hq' | 'missions' | 'army' | 'chat' | 'workspace' | 'research' | 'security' | 'memory' | 'interaction' | 'registry' | 'control' | 'settings'
+type ViewId = 'hq' | 'missions' | 'army' | 'core' | 'chat' | 'workspace' | 'research' | 'security' | 'memory' | 'interaction' | 'registry' | 'control' | 'settings'
 
 type NavigationItem = {
   id: ViewId
@@ -35,6 +36,7 @@ const viewMeta: Record<ViewId, { eyebrow: string; title: string; description: st
   hq: { eyebrow: 'SHADOW ARMY // COMMAND CONSOLE', title: 'Army HQ', description: 'Visible, local-first command coordination.' },
   missions: { eyebrow: 'MISSION CONTROL // APPROVAL FIRST', title: 'Mission workbench', description: 'Plan, verify and approve meaningful actions.' },
   army: { eyebrow: 'SHADOW ARMY // VISIBLE HIERARCHY', title: 'Army explorer', description: 'Inspect logical roles without spawning a hidden army.' },
+  core: { eyebrow: 'SHADOW ARMY // NATIVE MULTI-AGENT CORE', title: 'Army core', description: 'Map hierarchy, patterns and approval edges without starting a swarm.' },
   chat: { eyebrow: 'LOCAL AI // CONSENT AWARE', title: 'Command channel', description: 'Talk locally by default; cloud use is explicit.' },
   workspace: { eyebrow: 'IGRIS // READ-ONLY GUARD', title: 'Workspace Guard', description: 'Confined source diagnostics inside a selected folder.' },
   research: { eyebrow: 'TANK // NO-FETCH GATE', title: 'Research Gate', description: 'Validate a public-source plan without opening a URL.' },
@@ -53,6 +55,7 @@ const navigationGroups: Array<{ label: string; items: NavigationItem[] }> = [
       { id: 'hq', label: 'Army HQ', icon: '⌘' },
       { id: 'missions', label: 'Mission desk', icon: '◈' },
       { id: 'army', label: 'Army explorer', icon: '◫' },
+      { id: 'core', label: 'Army core', icon: '⌬' },
       { id: 'chat', label: 'Command channel', icon: '✦' },
     ],
   },
@@ -195,6 +198,72 @@ interface ApiWorkspaceAnalysis {
   truncated: boolean
 }
 
+
+interface ApiShadowArmyFramework {
+  id: string
+  label: string
+  category: string
+  pattern_role: string
+  implementation_status: string
+  execution_enabled: boolean
+}
+
+interface ApiShadowArmyAgent {
+  id: string
+  name: string
+  commander_id: string
+  division_id: string
+  division: string
+  specialty: string
+  logical: boolean
+  runtime_started: boolean
+}
+
+interface ApiShadowArmyStage {
+  id: string
+  label: string
+  owner: string
+  phase: 'intake' | 'route' | 'scope' | 'plan' | 'draft' | 'verify' | 'deliver'
+  detail: string
+  requires_approval: boolean
+}
+
+interface ApiShadowArmyOverview {
+  commanders: number
+  divisions: number
+  logical_agents: number
+  worker_slots: number
+  active_runtime_workers: number
+  runtime_cap_per_mission: number
+  all_external_runtimes_disabled: boolean
+  hierarchy: string[]
+  supported_patterns: CoordinationPattern[]
+}
+
+interface ApiShadowArmyPlan {
+  id: string
+  prompt: string
+  coordination: CoordinationPattern
+  commander_id: string
+  commander: string
+  division_id: string
+  division: string
+  requested_logical_agents: number
+  logical_agents_reserved: number
+  displayed_logical_agents: number
+  runtime_worker_cap: number
+  runtime_workers_started: number
+  risk: ShadowArmyPlan['risk']
+  requires_approval: boolean
+  external_runtime_invoked: boolean
+  pattern_summary: string
+  agents: ApiShadowArmyAgent[]
+  stages: ApiShadowArmyStage[]
+  frameworks: ApiShadowArmyFramework[]
+  guardrails: string[]
+  created_at: string
+}
+
 interface ApiMission {
   id: string
   prompt: string
@@ -208,6 +277,66 @@ interface ApiMission {
   workers: Mission['workers']
   result?: string
 }
+
+
+const shadowArmyOverviewFromApi = (overview: ApiShadowArmyOverview): ShadowArmyOverview => ({
+  commanders: overview.commanders,
+  divisions: overview.divisions,
+  logicalAgents: overview.logical_agents,
+  workerSlots: overview.worker_slots,
+  activeRuntimeWorkers: overview.active_runtime_workers,
+  runtimeCapPerMission: overview.runtime_cap_per_mission,
+  allExternalRuntimesDisabled: overview.all_external_runtimes_disabled,
+  hierarchy: overview.hierarchy,
+  supportedPatterns: overview.supported_patterns,
+})
+
+const shadowArmyPlanFromApi = (plan: ApiShadowArmyPlan): ShadowArmyPlan => ({
+  id: plan.id,
+  prompt: plan.prompt,
+  coordination: plan.coordination,
+  commanderId: plan.commander_id,
+  commander: plan.commander,
+  divisionId: plan.division_id,
+  division: plan.division,
+  requestedLogicalAgents: plan.requested_logical_agents,
+  logicalAgentsReserved: plan.logical_agents_reserved,
+  displayedLogicalAgents: plan.displayed_logical_agents,
+  runtimeWorkerCap: plan.runtime_worker_cap,
+  runtimeWorkersStarted: plan.runtime_workers_started,
+  risk: plan.risk,
+  requiresApproval: plan.requires_approval,
+  externalRuntimeInvoked: plan.external_runtime_invoked,
+  patternSummary: plan.pattern_summary,
+  agents: plan.agents.map((agent) => ({
+    id: agent.id,
+    name: agent.name,
+    commanderId: agent.commander_id,
+    divisionId: agent.division_id,
+    division: agent.division,
+    specialty: agent.specialty,
+    logical: agent.logical,
+    runtimeStarted: agent.runtime_started,
+  })),
+  stages: plan.stages.map((stage) => ({
+    id: stage.id,
+    label: stage.label,
+    owner: stage.owner,
+    phase: stage.phase,
+    detail: stage.detail,
+    requiresApproval: stage.requires_approval,
+  })),
+  frameworks: plan.frameworks.map((framework) => ({
+    id: framework.id,
+    label: framework.label,
+    category: framework.category,
+    patternRole: framework.pattern_role,
+    implementationStatus: framework.implementation_status,
+    executionEnabled: framework.execution_enabled,
+  })),
+  guardrails: plan.guardrails,
+  createdAt: plan.created_at,
+})
 
 const frameworkDryRunFromApi = (result: ApiFrameworkDryRun): FrameworkDryRun => ({
   frameworkId: result.framework_id,
@@ -338,7 +467,8 @@ const errorDetail = (payload: unknown, fallback: string) => {
 }
 
 function App() {
-  const [activeView, setActiveView] = useState<ViewId>('hq')
+  // Surface the latest owner-prioritised native core first; Army HQ remains one tap away.
+  const [activeView, setActiveView] = useState<ViewId>('core')
   const [navigationOpen, setNavigationOpen] = useState(false)
   const [now, setNow] = useState(() => new Date())
   const [selectedCommander, setSelectedCommander] = useState<Commander>(commanders[0])
@@ -348,6 +478,9 @@ function App() {
   const [frameworks, setFrameworks] = useState<FrameworkStatus[]>(defaultFrameworks)
   const [frameworkDryRun, setFrameworkDryRun] = useState<FrameworkDryRun | null>(null)
   const [frameworkBusy, setFrameworkBusy] = useState(false)
+  const [shadowOverview, setShadowOverview] = useState<ShadowArmyOverview | null>(null)
+  const [shadowPlan, setShadowPlan] = useState<ShadowArmyPlan | null>(null)
+  const [shadowBusy, setShadowBusy] = useState(false)
   const [researchPlan, setResearchPlan] = useState<ResearchPlan | null>(null)
   const [researchBusy, setResearchBusy] = useState(false)
   const [controlReview, setControlReview] = useState<ControlReview | null>(null)
@@ -403,6 +536,49 @@ function App() {
       return false
     } finally {
       setFrameworkBusy(false)
+    }
+  }
+
+
+  const createShadowArmyPlan = async (
+    message: string,
+    requestedLogicalAgents: number,
+    coordination: CoordinationPattern,
+  ): Promise<boolean> => {
+    const clean = message.trim()
+    if (isBlockedPrompt(clean)) {
+      setNotice('This request crosses a security or privacy boundary, so Jinwoo did not create an Army topology.')
+      return false
+    }
+
+    setShadowBusy(true)
+    try {
+      const response = await fetch('/api/shadow-army/plans', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: clean,
+          requested_logical_agents: requestedLogicalAgents,
+          coordination,
+        }),
+      })
+      const payload = await response.json() as ApiShadowArmyPlan | { detail?: string }
+      if (!response.ok || !('id' in payload)) {
+        setNotice(errorDetail(payload, 'Bellion could not prepare that bounded Army topology.'))
+        return false
+      }
+      const nextPlan = shadowArmyPlanFromApi(payload)
+      setShadowPlan(nextPlan)
+      const commander = commanders.find((item) => item.id === nextPlan.commanderId)
+      if (commander) setSelectedCommander(commander)
+      void loadAudit()
+      setNotice(`${nextPlan.commander} prepared a ${nextPlan.coordination.replaceAll('-', ' ')} topology. No external agent runtime was invoked.`)
+      return true
+    } catch {
+      setNotice('The Shadow Army core is unavailable because the local backend is offline.')
+      return false
+    } finally {
+      setShadowBusy(false)
     }
   }
 
@@ -715,6 +891,16 @@ function App() {
       .catch(() => {
         // The UI deliberately stays useful with its deterministic demo fallback.
       })
+    fetch('/api/shadow-army/overview')
+      .then(async (response) => response.ok ? response.json() : Promise.reject(new Error('Shadow Army core unavailable')))
+      .then((payload: ApiShadowArmyOverview) => {
+        if (mounted && payload && Array.isArray(payload.supported_patterns)) {
+          setShadowOverview(shadowArmyOverviewFromApi(payload))
+        }
+      })
+      .catch(() => {
+        // ShadowArmyCore provides a deterministic, no-runtime fallback for standalone UI previews.
+      })
     fetch('/api/frameworks')
       .then(async (response) => response.ok ? response.json() : Promise.reject(new Error('Framework registry unavailable')))
       .then((payload: { frameworks?: ApiFrameworkStatus[] }) => {
@@ -944,6 +1130,8 @@ function App() {
           )}
 
           {activeView === 'army' && <ArmyExplorer selectedCommander={selectedCommander} onSelectCommander={selectCommander} />}
+
+          {activeView === 'core' && <ShadowArmyCore overview={shadowOverview} plan={shadowPlan} busy={shadowBusy} onPlan={createShadowArmyPlan} />}
 
           {activeView === 'chat' && <ChatPanel messages={chatMessages} providers={providers} busy={chatBusy} onSend={sendChat} />}
 

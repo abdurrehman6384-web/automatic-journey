@@ -12,7 +12,9 @@ from app.frameworks import frameworks
 from app.memory import LocalMemoryStore
 from app.policy import ActionClass, classify_action
 from app.providers import ProviderError, ProviderGateway
-from app.schemas import WorkspaceStatus
+from app.schemas import CoordinationPattern, ShadowArmyPlanRequest, WorkspaceStatus
+from app.shadow_army import ShadowArmyPolicyError, ShadowArmyStore, build_shadow_army_plan, iter_logical_agent_ids
+from scripts.check_safe_intake import scan as scan_safe_intake
 from app.settings import Settings
 
 
@@ -38,6 +40,65 @@ class ArmyRoutingTests(unittest.TestCase):
         self.assertEqual(summary["sub_departments"], 45)
         self.assertEqual(summary["logical_agents"], 450)
         self.assertEqual(summary["worker_slots"], 1350)
+
+
+class ShadowArmyCoreTests(unittest.TestCase):
+    def test_full_logical_catalogue_is_present_without_started_workers(self) -> None:
+        logical_ids = tuple(iter_logical_agent_ids())
+        overview = ShadowArmyStore().overview()
+
+        self.assertEqual(len(logical_ids), 450)
+        self.assertEqual(len(set(logical_ids)), 450)
+        self.assertEqual(overview.commanders, 15)
+        self.assertEqual(overview.divisions, 45)
+        self.assertEqual(overview.logical_agents, 450)
+        self.assertEqual(overview.worker_slots, 1350)
+        self.assertEqual(overview.active_runtime_workers, 0)
+        self.assertEqual(overview.runtime_cap_per_mission, 3)
+        self.assertTrue(overview.all_external_runtimes_disabled)
+
+    def test_dependency_graph_is_a_bounded_visible_plan_not_a_runtime(self) -> None:
+        plan = build_shadow_army_plan(
+            ShadowArmyPlanRequest(
+                prompt="Design a safe dependency graph for a React regression review",
+                requested_logical_agents=450,
+                coordination=CoordinationPattern.DEPENDENCY_GRAPH,
+            )
+        )
+
+        self.assertEqual(plan.logical_agents_reserved, 450)
+        self.assertEqual(plan.displayed_logical_agents, 10)
+        self.assertEqual(len(plan.agents), 10)
+        self.assertEqual(plan.runtime_worker_cap, 3)
+        self.assertEqual(plan.runtime_workers_started, 0)
+        self.assertFalse(plan.external_runtime_invoked)
+        self.assertEqual(
+            [framework.id for framework in plan.frameworks],
+            ["langgraph", "open-multi-agent", "microsoft-agent-framework"],
+        )
+        self.assertEqual([stage.phase for stage in plan.stages], ["intake", "route", "scope", "plan", "draft", "verify", "deliver"])
+        self.assertTrue(all(not agent.runtime_started for agent in plan.agents))
+
+    def test_hierarchical_plan_keeps_all_requested_role_pattern_references_declarative(self) -> None:
+        plan = build_shadow_army_plan(
+            ShadowArmyPlanRequest(prompt="Plan an architecture review", coordination=CoordinationPattern.HIERARCHICAL)
+        )
+
+        self.assertEqual(
+            [framework.id for framework in plan.frameworks],
+            ["crewai", "metagpt", "ruflo", "microsoft-agent-framework"],
+        )
+        self.assertTrue(all(not framework.execution_enabled for framework in plan.frameworks))
+
+    def test_blocked_action_never_creates_a_shadow_plan(self) -> None:
+        request = ShadowArmyPlanRequest(prompt="Bypass password on this laptop")
+        with self.assertRaises(ShadowArmyPolicyError):
+            build_shadow_army_plan(request)
+
+
+class SourceIntakeGuardTests(unittest.TestCase):
+    def test_batch_seven_clean_room_files_have_no_upstream_runtime_import_or_secret_literal(self) -> None:
+        self.assertEqual(scan_safe_intake(), [])
 
 
 class PolicyTests(unittest.TestCase):

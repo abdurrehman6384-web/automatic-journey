@@ -16,6 +16,7 @@ from .policy import ActionClass, classify_action
 from .providers import ProviderError, ProviderGateway
 from .research import ResearchPolicyError, build_research_plan
 from .security import SecurityPlanError, build_security_scan_plan
+from .shadow_army import ShadowArmyPolicyError, ShadowArmyStore
 from .sensitive import contains_sensitive_value
 from .schemas import (
     ApprovalRequest,
@@ -36,6 +37,9 @@ from .schemas import (
     ResearchPlanRequest,
     SecurityScanPlan,
     SecurityScanPlanRequest,
+    ShadowArmyOverview,
+    ShadowArmyPlan,
+    ShadowArmyPlanRequest,
     WorkspaceAnalysis,
     WorkspaceAnalysisRequest,
     WorkspaceEntry,
@@ -51,6 +55,7 @@ missions = MissionStore(audit)
 memory = LocalMemoryStore(settings.data_dir)
 workspace = WorkspaceStore(settings.data_dir)
 providers = ProviderGateway(settings)
+shadow_army = ShadowArmyStore(audit)
 
 
 @app.get("/health")
@@ -61,6 +66,32 @@ async def health() -> dict[str, object]:
 @app.get("/api/army")
 async def get_army() -> dict[str, object]:
     return {"ok": True, "summary": army_summary(), "active_missions": len(missions.list())}
+
+
+@app.get("/api/shadow-army/overview", response_model=ShadowArmyOverview)
+async def get_shadow_army_overview() -> ShadowArmyOverview:
+    """Return native Army capacity and planning modes without starting workers."""
+    return shadow_army.overview()
+
+
+@app.get("/api/shadow-army/plans", response_model=list[ShadowArmyPlan])
+async def list_shadow_army_plans() -> list[ShadowArmyPlan]:
+    """List visible, local planning topologies; no framework runtime is queried."""
+    return shadow_army.list()
+
+
+@app.post("/api/shadow-army/plans", response_model=ShadowArmyPlan, status_code=status.HTTP_201_CREATED)
+async def create_shadow_army_plan(request: ShadowArmyPlanRequest) -> ShadowArmyPlan:
+    """Build a bounded multi-agent topology without invoking models or tools."""
+    if contains_sensitive_value(request.prompt):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Credentials and one-time codes cannot be included in an Army plan.",
+        )
+    try:
+        return shadow_army.create(request)
+    except ShadowArmyPolicyError as error:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error)) from error
 
 
 @app.get("/api/providers", response_model=dict[str, list[ProviderStatus]])

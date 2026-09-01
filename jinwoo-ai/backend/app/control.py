@@ -30,11 +30,12 @@ _BATCH_FIVE_IDS = {
     "scientific-agent-skills", "open-autoglm", "500-ai-agent-projects", "envagent-source-intake",
 }
 _BATCH_SIX_IDS = {"barehands", "ultron-orb-ui", "physical-cutter-safety-intake"}
+_BATCH_SEVEN_IDS = {"agent-swarm", "roma", "open-multi-agent", "awesome-agent-orchestration", "microsoft-agent-framework"}
 _LICENSE_REVIEW_IDS = {
     "firecrawl", "trufflehog", "iris-go", "iris-mini", "iris-zero", "anthropic-skills", "wordpress-agent-skills",
-    "official-mcp-servers", "barehands",
+    "official-mcp-servers", "barehands", "roma",
 }
-_REFERENCE_ONLY_IDS = {"iris-ai", "iris-x", "awesome-mcp-servers", "500-ai-agent-projects"}
+_REFERENCE_ONLY_IDS = {"iris-ai", "iris-x", "awesome-mcp-servers", "500-ai-agent-projects", "awesome-agent-orchestration"}
 _ARCHIVED_UPSTREAM_IDS = {"bytebot"}
 _QUEUED_IDS = {"open-autoglm"}
 _SOURCE_REVIEW_IDS = {"envagent-source-intake", "physical-cutter-safety-intake"}
@@ -56,6 +57,7 @@ def build_control_review(
     batch_four = [by_id[framework_id] for framework_id in _BATCH_FOUR_IDS if framework_id in by_id]
     batch_five = [by_id[framework_id] for framework_id in _BATCH_FIVE_IDS if framework_id in by_id]
     batch_six = [by_id[framework_id] for framework_id in _BATCH_SIX_IDS if framework_id in by_id]
+    batch_seven = [by_id[framework_id] for framework_id in _BATCH_SEVEN_IDS if framework_id in by_id]
     licence_gates = [by_id[framework_id] for framework_id in _LICENSE_REVIEW_IDS if framework_id in by_id]
     reference_only = [by_id[framework_id] for framework_id in _REFERENCE_ONLY_IDS if framework_id in by_id]
     archived_upstream = [by_id[framework_id] for framework_id in _ARCHIVED_UPSTREAM_IDS if framework_id in by_id]
@@ -128,6 +130,18 @@ def build_control_review(
             detail="Barehands, Ultron Orb UI and the physical-hardware intake remain bounded, non-executing interaction concepts.",
         ),
         ControlReviewCheck(
+            id="batch-seven-multi-agent-core",
+            label="Batch 07 multi-agent core inventory",
+            passed=(
+                len(batch_seven) == len(_BATCH_SEVEN_IDS)
+                and all(framework.integration_batch == 7 and not framework.execution_enabled for framework in batch_seven)
+            ),
+            detail=(
+                "Agent Swarm, ROMA, Open Multi-Agent, Awesome Agent Orchestration and Microsoft Agent Framework "
+                "are visible as bounded, non-executing Shadow Army integration lanes."
+            ),
+        ),
+        ControlReviewCheck(
             id="restricted-source-gates",
             label="Restricted source and licence gates",
             passed=(
@@ -160,8 +174,8 @@ def build_control_review(
                 )
             ),
             detail=(
-                "Licence gates remain on Firecrawl, TruffleHog, IRIS-GO/Mini/Zero, Anthropic Skills, WordPress skills, MCP Servers and Barehands; "
-                "reference-only, archived, queued-mobile, source-intake and physical-hardware boundaries remain locked."
+                "Licence gates remain on Firecrawl, TruffleHog, IRIS-GO/Mini/Zero, Anthropic Skills, WordPress skills, MCP Servers, Barehands and ROMA; "
+                "reference-only, archived, queued-mobile, source-intake, orchestration-catalogue and physical-hardware boundaries remain locked."
             ),
         ),
         ControlReviewCheck(

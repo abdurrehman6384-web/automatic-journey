@@ -175,6 +175,73 @@ export interface MemoryItem {
   createdAt: string
 }
 
+export type CoordinationPattern = 'hierarchical' | 'commander-council' | 'dependency-graph' | 'bounded-swarm'
+
+export interface ShadowArmyFramework {
+  id: string
+  label: string
+  category: string
+  patternRole: string
+  implementationStatus: string
+  executionEnabled: boolean
+}
+
+export interface ShadowArmyAgent {
+  id: string
+  name: string
+  commanderId: string
+  divisionId: string
+  division: string
+  specialty: string
+  logical: boolean
+  runtimeStarted: boolean
+}
+
+export interface ShadowArmyStage {
+  id: string
+  label: string
+  owner: string
+  phase: 'intake' | 'route' | 'scope' | 'plan' | 'draft' | 'verify' | 'deliver'
+  detail: string
+  requiresApproval: boolean
+}
+
+export interface ShadowArmyPlan {
+  id: string
+  prompt: string
+  coordination: CoordinationPattern
+  commanderId: string
+  commander: string
+  divisionId: string
+  division: string
+  requestedLogicalAgents: number
+  logicalAgentsReserved: number
+  displayedLogicalAgents: number
+  runtimeWorkerCap: number
+  runtimeWorkersStarted: number
+  risk: Mission['risk']
+  requiresApproval: boolean
+  externalRuntimeInvoked: boolean
+  patternSummary: string
+  agents: ShadowArmyAgent[]
+  stages: ShadowArmyStage[]
+  frameworks: ShadowArmyFramework[]
+  guardrails: string[]
+  createdAt: string
+}
+
+export interface ShadowArmyOverview {
+  commanders: number
+  divisions: number
+  logicalAgents: number
+  workerSlots: number
+  activeRuntimeWorkers: number
+  runtimeCapPerMission: number
+  allExternalRuntimesDisabled: boolean
+  hierarchy: string[]
+  supportedPatterns: CoordinationPattern[]
+}
+
 export interface ArmyStats {
   departments: number
   subDepartments: number

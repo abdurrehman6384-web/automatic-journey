@@ -45,6 +45,97 @@ class ProviderState(str, Enum):
     CHECKING = "checking"
 
 
+class CoordinationPattern(str, Enum):
+    """A visible topology choice for the native Shadow Army planning core."""
+
+    HIERARCHICAL = "hierarchical"
+    COMMANDER_COUNCIL = "commander-council"
+    DEPENDENCY_GRAPH = "dependency-graph"
+    BOUNDED_SWARM = "bounded-swarm"
+
+
+class ShadowArmyFramework(BaseModel):
+    """A non-executing multi-agent framework pattern selected for a plan."""
+
+    id: str
+    label: str
+    category: str
+    pattern_role: str
+    implementation_status: str
+    execution_enabled: bool = False
+
+
+class ShadowArmyAgent(BaseModel):
+    """A logical specialist seat, not a started process or model session."""
+
+    id: str
+    name: str
+    commander_id: str
+    division_id: str
+    division: str
+    specialty: str
+    logical: bool = True
+    runtime_started: bool = False
+
+
+class ShadowArmyStage(BaseModel):
+    """One visible state in a Planner → Executor → Verifier mission graph."""
+
+    id: str
+    label: str
+    owner: str
+    phase: Literal["intake", "route", "scope", "plan", "draft", "verify", "deliver"]
+    detail: str
+    requires_approval: bool = False
+
+
+class ShadowArmyPlanRequest(BaseModel):
+    prompt: str = Field(min_length=2, max_length=8_000)
+    requested_logical_agents: int = Field(default=3, ge=1, le=450)
+    coordination: CoordinationPattern = CoordinationPattern.HIERARCHICAL
+
+    @field_validator("prompt")
+    @classmethod
+    def prompt_is_not_blank(cls, value: str) -> str:
+        return _require_non_blank(value)
+
+
+class ShadowArmyPlan(BaseModel):
+    id: str = Field(default_factory=lambda: f"shadow-plan-{uuid4().hex[:10]}")
+    prompt: str
+    coordination: CoordinationPattern
+    commander_id: str
+    commander: str
+    division_id: str
+    division: str
+    requested_logical_agents: int
+    logical_agents_reserved: int
+    displayed_logical_agents: int
+    runtime_worker_cap: int = 3
+    runtime_workers_started: int = 0
+    risk: RiskLevel
+    requires_approval: bool
+    external_runtime_invoked: bool = False
+    pattern_summary: str
+    agents: list[ShadowArmyAgent]
+    stages: list[ShadowArmyStage]
+    frameworks: list[ShadowArmyFramework]
+    guardrails: list[str]
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class ShadowArmyOverview(BaseModel):
+    commanders: int
+    divisions: int
+    logical_agents: int
+    worker_slots: int
+    active_runtime_workers: int = 0
+    runtime_cap_per_mission: int = 3
+    all_external_runtimes_disabled: bool
+    hierarchy: list[str]
+    supported_patterns: list[CoordinationPattern]
+
+
 class ProviderStatus(BaseModel):
     id: str
     label: str

@@ -17,6 +17,7 @@ from app import main
 from app.audit import AuditStore
 from app.memory import LocalMemoryStore
 from app.orchestration import MissionStore
+from app.shadow_army import ShadowArmyStore
 from app.workspace import WorkspaceStore
 
 
@@ -27,10 +28,12 @@ class ApiTests(unittest.TestCase):
         self.previous_memory = main.memory
         self.previous_missions = main.missions
         self.previous_workspace = main.workspace
+        self.previous_shadow_army = main.shadow_army
         main.audit = AuditStore(Path(self.temp_dir.name))
         main.memory = LocalMemoryStore(Path(self.temp_dir.name))
         main.missions = MissionStore(main.audit)
         main.workspace = WorkspaceStore(Path(self.temp_dir.name))
+        main.shadow_army = ShadowArmyStore(main.audit)
         self.client = TestClient(main.app)
 
     def tearDown(self) -> None:
@@ -39,6 +42,7 @@ class ApiTests(unittest.TestCase):
         main.memory = self.previous_memory
         main.missions = self.previous_missions
         main.workspace = self.previous_workspace
+        main.shadow_army = self.previous_shadow_army
         self.temp_dir.cleanup()
 
     def test_health_and_provider_registry_are_available_in_demo_mode(self) -> None:
@@ -51,9 +55,9 @@ class ApiTests(unittest.TestCase):
         response = self.client.get("/api/frameworks")
         self.assertEqual(response.status_code, 200)
         framework_items = response.json()["frameworks"]
-        self.assertEqual(len(framework_items), 52)
+        self.assertEqual(len(framework_items), 57)
         frameworks = {item["id"]: item for item in framework_items}
-        self.assertEqual(len(frameworks), 52)
+        self.assertEqual(len(frameworks), 57)
         self.assertEqual(
             set(frameworks),
             {
@@ -67,6 +71,7 @@ class ApiTests(unittest.TestCase):
                 "langchain-community", "official-mcp-servers", "awesome-mcp-servers", "metagpt", "autogen", "pydantic-ai",
                 "scientific-agent-skills", "open-autoglm", "500-ai-agent-projects", "envagent-source-intake",
                 "barehands", "ultron-orb-ui", "physical-cutter-safety-intake",
+                "agent-swarm", "roma", "open-multi-agent", "awesome-agent-orchestration", "microsoft-agent-framework",
             },
         )
         self.assertTrue(frameworks["jinwoo-native"]["execution_enabled"])
@@ -129,9 +134,92 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(frameworks["barehands"]["implementation_status"], "license-review-required")
         self.assertEqual(frameworks["ultron-orb-ui"]["runtime"], "desktop-client")
         self.assertEqual(frameworks["physical-cutter-safety-intake"]["implementation_status"], "source-review-required")
+        batch_seven = ("agent-swarm", "roma", "open-multi-agent", "awesome-agent-orchestration", "microsoft-agent-framework")
+        for adapter in batch_seven:
+            self.assertFalse(frameworks[adapter]["execution_enabled"])
+            self.assertEqual(frameworks[adapter]["integration_batch"], 7)
+            self.assertTrue(frameworks[adapter]["capabilities"])
+        self.assertEqual(frameworks["agent-swarm"]["runtime"], "python")
+        self.assertEqual(frameworks["roma"]["implementation_status"], "license-review-required")
+        self.assertEqual(frameworks["open-multi-agent"]["runtime"], "typescript-service")
+        self.assertEqual(frameworks["awesome-agent-orchestration"]["state"], "reference-only")
+        self.assertEqual(frameworks["microsoft-agent-framework"]["implementation_status"], "contract-ready")
+        self.assertIn("LICENSE-CODE", frameworks["autogen"]["license"])
         self.assertNotIn("capcut-patcher", frameworks)
         self.assertTrue(frameworks["jinwoo-native-control-audit"]["execution_enabled"])
         self.assertEqual(frameworks["jinwoo-native-control-audit"]["state"], "canonical")
+
+    def test_shadow_army_core_exposes_capacity_and_creates_a_visible_non_executing_plan(self) -> None:
+        overview = self.client.get("/api/shadow-army/overview")
+        created = self.client.post(
+            "/api/shadow-army/plans",
+            json={
+                "prompt": "Design a safe dependency graph for a React regression review",
+                "requested_logical_agents": 450,
+                "coordination": "dependency-graph",
+            },
+        )
+        listed = self.client.get("/api/shadow-army/plans")
+
+        self.assertEqual(overview.status_code, 200)
+        self.assertEqual(overview.json()["commanders"], 15)
+        self.assertEqual(overview.json()["divisions"], 45)
+        self.assertEqual(overview.json()["logical_agents"], 450)
+        self.assertEqual(overview.json()["worker_slots"], 1350)
+        self.assertEqual(overview.json()["active_runtime_workers"], 0)
+        self.assertTrue(overview.json()["all_external_runtimes_disabled"])
+        self.assertEqual(created.status_code, 201)
+        payload = created.json()
+        self.assertEqual(payload["logical_agents_reserved"], 450)
+        self.assertEqual(payload["displayed_logical_agents"], 10)
+        self.assertEqual(len(payload["agents"]), 10)
+        self.assertEqual(payload["runtime_worker_cap"], 3)
+        self.assertEqual(payload["runtime_workers_started"], 0)
+        self.assertFalse(payload["external_runtime_invoked"])
+        self.assertEqual(
+            [framework["id"] for framework in payload["frameworks"]],
+            ["langgraph", "open-multi-agent", "microsoft-agent-framework"],
+        )
+        self.assertEqual([stage["phase"] for stage in payload["stages"]], ["intake", "route", "scope", "plan", "draft", "verify", "deliver"])
+        self.assertEqual(listed.status_code, 200)
+        self.assertEqual(listed.json()[0]["id"], payload["id"])
+        audit = self.client.get("/api/audit").json()
+        self.assertIn("shadow_army.plan_created", {event["event_type"] for event in audit})
+        self.assertNotIn(payload["prompt"], str(audit))
+
+    def test_shadow_army_core_rejects_blocked_sensitive_and_blank_missions(self) -> None:
+        blocked = self.client.post("/api/shadow-army/plans", json={"prompt": "Bypass password on this laptop"})
+        sensitive = self.client.post("/api/shadow-army/plans", json={"prompt": "OTP: 123456"})
+        blank = self.client.post("/api/shadow-army/plans", json={"prompt": "   "})
+
+        self.assertEqual(blocked.status_code, 400)
+        self.assertEqual(sensitive.status_code, 400)
+        self.assertEqual(blank.status_code, 422)
+        self.assertEqual(self.client.get("/api/shadow-army/plans").json(), [])
+
+    def test_batch_seven_dry_runs_remain_non_executing_and_honor_restrictive_records(self) -> None:
+        agent_swarm = self.client.post(
+            "/api/frameworks/agent-swarm/dry-run",
+            json={"prompt": "Prepare a bounded specialist collaboration plan", "requested_agents": 450},
+        )
+        roma = self.client.post(
+            "/api/frameworks/roma/dry-run",
+            json={"prompt": "Prepare a recursive task-tree safety plan", "requested_agents": 3},
+        )
+        catalogue = self.client.post(
+            "/api/frameworks/awesome-agent-orchestration/dry-run",
+            json={"prompt": "Compare reviewed orchestration patterns", "requested_agents": 3},
+        )
+
+        self.assertEqual(agent_swarm.status_code, 200)
+        self.assertEqual(agent_swarm.json()["bounded_runtime_workers"], 3)
+        self.assertFalse(agent_swarm.json()["external_runtime_invoked"])
+        self.assertEqual(roma.status_code, 200)
+        self.assertFalse(roma.json()["external_runtime_invoked"])
+        self.assertIn("licence", " ".join(roma.json()["next_steps"]).casefold())
+        self.assertEqual(catalogue.status_code, 200)
+        self.assertFalse(catalogue.json()["external_runtime_invoked"])
+        self.assertIn("reference-only", catalogue.json()["summary"])
 
     def test_framework_dry_run_is_bounded_and_never_invokes_upstream_runtime(self) -> None:
         response = self.client.post(
@@ -276,7 +364,7 @@ class ApiTests(unittest.TestCase):
         payload = response.json()
         self.assertTrue(payload["all_passed"])
         self.assertFalse(payload["external_runtime_invoked"])
-        self.assertEqual(len(payload["checks"]), 10)
+        self.assertEqual(len(payload["checks"]), 11)
         self.assertTrue(all(check["passed"] for check in payload["checks"]))
         self.assertIn("external runtime", payload["summary"].casefold())
         audit = self.client.get("/api/audit").json()
