@@ -23,12 +23,28 @@ This works without Docker, PostgreSQL, Redis, GPU hardware or cloud API keys.
 ## Multi-agent framework boundary
 
 Jinwoo's native mission engine is the single canonical orchestrator in V1.
-Batch 01 registers Swarms, Agency-Swarm, Ruflo, LangGraph and CrewAI as
-contract-ready adapters. They can prepare a bounded, policy-screened dry run,
-but the backend will not install or execute an upstream runtime. Any future
-adapter must return proposed work through Jinwoo's policy, approval, workspace
-and audit boundaries. See [`FRAMEWORK_ADAPTERS.md`](FRAMEWORK_ADAPTERS.md) and
-[`INTEGRATION_BATCH_01.md`](INTEGRATION_BATCH_01.md).
+Batch 01 registers Swarms, Agency-Swarm, Ruflo, LangGraph and CrewAI. Batch 02
+registers AG2, OpenHands, Firecrawl, Firecrawl Web-Agent and Crawl4AI. They can
+prepare a bounded, policy-screened dry run, but the backend will not install or
+execute an upstream runtime. OpenHands has no container/sandbox path yet.
+Firecrawl is marked `license-review-required` due to its AGPL-3.0 licence and
+must not be activated, bundled or copied without an explicit compatibility
+decision. Any future adapter must return proposed work through Jinwoo's policy,
+approval, workspace and audit boundaries. See
+[`FRAMEWORK_ADAPTERS.md`](FRAMEWORK_ADAPTERS.md),
+[`INTEGRATION_BATCH_01.md`](INTEGRATION_BATCH_01.md), and
+[`INTEGRATION_BATCH_02.md`](INTEGRATION_BATCH_02.md).
+
+## Tank research gate
+
+Tank's local Research Gate validates a no-fetch research plan only. It does not
+make a network request, resolve DNS, launch a browser or start a crawler. A plan
+can contain at most ten explicit public HTTPS domain sources and rejects
+literal IPs, localhost, local/internal hostnames, credentials and
+credential-like query strings. A future retrieval executor must revalidate the
+resolved connection target to prevent SSRF/rebinding, require visible approval,
+and enforce source/robots, rate, depth, response-size, domain, citation and
+local-retention limits.
 
 ## Why Rust and Go are not initial services
 

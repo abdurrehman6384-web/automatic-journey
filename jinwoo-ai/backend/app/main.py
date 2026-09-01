@@ -11,6 +11,7 @@ from .memory import LocalMemoryStore
 from .orchestration import MissionStore
 from .policy import ActionClass, classify_action
 from .providers import ProviderError, ProviderGateway
+from .research import ResearchPolicyError, build_research_plan
 from .sensitive import contains_sensitive_value
 from .schemas import (
     ApprovalRequest,
@@ -26,6 +27,8 @@ from .schemas import (
     Mission,
     MissionRequest,
     ProviderStatus,
+    ResearchPlan,
+    ResearchPlanRequest,
     WorkspaceAnalysis,
     WorkspaceAnalysisRequest,
     WorkspaceEntry,
@@ -82,6 +85,31 @@ async def dry_run_framework(framework_id: str, request: FrameworkDryRunRequest) 
         actor="local-user",
     )
     return result
+
+
+@app.post("/api/research/plan", response_model=ResearchPlan)
+async def plan_research(request: ResearchPlanRequest) -> ResearchPlan:
+    """Validate a Tank research request without opening or resolving any URL."""
+    if contains_sensitive_value(request.topic) or any(contains_sensitive_value(target) for target in request.targets):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Credentials and one-time codes cannot be included in a research plan.",
+        )
+    try:
+        plan = build_research_plan(
+            framework_id=request.framework_id,
+            topic=request.topic,
+            targets=request.targets,
+            confirm_public_sources=request.confirm_public_sources,
+        )
+    except ResearchPolicyError as error:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error)) from error
+    audit.record(
+        "research.plan_created",
+        f"Tank prepared a no-fetch {request.framework_id} research plan for {len(plan.targets)} approved public targets.",
+        actor="local-user",
+    )
+    return plan
 
 
 @app.get("/api/audit", response_model=list[AuditEvent])

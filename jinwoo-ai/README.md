@@ -14,8 +14,9 @@ An original, local-first desktop assistant foundation for the **Jinwoo AI / Shad
 - redacted local audit trail for mission routing, approvals, completion and Memory Vault changes;
 - Igris Workspace Guard: user-selected, read-only folder listing and bounded source diagnostics with path-escape protection;
 - provider registry for Ollama, LM Studio, Claude, GLM/Z.ai, Hugging Face and optional Mem0;
-- controlled Batch 01 adapter registry for Swarms, Agency-Swarm, Ruflo, LangGraph and CrewAI; each supports a bounded policy dry run but cannot execute an upstream runtime in V1;
-- unit tests for routing, policy, local memory, workspace confinement and framework boundaries;
+- controlled Batch 01 + Batch 02 adapter registry for Swarms, Agency-Swarm, Ruflo, LangGraph, CrewAI, AG2, OpenHands, Firecrawl, Firecrawl Web-Agent and Crawl4AI; each is policy-gated and cannot execute an upstream runtime in V1;
+- Tank's no-fetch Research Gate for validating explicit public HTTPS source plans without opening a URL, starting a browser or calling a crawler;
+- unit tests for routing, policy, local memory, workspace confinement, framework boundaries and no-fetch research validation;
 - original code only. External source archives are references until their licence and intended merge path are reviewed.
 
 ## Security model
@@ -23,7 +24,7 @@ An original, local-first desktop assistant foundation for the **Jinwoo AI / Shad
 Jinwoo makes plans and drafts by default. Actions that may alter files, run a
 terminal command, install software, send/upload content or control a desktop
 must request explicit approval. The included backend intentionally has no raw
-shell execution endpoint. The current Igris Workspace Guard is read-only and
+shell execution endpoint or URL-fetch/crawler endpoint. The current Igris Workspace Guard is read-only and
 resolves every inspected path beneath the one folder selected by the user.
 
 ## Run the dashboard
@@ -80,13 +81,22 @@ to the browser.
 
 ## Orchestration integrations
 
-`/api/frameworks` reports the controlled integration boundary. Batch 01
-contains Swarms, Agency-Swarm, Ruflo, LangGraph and CrewAI. Their adapters can
+`/api/frameworks` reports the controlled integration boundary. Batch 01 contains
+Swarms, Agency-Swarm, Ruflo, LangGraph and CrewAI; Batch 02 contains AG2,
+OpenHands, Firecrawl, Firecrawl Web-Agent and Crawl4AI. Their adapters can
 prepare a bounded, policy-screened dry run through
 `POST /api/frameworks/{id}/dry-run`, but no upstream runtime is invoked or
-enabled in V1. See [`docs/INTEGRATION_BATCH_01.md`](docs/INTEGRATION_BATCH_01.md)
-and [`docs/FRAMEWORK_ADAPTERS.md`](docs/FRAMEWORK_ADAPTERS.md) before enabling
-any adapter.
+enabled in V1.
+
+For web research lanes, `POST /api/research/plan` only validates a user-visible,
+no-fetch plan: it does not resolve DNS, open a URL, launch a browser or call a
+crawler. It accepts only public HTTPS domain targets and requires a separate
+approved retrieval implementation later. Firecrawl is explicitly blocked from activation
+pending an AGPL-3.0 compatibility decision. See
+[`docs/INTEGRATION_BATCH_01.md`](docs/INTEGRATION_BATCH_01.md),
+[`docs/INTEGRATION_BATCH_02.md`](docs/INTEGRATION_BATCH_02.md), and
+[`docs/FRAMEWORK_ADAPTERS.md`](docs/FRAMEWORK_ADAPTERS.md) before enabling any
+adapter.
 
 ## Desktop packaging
 

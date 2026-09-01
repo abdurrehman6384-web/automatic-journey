@@ -47,19 +47,29 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual({item["id"] for item in response.json()["providers"]}, {"ollama", "lm-studio", "claude", "glm", "hugging-face", "mem0"})
 
-    def test_first_framework_batch_is_visible_but_optional_adapters_are_disabled(self) -> None:
+    def test_framework_batches_are_visible_but_optional_adapters_are_disabled(self) -> None:
         response = self.client.get("/api/frameworks")
         self.assertEqual(response.status_code, 200)
         frameworks = {item["id"]: item for item in response.json()["frameworks"]}
         self.assertEqual(
             set(frameworks),
-            {"jinwoo-native", "swarms", "agency-swarm", "ruflo", "langgraph", "crewai"},
+            {
+                "jinwoo-native", "swarms", "agency-swarm", "ruflo", "langgraph", "crewai",
+                "ag2", "openhands", "firecrawl", "firecrawl-web-agent", "crawl4ai",
+            },
         )
         self.assertTrue(frameworks["jinwoo-native"]["execution_enabled"])
+        self.assertEqual(frameworks["jinwoo-native"]["implementation_status"], "active")
         for adapter in ("swarms", "agency-swarm", "ruflo", "langgraph", "crewai"):
             self.assertFalse(frameworks[adapter]["execution_enabled"])
             self.assertEqual(frameworks[adapter]["integration_batch"], 1)
             self.assertEqual(frameworks[adapter]["implementation_status"], "contract-ready")
+        for adapter in ("ag2", "openhands", "firecrawl", "firecrawl-web-agent", "crawl4ai"):
+            self.assertFalse(frameworks[adapter]["execution_enabled"])
+            self.assertEqual(frameworks[adapter]["integration_batch"], 2)
+        self.assertEqual(frameworks["firecrawl"]["implementation_status"], "license-review-required")
+        self.assertEqual(frameworks["openhands"]["runtime"], "container-sidecar")
+        self.assertEqual(frameworks["crawl4ai"]["category"], "web-collection")
 
     def test_framework_dry_run_is_bounded_and_never_invokes_upstream_runtime(self) -> None:
         response = self.client.post(
@@ -75,6 +85,71 @@ class ApiTests(unittest.TestCase):
         self.assertFalse(response.json()["external_runtime_invoked"])
         self.assertEqual(blocked.status_code, 200)
         self.assertEqual(blocked.json()["policy_outcome"], "blocked")
+
+    def test_batch_two_dry_runs_remain_non_executing_and_expose_boundaries(self) -> None:
+        response = self.client.post(
+            "/api/frameworks/openhands/dry-run",
+            json={"prompt": "Prepare a safe patch review plan", "requested_agents": 80},
+        )
+        crawl = self.client.post(
+            "/api/frameworks/crawl4ai/dry-run",
+            json={"prompt": "Plan public documentation research", "requested_agents": 4},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.json()["external_runtime_invoked"])
+        self.assertEqual(response.json()["bounded_runtime_workers"], 3)
+        self.assertIn("Never run shell commands", " ".join(response.json()["next_steps"]))
+        self.assertEqual(crawl.status_code, 200)
+        self.assertIn("No URL is fetched", " ".join(crawl.json()["next_steps"]))
+
+    def test_research_plan_validates_public_targets_without_fetching_or_auditing_content(self) -> None:
+        topic = "Compare privacy-first local embedding documentation"
+        response = self.client.post(
+            "/api/research/plan",
+            json={
+                "framework_id": "crawl4ai",
+                "topic": topic,
+                "targets": ["https://docs.example.org/guide#overview"],
+                "confirm_public_sources": True,
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertFalse(payload["external_fetch_started"])
+        self.assertTrue(payload["requires_approval_for_fetch"])
+        self.assertEqual(payload["targets"], [{"url": "https://docs.example.org/guide", "hostname": "docs.example.org"}])
+        self.assertIn("No network request", " ".join(payload["safeguards"]))
+        audit = self.client.get("/api/audit").json()
+        self.assertIn("research.plan_created", {event["event_type"] for event in audit})
+        self.assertNotIn(topic, str(audit))
+        self.assertNotIn("docs.example.org", str(audit))
+
+    def test_research_plan_rejects_unconfirmed_or_private_or_credential_targets(self) -> None:
+        unconfirmed = self.client.post(
+            "/api/research/plan",
+            json={"topic": "Review source", "targets": ["https://example.org/docs"], "confirm_public_sources": False},
+        )
+        private = self.client.post(
+            "/api/research/plan",
+            json={"topic": "Review source", "targets": ["https://127.0.0.1/private"], "confirm_public_sources": True},
+        )
+        credential_query = self.client.post(
+            "/api/research/plan",
+            json={"topic": "Review source", "targets": ["https://example.org/docs?token=secret"], "confirm_public_sources": True},
+        )
+        ambiguous_numeric = self.client.post(
+            "/api/research/plan",
+            json={"topic": "Review source", "targets": ["https://0177.0.0.1/private"], "confirm_public_sources": True},
+        )
+        api_key_query = self.client.post(
+            "/api/research/plan",
+            json={"topic": "Review source", "targets": ["https://example.org/docs?x-api-key=secret"], "confirm_public_sources": True},
+        )
+        self.assertEqual(unconfirmed.status_code, 400)
+        self.assertEqual(private.status_code, 400)
+        self.assertEqual(credential_query.status_code, 400)
+        self.assertEqual(ambiguous_numeric.status_code, 400)
+        self.assertEqual(api_key_query.status_code, 400)
 
     def test_demo_chat_is_local_and_chat_rejects_blocked_or_sensitive_content(self) -> None:
         chat = self.client.post("/api/chat", json={"message": "Give me a safe release checklist"})

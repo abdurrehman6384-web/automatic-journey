@@ -57,14 +57,14 @@ class FrameworkStatus(BaseModel):
 
     id: str
     label: str
-    runtime: Literal["builtin", "python", "typescript-mcp"]
-    category: Literal["orchestration", "workflow"]
+    runtime: Literal["builtin", "python", "typescript-mcp", "typescript-service", "container-sidecar"]
+    category: Literal["orchestration", "workflow", "coding", "research", "web-collection"]
     integration_batch: int
     owner_commander: str
     license: str
     source_url: str | None = None
     state: FrameworkState
-    implementation_status: Literal["active", "contract-ready", "queued"]
+    implementation_status: Literal["active", "contract-ready", "license-review-required", "queued"]
     execution_enabled: bool
     detail: str
 
@@ -176,6 +176,28 @@ class WorkspaceAnalysis(BaseModel):
     symbol_count: int
     sha256: str
     truncated: bool
+
+
+class ResearchPlanRequest(BaseModel):
+    topic: str = Field(min_length=2, max_length=2_000)
+    framework_id: Literal["firecrawl", "firecrawl-web-agent", "crawl4ai"] = "crawl4ai"
+    targets: list[str] = Field(default_factory=list, max_length=10)
+    confirm_public_sources: bool = False
+
+
+class ResearchTarget(BaseModel):
+    url: str
+    hostname: str
+
+
+class ResearchPlan(BaseModel):
+    framework_id: str
+    topic: str
+    targets: list[ResearchTarget]
+    external_fetch_started: bool = False
+    requires_approval_for_fetch: bool = True
+    safeguards: list[str]
+    next_steps: list[str]
 
 
 class ChatRequest(BaseModel):

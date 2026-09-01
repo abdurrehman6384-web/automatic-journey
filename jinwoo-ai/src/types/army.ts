@@ -55,14 +55,14 @@ export interface ProviderStatus {
 export interface FrameworkStatus {
   id: string
   label: string
-  runtime: 'builtin' | 'python' | 'typescript-mcp'
-  category: 'orchestration' | 'workflow'
+  runtime: 'builtin' | 'python' | 'typescript-mcp' | 'typescript-service' | 'container-sidecar'
+  category: 'orchestration' | 'workflow' | 'coding' | 'research' | 'web-collection'
   integrationBatch: number
   ownerCommander: string
   license: string
   sourceUrl?: string
   state: 'canonical' | 'not-installed' | 'detected'
-  implementationStatus: 'active' | 'contract-ready' | 'queued'
+  implementationStatus: 'active' | 'contract-ready' | 'license-review-required' | 'queued'
   executionEnabled: boolean
   detail: string
 }
@@ -76,6 +76,21 @@ export interface FrameworkDryRun {
   externalRuntimeInvoked: boolean
   requiresApproval: boolean
   summary: string
+  nextSteps: string[]
+}
+
+export interface ResearchTarget {
+  url: string
+  hostname: string
+}
+
+export interface ResearchPlan {
+  frameworkId: 'firecrawl' | 'firecrawl-web-agent' | 'crawl4ai'
+  topic: string
+  targets: ResearchTarget[]
+  externalFetchStarted: boolean
+  requiresApprovalForFetch: boolean
+  safeguards: string[]
   nextSteps: string[]
 }
 

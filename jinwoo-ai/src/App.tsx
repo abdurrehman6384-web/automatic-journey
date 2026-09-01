@@ -7,10 +7,11 @@ import { FrameworkPanel } from './components/FrameworkPanel'
 import { MemoryVault } from './components/MemoryVault'
 import { MissionPanel } from './components/MissionPanel'
 import { ProviderPanel } from './components/ProviderPanel'
+import { ResearchPanel } from './components/ResearchPanel'
 import { WorkspacePanel } from './components/WorkspacePanel'
 import { commanders, buildArmyStats, defaultFrameworks, defaultProviders } from './data/army'
 import { buildMission, isBlockedPrompt } from './lib/mission'
-import type { AuditEvent, ChatMessage, Commander, FrameworkDryRun, FrameworkStatus, MemoryItem, MemoryKind, Mission, ProviderStatus, WorkspaceAnalysis, WorkspaceEntry, WorkspaceStatus } from './types/army'
+import type { AuditEvent, ChatMessage, Commander, FrameworkDryRun, FrameworkStatus, MemoryItem, MemoryKind, Mission, ProviderStatus, ResearchPlan, WorkspaceAnalysis, WorkspaceEntry, WorkspaceStatus } from './types/army'
 
 const starterPrompts = [
   'Analyze my project structure and suggest a clean architecture.',
@@ -42,6 +43,21 @@ interface ApiFrameworkDryRun {
   external_runtime_invoked: boolean
   requires_approval: boolean
   summary: string
+  next_steps: string[]
+}
+
+interface ApiResearchTarget {
+  url: string
+  hostname: string
+}
+
+interface ApiResearchPlan {
+  framework_id: ResearchPlan['frameworkId']
+  topic: string
+  targets: ApiResearchTarget[]
+  external_fetch_started: boolean
+  requires_approval_for_fetch: boolean
+  safeguards: string[]
   next_steps: string[]
 }
 
@@ -178,6 +194,16 @@ const frameworkFromApi = (framework: ApiFrameworkStatus): FrameworkStatus => ({
   detail: framework.detail,
 })
 
+const researchPlanFromApi = (plan: ApiResearchPlan): ResearchPlan => ({
+  frameworkId: plan.framework_id,
+  topic: plan.topic,
+  targets: plan.targets,
+  externalFetchStarted: plan.external_fetch_started,
+  requiresApprovalForFetch: plan.requires_approval_for_fetch,
+  safeguards: plan.safeguards,
+  nextSteps: plan.next_steps,
+})
+
 const missionFromApi = (mission: ApiMission): Mission => ({
   id: mission.id,
   prompt: mission.prompt,
@@ -200,7 +226,7 @@ const errorDetail = (payload: unknown, fallback: string) => {
 }
 
 function App() {
-  const [activeView, setActiveView] = useState<'hq' | 'chat' | 'missions' | 'memory' | 'settings'>('hq')
+  const [activeView, setActiveView] = useState<'hq' | 'chat' | 'missions' | 'research' | 'memory' | 'settings'>('hq')
   const [selectedCommander, setSelectedCommander] = useState<Commander>(commanders[0])
   const [mission, setMission] = useState<Mission | null>(null)
   const [prompt, setPrompt] = useState('')
@@ -208,6 +234,8 @@ function App() {
   const [frameworks, setFrameworks] = useState<FrameworkStatus[]>(defaultFrameworks)
   const [frameworkDryRun, setFrameworkDryRun] = useState<FrameworkDryRun | null>(null)
   const [frameworkBusy, setFrameworkBusy] = useState(false)
+  const [researchPlan, setResearchPlan] = useState<ResearchPlan | null>(null)
+  const [researchBusy, setResearchBusy] = useState(false)
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
     { id: 'welcome', role: 'assistant', content: 'I am Jinwoo. Ask for a safe explanation, draft, or plan. Use the command bar above to turn work into a visible Army mission.', provider: 'Jinwoo local interface', localOnly: true },
   ])
@@ -257,6 +285,37 @@ function App() {
       return false
     } finally {
       setFrameworkBusy(false)
+    }
+  }
+
+  const createResearchPlan = async (frameworkId: ResearchPlan['frameworkId'], topic: string, targets: string[], confirmPublicSources: boolean): Promise<boolean> => {
+    setResearchBusy(true)
+    try {
+      const response = await fetch('/api/research/plan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          framework_id: frameworkId,
+          topic,
+          targets,
+          confirm_public_sources: confirmPublicSources,
+        }),
+      })
+      const payload = await response.json() as ApiResearchPlan | { detail?: string }
+      if (!response.ok || !('framework_id' in payload)) {
+        setNotice(errorDetail(payload, 'Tank could not create that no-fetch research plan.'))
+        return false
+      }
+      const result = researchPlanFromApi(payload)
+      setResearchPlan(result)
+      void loadAudit()
+      setNotice(`Tank validated ${result.targets.length} public research target${result.targets.length === 1 ? '' : 's'} without opening a URL.`)
+      return true
+    } catch {
+      setNotice('The research planner is unavailable because the local backend is offline.')
+      return false
+    } finally {
+      setResearchBusy(false)
     }
   }
 
@@ -618,6 +677,7 @@ function App() {
           <button className={activeView === 'hq' ? 'nav-item nav-item--active' : 'nav-item'} type="button" onClick={() => setActiveView('hq')}><span>⌘</span> Army HQ</button>
           <button className={activeView === 'chat' ? 'nav-item nav-item--active' : 'nav-item'} type="button" onClick={() => setActiveView('chat')}><span>✦</span> Chat</button>
           <button className={activeView === 'missions' ? 'nav-item nav-item--active' : 'nav-item'} type="button" onClick={() => setActiveView('missions')}><span>◈</span> Missions</button>
+          <button className={activeView === 'research' ? 'nav-item nav-item--active' : 'nav-item'} type="button" onClick={() => setActiveView('research')}><span>◍</span> Research Gate</button>
           <button className={activeView === 'memory' ? 'nav-item nav-item--active' : 'nav-item'} type="button" onClick={() => setActiveView('memory')}><span>◌</span> Memory Vault</button>
           <button className={activeView === 'settings' ? 'nav-item nav-item--active' : 'nav-item'} type="button" onClick={() => setActiveView('settings')}><span>⚙</span> Settings</button>
         </nav>
@@ -630,7 +690,7 @@ function App() {
 
       <main className="main-content">
         <header className="topbar">
-          <div><p className="eyebrow">SHADOW ARMY // COMMAND CONSOLE</p><strong>{activeView === 'hq' ? 'Army HQ' : activeView === 'chat' ? 'Local AI Chat' : activeView === 'missions' ? 'Mission Control' : activeView === 'memory' ? 'Memory Vault' : 'Command Settings'}</strong></div>
+          <div><p className="eyebrow">SHADOW ARMY // COMMAND CONSOLE</p><strong>{activeView === 'hq' ? 'Army HQ' : activeView === 'chat' ? 'Local AI Chat' : activeView === 'missions' ? 'Mission Control' : activeView === 'research' ? 'Tank Research Gate' : activeView === 'memory' ? 'Memory Vault' : 'Command Settings'}</strong></div>
           <div className="topbar-actions"><span className="mode-indicator"><i /> LOCAL-FIRST</span><button type="button" className="avatar-button" aria-label="Open commander profile">J</button></div>
         </header>
 
@@ -659,6 +719,8 @@ function App() {
             </aside>
           </div>
         )}
+
+        {activeView === 'research' && <ResearchPanel plan={researchPlan} busy={researchBusy} onPlan={createResearchPlan} />}
 
         {activeView === 'memory' && (
           <MemoryVault

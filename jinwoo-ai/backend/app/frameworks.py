@@ -4,9 +4,9 @@ Jinwoo's local mission engine remains the one canonical orchestrator. An
 installed package or sidecar never receives a mission automatically and cannot
 bypass the policy, approval, workspace, or audit boundaries owned by Jinwoo.
 
-Batch 1 contains the first five integrations requested by the owner. Their
-adapter contracts are real and testable now; their upstream runtimes remain
-non-executable until a version-pinned, local compatibility review is complete.
+Batches 01 and 02 contain owner-requested integrations. Their adapter contracts
+are real and testable now; their upstream runtimes remain non-executable until
+a version-pinned, local compatibility and licence review is complete.
 """
 
 from __future__ import annotations
@@ -30,13 +30,15 @@ class FrameworkAdapter:
 
     id: str
     label: str
-    runtime: Literal["builtin", "python", "typescript-mcp"]
-    category: Literal["orchestration", "workflow"]
+    runtime: Literal["builtin", "python", "typescript-mcp", "typescript-service", "container-sidecar"]
+    category: Literal["orchestration", "workflow", "coding", "research", "web-collection"]
     integration_batch: int
     owner_commander: str
     license: str
     source_url: str | None
     purpose: str
+    implementation_status: Literal["active", "contract-ready", "license-review-required", "queued"] = "contract-ready"
+    guardrails: tuple[str, ...] = ()
     python_module: str | None = None
     executable: str | None = None
 
@@ -46,13 +48,11 @@ class FrameworkAdapter:
 
     def is_detected(self) -> bool:
         try:
-            if self.python_module:
-                return find_spec(self.python_module) is not None
-            if self.executable:
-                return which(self.executable) is not None
+            module_detected = bool(self.python_module and find_spec(self.python_module) is not None)
+            executable_detected = bool(self.executable and which(self.executable) is not None)
+            return self.is_native or module_detected or executable_detected
         except (ImportError, ValueError):
             return False
-        return self.is_native
 
     def status(self) -> FrameworkStatus:
         if self.is_native:
@@ -66,7 +66,7 @@ class FrameworkAdapter:
                 license=self.license,
                 source_url=self.source_url,
                 state=FrameworkState.CANONICAL,
-                implementation_status="active",
+                implementation_status=self.implementation_status,
                 execution_enabled=True,
                 detail="Canonical local mission engine; policy, approval, workspace and audit controls stay here.",
             )
@@ -74,6 +74,12 @@ class FrameworkAdapter:
         detected = self.is_detected()
         state = FrameworkState.DETECTED if detected else FrameworkState.NOT_INSTALLED
         availability = "Detected locally" if detected else "Not installed"
+        if self.implementation_status == "license-review-required":
+            readiness = "licence review is required before upstream activation"
+        elif self.implementation_status == "queued":
+            readiness = "adapter implementation is queued"
+        else:
+            readiness = "the controlled adapter contract is ready"
         return FrameworkStatus(
             id=self.id,
             label=self.label,
@@ -84,10 +90,10 @@ class FrameworkAdapter:
             license=self.license,
             source_url=self.source_url,
             state=state,
-            implementation_status="contract-ready" if self.integration_batch == 1 else "queued",
+            implementation_status=self.implementation_status,
             execution_enabled=False,
             detail=(
-                f"{availability}; the controlled adapter contract is ready, but upstream execution is disabled. "
+                f"{availability}; {readiness}, and upstream execution is disabled. "
                 f"{self.purpose}"
             ),
         )
@@ -116,6 +122,9 @@ class FrameworkAdapter:
                 "Keep external framework execution disabled until its version-pinned review passes.",
                 "Return evidence and a visible audit event through Jinwoo.",
             ]
+
+        if self.guardrails and policy_outcome != "blocked":
+            steps.extend(self.guardrails)
 
         return FrameworkDryRun(
             framework_id=self.id,
@@ -151,6 +160,7 @@ class FrameworkRegistry:
                 license="Original project code",
                 source_url=None,
                 purpose="Visible Planner, Executor and Verifier mission flow.",
+                implementation_status="active",
             ),
             # Owner-requested integration batch 1 (listed order).
             FrameworkAdapter(
@@ -212,6 +222,87 @@ class FrameworkRegistry:
                 source_url="https://github.com/crewAIInc/crewAI",
                 python_module="crewai",
                 purpose="Reserved for bounded role-based crews after local compatibility review.",
+            ),
+            # Owner-requested integration batch 2 (listed order).
+            FrameworkAdapter(
+                id="ag2",
+                label="AG2",
+                runtime="python",
+                category="orchestration",
+                integration_batch=2,
+                owner_commander="Bellion",
+                license="Apache-2.0",
+                source_url="https://github.com/ag2ai/ag2",
+                python_module="ag2",
+                purpose="Reserved for bounded, policy-mediated multi-agent conversations and hand-offs.",
+                guardrails=(
+                    "Let Bellion own routing; do not create independent agent-to-agent loops.",
+                    "Keep provider, tool and approval decisions inside Jinwoo's native gateway.",
+                ),
+            ),
+            FrameworkAdapter(
+                id="openhands",
+                label="OpenHands",
+                runtime="container-sidecar",
+                category="coding",
+                integration_batch=2,
+                owner_commander="Igris",
+                license="MIT",
+                source_url="https://github.com/OpenHands/OpenHands",
+                python_module="openhands",
+                executable="openhands",
+                purpose="Reserved for isolated coding-task proposals and sandboxed patch review.",
+                guardrails=(
+                    "Require an isolated sandbox and the selected Workspace Guard root.",
+                    "Never run shell commands, patches, git operations or installs without a visible approval.",
+                ),
+            ),
+            FrameworkAdapter(
+                id="firecrawl",
+                label="Firecrawl",
+                runtime="typescript-service",
+                category="web-collection",
+                integration_batch=2,
+                owner_commander="Tank",
+                license="AGPL-3.0",
+                source_url="https://github.com/firecrawl/firecrawl",
+                purpose="Reserved for user-approved public-web search/scrape plans after a separate licence decision.",
+                implementation_status="license-review-required",
+                guardrails=(
+                    "Do not crawl, fetch URLs, use cookies or transmit workspace data in a dry run.",
+                    "Future targets must be public, user-supplied or explicitly approved, and policy-checked.",
+                ),
+            ),
+            FrameworkAdapter(
+                id="firecrawl-web-agent",
+                label="Firecrawl Web-Agent",
+                runtime="typescript-service",
+                category="research",
+                integration_batch=2,
+                owner_commander="Tank",
+                license="MIT",
+                source_url="https://github.com/firecrawl/web-agent",
+                purpose="Reserved for structured, approved public-web research plans.",
+                guardrails=(
+                    "No browser session, authenticated site, cookie or private-network access is allowed.",
+                    "Future research requires source attribution and user-visible target approval.",
+                ),
+            ),
+            FrameworkAdapter(
+                id="crawl4ai",
+                label="Crawl4AI",
+                runtime="python",
+                category="web-collection",
+                integration_batch=2,
+                owner_commander="Tank",
+                license="Apache-2.0",
+                source_url="https://github.com/unclecode/crawl4ai",
+                python_module="crawl4ai",
+                purpose="Reserved for bounded public-web collection after robots, target and rate-limit review.",
+                guardrails=(
+                    "No URL is fetched in a dry run; authenticated, private and localhost targets stay disallowed.",
+                    "Future collection must use strict domain, rate, size and citation limits.",
+                ),
             ),
         )
         self._by_id = {adapter.id: adapter for adapter in self._adapters}

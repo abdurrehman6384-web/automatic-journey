@@ -11,7 +11,8 @@ interface FrameworkPanelProps {
 
 const runtimeIcon = (runtime: FrameworkStatus['runtime']) => {
   if (runtime === 'builtin') return '♛'
-  if (runtime === 'typescript-mcp') return '⌘'
+  if (runtime === 'container-sidecar') return '▣'
+  if (runtime === 'typescript-mcp' || runtime === 'typescript-service') return '⌘'
   return '◈'
 }
 
@@ -49,8 +50,8 @@ export function FrameworkPanel({ frameworks, dryRun, busy, onDryRun }: Framework
             <div>
               <strong>{framework.label}</strong>
               <p>{framework.detail}</p>
-              <small className="framework-meta">{framework.integrationBatch ? `Batch ${framework.integrationBatch}` : 'Core'} · {framework.ownerCommander} · {framework.implementationStatus.replace('-', ' ')} · {framework.license}{framework.sourceUrl ? <> · <a href={framework.sourceUrl} target="_blank" rel="noreferrer">Source</a></> : null}</small>
-              {framework.implementationStatus === 'contract-ready' && <button className="framework-review-button" type="button" onClick={() => setSelectedId(framework.id)} disabled={busy}>Dry-run plan</button>}
+              <small className="framework-meta">{framework.integrationBatch ? `Batch ${framework.integrationBatch}` : 'Core'} · {framework.ownerCommander} · {framework.implementationStatus.replaceAll('-', ' ')} · {framework.license}{framework.sourceUrl ? <> · <a href={framework.sourceUrl} target="_blank" rel="noreferrer">Source</a></> : null}</small>
+              {framework.integrationBatch > 0 && framework.implementationStatus !== 'queued' && <button className="framework-review-button" type="button" onClick={() => setSelectedId(framework.id)} disabled={busy}>Dry-run plan</button>}
             </div>
             <span className={`framework-state framework-state--${framework.state}`}>
               {framework.executionEnabled ? 'active' : framework.state.replace('-', ' ')}

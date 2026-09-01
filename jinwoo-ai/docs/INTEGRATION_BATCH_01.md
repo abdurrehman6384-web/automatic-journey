@@ -65,13 +65,15 @@ An upstream package/sidecar remains disabled until all items below pass:
    rollback/disable switch.
 8. Record redacted hand-off and outcome metadata in the local audit log.
 
-## Next owner-requested batches
+## Subsequent owner-requested batches
 
-The next two batches are intentionally not installed or activated yet:
+**Batch 02 is now registered as controlled, non-executing contracts:** AG2,
+OpenHands, Firecrawl, Firecrawl Web-Agent and Crawl4AI. Its review pins,
+no-fetch Tank planner and adapter-specific boundaries are documented in
+[`INTEGRATION_BATCH_02.md`](INTEGRATION_BATCH_02.md). Firecrawl remains blocked
+from activation pending an AGPL-3.0 compatibility decision.
 
-- **Batch 02:** AG2, OpenHands, Firecrawl, Firecrawl Web-Agent, Crawl4AI.
-- **Batch 03:** Mem0, OpenClaw, TruffleHog, Gitleaks, then a final review of the
-  Jinwoo Native control/audit lane as the fifteenth integration lane.
-
-When the owner says “next five,” the same supply-chain and safety checklist
-will be applied before any runtime is enabled.
+Only **Batch 03** remains queued: Mem0, OpenClaw, TruffleHog, Gitleaks, then a
+final review of the Jinwoo Native control/audit lane as the fifteenth integration
+lane. It starts only on a later explicit owner instruction. The same
+supply-chain and safety checklist applies before any runtime is enabled.

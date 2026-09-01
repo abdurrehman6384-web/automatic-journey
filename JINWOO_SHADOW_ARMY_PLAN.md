@@ -337,13 +337,16 @@ inside that hierarchy, not fifteen replacement commander departments.
 
 | Batch | Scope | Current state |
 |---:|---|---|
-| 01 — now | Swarms, Agency-Swarm, Ruflo, LangGraph, CrewAI | typed, policy-gated dry-run contracts; upstream execution disabled |
-| 02 — on next instruction | AG2, OpenHands, Firecrawl, Firecrawl Web-Agent, Crawl4AI | queued for supply-chain and safety review |
-| 03 — on final instruction | Mem0, OpenClaw, TruffleHog, Gitleaks, Jinwoo Native control/audit review | queued for supply-chain and safety review |
+| 01 — complete | Swarms, Agency-Swarm, Ruflo, LangGraph, CrewAI | typed, policy-gated dry-run contracts; upstream execution disabled |
+| 02 — complete | AG2, OpenHands, Firecrawl, Firecrawl Web-Agent, Crawl4AI | typed dry-run contracts plus Tank no-fetch planning gate; all upstream execution disabled; Firecrawl needs an AGPL-3.0 compatibility decision |
+| 03 — only on final instruction | Mem0, OpenClaw, TruffleHog, Gitleaks, Jinwoo Native control/audit review | queued for supply-chain and safety review |
 
-A Batch 01 dry run may represent up to 450 logical agents but caps runtime
+A Batch 01/02 dry run may represent up to 450 logical agents but caps runtime
 planning at three Planner/Executor/Verifier workers. It never starts an
-upstream framework, network crawl, shell, or tool action.
+upstream framework, network crawl, shell, browser, container, code patch, or
+tool action. Tank's Batch 02 source-plan gate validates at most ten explicit
+public HTTPS targets without opening a URL or resolving DNS; future retrieval
+remains separately approval-, policy-, licence- and limit-gated.
 
 ---
 
@@ -703,6 +706,8 @@ SQLite consent-based memory with view, edit, delete and local JSON export contro
 Credential and one-time-code rejection before memory storage
 Provider registry/adapters for local and cloud routes
 Controlled Batch 01 framework registry/dry-run contracts for Swarms, Agency-Swarm, Ruflo, LangGraph and CrewAI
+Controlled Batch 02 registry/dry-run contracts for AG2, OpenHands, Firecrawl, Firecrawl Web-Agent and Crawl4AI; Firecrawl remains licence-review-required
+Tank no-fetch public-web research planner with explicit HTTPS target validation, no DNS/network/browser access and metadata-only audit records
 Docker Compose foundation
 Electron shell foundation
 Automated backend tests
@@ -711,7 +716,7 @@ Automated backend tests
 The UI and backend now use the final hierarchy: **45 sub-departments, 450
 logical agents and 1,350 logical worker slots**. Framework presence is visible
 in Settings, but optional adapters remain non-executable until their individual
-review and policy-gated implementation.
+review and policy-gated implementation. Tank's visible source-plan gate is no-fetch only; it cannot activate a crawler or browser runtime.
 
 ---
 
@@ -723,9 +728,9 @@ Build provider Settings UI and OS secure keychain storage
 Connect one real local provider first: Ollama or LM Studio
 Add Claude, GLM and HF live-provider integration tests with user-owned keys
 Add approved Igris workspace write/patch tools after the read-only guard review
-Implement Tank approved research/source citation flow
+Implement Tank approved retrieval/source citation flow after the no-fetch gate, including runtime DNS/SSRF checks and source/rate/depth/size limits
 Add local vector retrieval and Memory Vault search
-Complete Batch 01 activation review before enabling any of Swarms, Agency-Swarm, Ruflo, LangGraph or CrewAI; then implement Batch 02 and Batch 03 one reviewed adapter at a time
+Complete individual activation reviews before enabling any Batch 01/02 runtime; decide Firecrawl AGPL-3.0 compatibility before any Firecrawl code, service or container work; Batch 03 remains queued until explicitly requested
 Add Electron packaging and Windows installer
 Add Rust/Go sidecars only after profiling
 ```
