@@ -59,6 +59,9 @@ authorise a network, shell, browser, desktop or mobile action.
 | 05 | Open-AutoGLM | Nox | Future Android screen-understanding and mobile-action design | **Queued companion phase**; no device/Accessibility/capture/input route |
 | 05 | 500 AI Agents Projects | Ashborn | Agent use-case and blueprint catalogue | **Reference only**; linked projects need individual review |
 | 05 | EnvAgent | Igris | Requested sandbox and runtime-bug-review capability | **Source review required**; exact GitHub URL/licence not yet supplied |
+| 06 | Barehands Gesture Interface | Nox | Future local hand-gesture, spatial-board and accessibility patterns | **AGPL licence review required**; no webcam/CDN/state/localhost/gesture action route |
+| 06 | Ultron Orb UI (Sagar Builds) | Tusk | Independently designed orb, HUD and optional gesture UX patterns | Bounded visual/interaction review only; no upstream source/camera/device/control route |
+| 06 | Physical Cutter / Robotics Safety Intake | Nox | Physical-device safety and operator-consent concept | **Source/machine safety review required**; no controller, hardware or physical-action route |
 
 `GET /api/frameworks` exposes each record's runtime/category, discovery state,
 licence, source URL, owner, capability tags, activation boundary and contract
@@ -100,7 +103,7 @@ rate/depth/size/domain limits, and retain cited data locally.
 `POST /api/control/review` and its Settings panel provide a zero-side-effect
 local review. It makes no network request, file read, tool call or
 execution-state change. It verifies final Army capacity, native ownership,
-external-runtime locks, Batch 03, Batch 04 and Batch 05 inventories,
+external-runtime locks, Batch 03, Batch 04, Batch 05 and Batch 06 inventories,
 restricted source/licence/review gates, read-only Workspace Guard and audit
 availability.
 
@@ -113,18 +116,21 @@ privacy, network behavior or tool access. Therefore all external adapters have
 The following restrictions are specifically enforced in the registry:
 
 - **Licence-review-required:** Firecrawl, TruffleHog, IRIS-GO, IRIS-Mini,
-  IRIS-Zero, Anthropic Skills, WordPress Agent Skill Prototypes and Official
-  MCP Servers cannot be copied, bundled, linked, installed or run until their
-  individual licence/component/deployment decision is documented.
+  IRIS-Zero, Anthropic Skills, WordPress Agent Skill Prototypes, Official MCP
+  Servers and Barehands cannot be copied, bundled, linked, installed or run
+  until their individual licence/component/deployment decision is documented.
+  Barehands additionally needs an AGPL-3.0 compatibility decision before any
+  source, derivative, service or runtime is considered.
 - **Archived upstream:** Bytebot cannot be adopted until a maintained source,
   security and support review passes.
 - **Reference-only:** IRIS-AI, IRIS-X, Awesome MCP Servers and 500 AI Agents
   Projects cannot be used as source/runtime integrations. Their downstream or
   proprietary sources need their own review; any Jinwoo feature must be
   independently designed.
-- **Source-review-required:** EnvAgent has no selected upstream source. Jinwoo
-  will not guess a repository or install a package until the owner supplies an
-  exact GitHub URL and its licence can be reviewed.
+- **Source-review-required:** EnvAgent and the Physical Cutter / Robotics Safety
+  Intake have no selected upstream source/runtime. Jinwoo will not guess a
+  repository, hardware controller or machine protocol or install a package until
+  the owner supplies the exact evidence and it passes source/licence/safety review.
 - **Queued companion phase:** Open-AutoGLM does not belong to desktop V1 and
   has no phone, Accessibility, screen-capture or input capability.
 - **Computer-use, execution or external-tool lanes:** Goose, Bytebot,
@@ -132,6 +138,11 @@ The following restrictions are specifically enforced in the registry:
   Stagehand, LangChain Community and MCP sources receive no terminal, desktop,
   browser, capture, plugin, schedule, provider, account or credential access
   simply by being listed here.
+- **Camera, gestures and physical hardware:** Barehands, Ultron Orb UI and the
+  physical-device intake receive no webcam/microphone/screen permission,
+  MediaPipe/CDN runtime, local-service call, Android/desktop input, USB/serial/
+  Bluetooth/Wi-Fi/GPIO controller, motor, blade, laser, actuator or physical
+  action merely by being present in the registry.
 
 ## Required activation gate for a later phase
 
@@ -165,6 +176,10 @@ and implemented:
 13. For an archived, restrictive, unverified or reference-only source, resolve
     or preserve its source boundary **before** any dependency, binary,
     container, copied code or runtime implementation is considered.
+14. For camera, gesture or hardware concepts, require fresh revocable consent,
+    capture minimisation/local processing evidence, visible capture status,
+    emergency stop, physical safeguarding, trained local operator and a separate
+    machine-specific safety review before any physical/device action is considered.
 
 ### Boundary that never moves
 
@@ -179,6 +194,7 @@ and implemented:
 See [`INTEGRATION_BATCH_01.md`](INTEGRATION_BATCH_01.md),
 [`INTEGRATION_BATCH_02.md`](INTEGRATION_BATCH_02.md),
 [`INTEGRATION_BATCH_03.md`](INTEGRATION_BATCH_03.md),
-[`INTEGRATION_BATCH_04.md`](INTEGRATION_BATCH_04.md), and
-[`INTEGRATION_BATCH_05.md`](INTEGRATION_BATCH_05.md) for the source-review
+[`INTEGRATION_BATCH_04.md`](INTEGRATION_BATCH_04.md),
+[`INTEGRATION_BATCH_05.md`](INTEGRATION_BATCH_05.md), and
+[`INTEGRATION_BATCH_06.md`](INTEGRATION_BATCH_06.md) for the source-review
 records and adapter-specific activation requirements.

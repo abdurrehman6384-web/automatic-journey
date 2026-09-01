@@ -29,14 +29,15 @@ _BATCH_FIVE_IDS = {
     "langchain-community", "official-mcp-servers", "awesome-mcp-servers", "metagpt", "autogen", "pydantic-ai",
     "scientific-agent-skills", "open-autoglm", "500-ai-agent-projects", "envagent-source-intake",
 }
+_BATCH_SIX_IDS = {"barehands", "ultron-orb-ui", "physical-cutter-safety-intake"}
 _LICENSE_REVIEW_IDS = {
     "firecrawl", "trufflehog", "iris-go", "iris-mini", "iris-zero", "anthropic-skills", "wordpress-agent-skills",
-    "official-mcp-servers",
+    "official-mcp-servers", "barehands",
 }
 _REFERENCE_ONLY_IDS = {"iris-ai", "iris-x", "awesome-mcp-servers", "500-ai-agent-projects"}
 _ARCHIVED_UPSTREAM_IDS = {"bytebot"}
 _QUEUED_IDS = {"open-autoglm"}
-_SOURCE_REVIEW_IDS = {"envagent-source-intake"}
+_SOURCE_REVIEW_IDS = {"envagent-source-intake", "physical-cutter-safety-intake"}
 
 
 def build_control_review(
@@ -54,6 +55,7 @@ def build_control_review(
     batch_three = [by_id[framework_id] for framework_id in _BATCH_THREE_IDS if framework_id in by_id]
     batch_four = [by_id[framework_id] for framework_id in _BATCH_FOUR_IDS if framework_id in by_id]
     batch_five = [by_id[framework_id] for framework_id in _BATCH_FIVE_IDS if framework_id in by_id]
+    batch_six = [by_id[framework_id] for framework_id in _BATCH_SIX_IDS if framework_id in by_id]
     licence_gates = [by_id[framework_id] for framework_id in _LICENSE_REVIEW_IDS if framework_id in by_id]
     reference_only = [by_id[framework_id] for framework_id in _REFERENCE_ONLY_IDS if framework_id in by_id]
     archived_upstream = [by_id[framework_id] for framework_id in _ARCHIVED_UPSTREAM_IDS if framework_id in by_id]
@@ -117,6 +119,15 @@ def build_control_review(
             detail="All 21 owner-requested specialist skill/toolkit lanes are registered as bounded, non-executing capabilities.",
         ),
         ControlReviewCheck(
+            id="batch-six-interaction-safety",
+            label="Batch 06 interaction-safety inventory",
+            passed=(
+                len(batch_six) == len(_BATCH_SIX_IDS)
+                and all(framework.integration_batch == 6 and not framework.execution_enabled for framework in batch_six)
+            ),
+            detail="Barehands, Ultron Orb UI and the physical-hardware intake remain bounded, non-executing interaction concepts.",
+        ),
+        ControlReviewCheck(
             id="restricted-source-gates",
             label="Restricted source and licence gates",
             passed=(
@@ -149,8 +160,8 @@ def build_control_review(
                 )
             ),
             detail=(
-                "Licence gates remain on Firecrawl, TruffleHog, IRIS-GO/Mini/Zero, Anthropic Skills, WordPress skills and MCP Servers; "
-                "reference-only, archived, queued-mobile and source-intake boundaries remain locked."
+                "Licence gates remain on Firecrawl, TruffleHog, IRIS-GO/Mini/Zero, Anthropic Skills, WordPress skills, MCP Servers and Barehands; "
+                "reference-only, archived, queued-mobile, source-intake and physical-hardware boundaries remain locked."
             ),
         ),
         ControlReviewCheck(

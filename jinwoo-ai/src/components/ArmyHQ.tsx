@@ -1,15 +1,26 @@
 import { commanders } from '../data/army'
-import type { ArmyStats, Commander } from '../types/army'
+import type { ArmyStats, Commander, Mission } from '../types/army'
+import { CommandOrb } from './CommandOrb'
 import { CommanderCard } from './CommanderCard'
 import { ShadowGate } from './ShadowGate'
 
 interface ArmyHQProps {
   stats: ArmyStats
   selectedCommander: Commander
+  mission?: Mission | null
   onSelectCommander: (commander: Commander) => void
+  onOpenMission: () => void
+  onOpenArmy: () => void
+  onOpenInteraction: () => void
 }
 
-export function ArmyHQ({ stats, selectedCommander, onSelectCommander }: ArmyHQProps) {
+export function ArmyHQ({ stats, selectedCommander, mission, onSelectCommander, onOpenMission, onOpenArmy, onOpenInteraction }: ArmyHQProps) {
+  const missionState = mission?.status === 'running'
+    ? 'Mission flow active'
+    : mission?.requiresApproval
+      ? 'Approval checkpoint'
+      : 'Ready for a safe plan'
+
   return (
     <section className="army-hq" aria-labelledby="army-hq-title">
       <div className="army-hq__hero panel">
@@ -21,16 +32,24 @@ export function ArmyHQ({ stats, selectedCommander, onSelectCommander }: ArmyHQPr
           </p>
           <div className="hero-pills">
             <span>15 command roles</span>
-            <span>3 teams / commander</span>
-            <span>10 agents / team</span>
-            <span>Local memory active</span>
+            <span>45 visible divisions</span>
+            <span>450 logical agents</span>
+            <span>Consent-based memory</span>
+          </div>
+          <div className="hero-actions">
+            <button className="button" type="button" onClick={onOpenMission}>Open mission desk <span>↗</span></button>
+            <button className="button button--ghost" type="button" onClick={onOpenArmy}>Explore army</button>
           </div>
         </div>
-        <ShadowGate active />
+        <div className="hero-visuals" aria-label="Jinwoo command visuals">
+          <ShadowGate active />
+          <CommandOrb mission={mission} />
+        </div>
         <div className="hero-readout">
           <span>MONARCH STATUS</span>
-          <strong>READY</strong>
-          <small>Bellion is synchronising the command flow.</small>
+          <strong>{mission?.status === 'running' ? 'ACTIVE' : mission?.requiresApproval ? 'GUARDED' : 'READY'}</strong>
+          <small>{missionState}</small>
+          <button className="hero-readout__link" type="button" onClick={onOpenInteraction}>Interaction safety lab <span>↗</span></button>
         </div>
       </div>
 

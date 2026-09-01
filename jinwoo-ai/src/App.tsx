@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
+import { ArmyExplorer } from './components/ArmyExplorer'
 import { ArmyHQ } from './components/ArmyHQ'
 import { AuditTrail } from './components/AuditTrail'
 import { ChatPanel } from './components/ChatPanel'
 import { ControlReviewPanel } from './components/ControlReviewPanel'
 import { FrameworkPanel } from './components/FrameworkPanel'
+import { InteractionLab } from './components/InteractionLab'
 import { MemoryVault } from './components/MemoryVault'
 import { MissionPanel } from './components/MissionPanel'
 import { ProviderPanel } from './components/ProviderPanel'
@@ -19,6 +21,59 @@ const starterPrompts = [
   'Analyze my project structure and suggest a clean architecture.',
   'Create a research plan for local AI models on my laptop.',
   'Write a safe release checklist for this desktop application.',
+]
+
+type ViewId = 'hq' | 'missions' | 'army' | 'chat' | 'workspace' | 'research' | 'security' | 'memory' | 'interaction' | 'registry' | 'control' | 'settings'
+
+type NavigationItem = {
+  id: ViewId
+  label: string
+  icon: string
+}
+
+const viewMeta: Record<ViewId, { eyebrow: string; title: string; description: string }> = {
+  hq: { eyebrow: 'SHADOW ARMY // COMMAND CONSOLE', title: 'Army HQ', description: 'Visible, local-first command coordination.' },
+  missions: { eyebrow: 'MISSION CONTROL // APPROVAL FIRST', title: 'Mission workbench', description: 'Plan, verify and approve meaningful actions.' },
+  army: { eyebrow: 'SHADOW ARMY // VISIBLE HIERARCHY', title: 'Army explorer', description: 'Inspect logical roles without spawning a hidden army.' },
+  chat: { eyebrow: 'LOCAL AI // CONSENT AWARE', title: 'Command channel', description: 'Talk locally by default; cloud use is explicit.' },
+  workspace: { eyebrow: 'IGRIS // READ-ONLY GUARD', title: 'Workspace Guard', description: 'Confined source diagnostics inside a selected folder.' },
+  research: { eyebrow: 'TANK // NO-FETCH GATE', title: 'Research Gate', description: 'Validate a public-source plan without opening a URL.' },
+  security: { eyebrow: 'GREED // DEFENSIVE ONLY', title: 'Security Gate', description: 'Prepare an authorised no-scan boundary review.' },
+  memory: { eyebrow: 'LOCAL MEMORY // CONSENT FIRST', title: 'Memory Vault', description: 'Inspect and control locally stored memories.' },
+  interaction: { eyebrow: 'BATCH 06 // SAFETY-LOCKED', title: 'Interaction Lab', description: 'Review gesture and hardware concepts without capture or control.' },
+  registry: { eyebrow: 'ADAPTERS // EXPLICIT BOUNDARIES', title: 'Framework registry', description: 'Review capability contracts before any runtime can exist.' },
+  control: { eyebrow: 'JINWOO NATIVE // ZERO SIDE EFFECT', title: 'Control & audit', description: 'Verify locks, capacity and local audit availability.' },
+  settings: { eyebrow: 'LOCAL-FIRST // CONFIGURATION', title: 'Command settings', description: 'Provider visibility and delivery constraints.' },
+}
+
+const navigationGroups: Array<{ label: string; items: NavigationItem[] }> = [
+  {
+    label: 'COMMAND',
+    items: [
+      { id: 'hq', label: 'Army HQ', icon: '⌘' },
+      { id: 'missions', label: 'Mission desk', icon: '◈' },
+      { id: 'army', label: 'Army explorer', icon: '◫' },
+      { id: 'chat', label: 'Command channel', icon: '✦' },
+    ],
+  },
+  {
+    label: 'GUARDRAILS',
+    items: [
+      { id: 'workspace', label: 'Workspace Guard', icon: '▣' },
+      { id: 'research', label: 'Research Gate', icon: '◍' },
+      { id: 'security', label: 'Security Gate', icon: '◐' },
+      { id: 'memory', label: 'Memory Vault', icon: '◌' },
+    ],
+  },
+  {
+    label: 'SYSTEM',
+    items: [
+      { id: 'interaction', label: 'Interaction Lab', icon: '⌁' },
+      { id: 'registry', label: 'Framework registry', icon: '✧' },
+      { id: 'control', label: 'Control & audit', icon: '✓' },
+      { id: 'settings', label: 'Settings', icon: '⚙' },
+    ],
+  },
 ]
 
 interface ApiFrameworkStatus {
@@ -283,7 +338,9 @@ const errorDetail = (payload: unknown, fallback: string) => {
 }
 
 function App() {
-  const [activeView, setActiveView] = useState<'hq' | 'chat' | 'missions' | 'research' | 'memory' | 'settings'>('hq')
+  const [activeView, setActiveView] = useState<ViewId>('hq')
+  const [navigationOpen, setNavigationOpen] = useState(false)
+  const [now, setNow] = useState(() => new Date())
   const [selectedCommander, setSelectedCommander] = useState<Commander>(commanders[0])
   const [mission, setMission] = useState<Mission | null>(null)
   const [prompt, setPrompt] = useState('')
@@ -635,6 +692,11 @@ function App() {
   }
 
   useEffect(() => {
+    const timer = window.setInterval(() => setNow(new Date()), 30_000)
+    return () => window.clearInterval(timer)
+  }, [])
+
+  useEffect(() => {
     void loadMemories()
     void loadAudit()
     void loadWorkspace()
@@ -781,82 +843,218 @@ function App() {
     setNotice(`${commander.name} selected — ${commander.defaultSafety.replaceAll('-', ' ')} policy active.`)
   }
 
+  const navigate = (view: ViewId) => {
+    setActiveView(view)
+    setNavigationOpen(false)
+  }
+
   return (
-    <div className="app-shell">
-      <aside className="sidebar">
-        <div className="brand"><span className="brand-mark">♛</span><span><b>JINWOO</b><small>SHADOW ARMY</small></span></div>
-        <nav aria-label="Primary navigation">
-          <button className={activeView === 'hq' ? 'nav-item nav-item--active' : 'nav-item'} type="button" onClick={() => setActiveView('hq')}><span>⌘</span> Army HQ</button>
-          <button className={activeView === 'chat' ? 'nav-item nav-item--active' : 'nav-item'} type="button" onClick={() => setActiveView('chat')}><span>✦</span> Chat</button>
-          <button className={activeView === 'missions' ? 'nav-item nav-item--active' : 'nav-item'} type="button" onClick={() => setActiveView('missions')}><span>◈</span> Missions</button>
-          <button className={activeView === 'research' ? 'nav-item nav-item--active' : 'nav-item'} type="button" onClick={() => setActiveView('research')}><span>◍</span> Research Gate</button>
-          <button className={activeView === 'memory' ? 'nav-item nav-item--active' : 'nav-item'} type="button" onClick={() => setActiveView('memory')}><span>◌</span> Memory Vault</button>
-          <button className={activeView === 'settings' ? 'nav-item nav-item--active' : 'nav-item'} type="button" onClick={() => setActiveView('settings')}><span>⚙</span> Settings</button>
+    <div className={`app-shell ${navigationOpen ? 'app-shell--nav-open' : ''}`}>
+      {navigationOpen && <button className="mobile-nav-backdrop" type="button" aria-label="Close navigation" onClick={() => setNavigationOpen(false)} />}
+      <aside className="sidebar" id="primary-navigation">
+        <div className="sidebar__header">
+          <div className="brand">
+            <span className="brand-mark">♛</span>
+            <span><b>JINWOO</b><small>SHADOW ARMY</small></span>
+          </div>
+          <button className="sidebar__close" type="button" onClick={() => setNavigationOpen(false)} aria-label="Close navigation">×</button>
+        </div>
+        <nav className="sidebar-nav" aria-label="Primary navigation">
+          {navigationGroups.map((group) => (
+            <div className="nav-group" key={group.label}>
+              <p>{group.label}</p>
+              {group.items.map((item) => (
+                <button
+                  className={activeView === item.id ? 'nav-item nav-item--active' : 'nav-item'}
+                  type="button"
+                  onClick={() => navigate(item.id)}
+                  aria-current={activeView === item.id ? 'page' : undefined}
+                  key={item.id}
+                >
+                  <span>{item.icon}</span>{item.label}
+                </button>
+              ))}
+            </div>
+          ))}
         </nav>
         <div className="sidebar-status">
           <span className="signal-dot" />
-          <div><b>LOCAL MODE</b><small>Private by default</small></div>
+          <div><b>LOCAL MODE</b><small>Private by default · approval gated</small></div>
         </div>
-        <p className="sidebar-foot">Every impactful desktop action needs visible approval.</p>
+        <p className="sidebar-foot">External tools, cameras, device control and workspace writes stay disabled until separately reviewed.</p>
       </aside>
 
       <main className="main-content">
         <header className="topbar">
-          <div><p className="eyebrow">SHADOW ARMY // COMMAND CONSOLE</p><strong>{activeView === 'hq' ? 'Army HQ' : activeView === 'chat' ? 'Local AI Chat' : activeView === 'missions' ? 'Mission Control' : activeView === 'research' ? 'Tank Research Gate' : activeView === 'memory' ? 'Memory Vault' : 'Command Settings'}</strong></div>
-          <div className="topbar-actions"><span className="mode-indicator"><i /> LOCAL-FIRST</span><button type="button" className="avatar-button" aria-label="Open commander profile">J</button></div>
+          <div className="topbar__title">
+            <button className="menu-toggle" type="button" aria-controls="primary-navigation" aria-expanded={navigationOpen} onClick={() => setNavigationOpen(true)} aria-label="Open navigation">☰</button>
+            <div>
+              <p className="eyebrow">{viewMeta[activeView].eyebrow}</p>
+              <strong>{viewMeta[activeView].title}</strong>
+              <small>{viewMeta[activeView].description}</small>
+            </div>
+          </div>
+          <div className="topbar-actions">
+            <time className="command-clock" dateTime={now.toISOString()}>{now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</time>
+            <span className="mode-indicator"><i /> LOCAL-FIRST</span>
+            <button type="button" className="avatar-button" aria-label="Open command settings" onClick={() => navigate('settings')}>J</button>
+          </div>
         </header>
 
-        <section className="command-bar panel">
+        <section className="command-bar panel" aria-label="Mission command bar">
           <div className="command-bar__icon">✦</div>
           <form onSubmit={submitPrompt}>
             <label htmlFor="command">Give the army an order</label>
             <input id="command" value={prompt} onChange={(event) => setPrompt(event.target.value)} placeholder="Example: analyze my project and make a safe fix plan" />
           </form>
+          <span className="command-bar__safety">Plan first</span>
           <button className="button command-bar__button" type="button" onClick={() => { void dispatchMission(prompt) }}>Deploy <span>↗</span></button>
         </section>
 
-        <p className="notice"><span className="status-dot status-dot--ready" />{notice}</p>
+        <div className="notice" role="status" aria-live="polite"><span className="status-dot status-dot--ready" /><span>{notice}</span><small>No external runtime invoked by this interface.</small></div>
 
-        {activeView === 'hq' && <ArmyHQ stats={stats} selectedCommander={selectedCommander} onSelectCommander={selectCommander} />}
+        <section className="view-transition" aria-label={`${viewMeta[activeView].title} content`}>
+          {activeView === 'hq' && (
+            <ArmyHQ
+              stats={stats}
+              selectedCommander={selectedCommander}
+              mission={mission}
+              onSelectCommander={selectCommander}
+              onOpenMission={() => navigate('missions')}
+              onOpenArmy={() => navigate('army')}
+              onOpenInteraction={() => navigate('interaction')}
+            />
+          )}
 
-        {activeView === 'chat' && <ChatPanel messages={chatMessages} providers={providers} busy={chatBusy} onSend={sendChat} />}
-
-        {activeView === 'missions' && (
-          <div className="mission-layout">
-            <MissionPanel mission={mission} selectedCommander={selectedCommander} onApprove={() => { void transitionMission('approve') }} onCancel={() => { void transitionMission('cancel') }} />
-            <aside className="side-stack">
-              <ProviderPanel providers={providers} />
-              <AuditTrail events={auditEvents} missionId={mission?.id} />
-              <section className="panel quick-panel"><p className="eyebrow">QUICK MISSIONS</p><h2>Try a safe request</h2>{starterPrompts.map((item) => <button type="button" onClick={() => { void dispatchMission(item) }} key={item}>{item}<span>↗</span></button>)}</section>
-            </aside>
-          </div>
-        )}
-
-        {activeView === 'research' && <ResearchPanel plan={researchPlan} busy={researchBusy} onPlan={createResearchPlan} />}
-
-        {activeView === 'memory' && (
-          <MemoryVault
-            memories={memories}
-            available={memoryAvailable}
-            busy={memoryBusy}
-            onCreate={createMemory}
-            onUpdate={updateMemory}
-            onDelete={deleteMemory}
-            onRefresh={() => loadMemories(true)}
-          />
-        )}
-
-        {activeView === 'settings' && (
-          <div className="settings-layout">
-            <div className="settings-main-stack">
-              <WorkspacePanel status={workspaceStatus} entries={workspaceEntries} analysis={workspaceAnalysis} busy={workspaceBusy} onSelect={selectWorkspace} onClear={clearWorkspace} onBrowse={browseWorkspace} onAnalyze={analyzeWorkspaceFile} />
-              <section className="panel settings-card"><p className="eyebrow">ROUTING POLICY</p><h2>Local first, cloud by choice.</h2><p>Ollama and LM Studio can power local runs. Claude, GLM and Hugging Face adapters remain disabled until their keys are stored outside the browser bundle. Optional framework lanes stay under Jinwoo control.</p><div className="settings-list"><span>Python FastAPI orchestration</span><span>TypeScript command dashboard</span><span>Optional Rust / Go sidecars after profiling</span><span>SQLite + local vector-memory foundation</span><span>Framework adapters remain policy-gated</span></div></section>
-              <SecurityScanPanel workspace={workspaceStatus} plan={securityScanPlan} busy={securityScanBusy} onPlan={createSecurityScanPlan} />
-              <ControlReviewPanel review={controlReview} busy={controlReviewBusy} onRun={runControlReview} />
+          {activeView === 'missions' && (
+            <div className="mission-layout">
+              <MissionPanel mission={mission} selectedCommander={selectedCommander} onApprove={() => { void transitionMission('approve') }} onCancel={() => { void transitionMission('cancel') }} />
+              <aside className="side-stack">
+                <section className="panel mission-safety-card">
+                  <p className="eyebrow">MISSION SAFETY</p>
+                  <h2>Visible work only</h2>
+                  <p>Planner, Executor and Verifier roles are capped at three proposed workers. Approval never silently starts an optional framework, shell, browser or device tool.</p>
+                  <button className="button button--ghost" type="button" onClick={() => navigate('control')}>Open control review</button>
+                </section>
+                <ProviderPanel providers={providers} />
+                <AuditTrail events={auditEvents} missionId={mission?.id} />
+                <section className="panel quick-panel"><p className="eyebrow">QUICK MISSIONS</p><h2>Try a safe request</h2>{starterPrompts.map((item) => <button type="button" onClick={() => { void dispatchMission(item) }} key={item}>{item}<span>↗</span></button>)}</section>
+              </aside>
             </div>
-            <aside className="side-stack"><ProviderPanel providers={providers} /><FrameworkPanel frameworks={frameworks} dryRun={frameworkDryRun} busy={frameworkBusy} onDryRun={runFrameworkDryRun} /></aside>
-          </div>
-        )}
+          )}
+
+          {activeView === 'army' && <ArmyExplorer selectedCommander={selectedCommander} onSelectCommander={selectCommander} />}
+
+          {activeView === 'chat' && <ChatPanel messages={chatMessages} providers={providers} busy={chatBusy} onSend={sendChat} />}
+
+          {activeView === 'workspace' && (
+            <div className="guardrail-layout">
+              <WorkspacePanel status={workspaceStatus} entries={workspaceEntries} analysis={workspaceAnalysis} busy={workspaceBusy} onSelect={selectWorkspace} onClear={clearWorkspace} onBrowse={browseWorkspace} onAnalyze={analyzeWorkspaceFile} />
+              <aside className="side-stack">
+                <section className="panel boundary-card">
+                  <p className="eyebrow">WORKSPACE BOUNDARY</p>
+                  <h2>Igris reads, never writes.</h2>
+                  <p>Selecting a folder enables bounded diagnostics only. Patch, terminal, Git, test and dependency actions remain separate future approvals.</p>
+                  <div className="boundary-card__list"><span>Path escape protected</span><span>Regular files only</span><span>No automatic changes</span></div>
+                </section>
+                <AuditTrail events={auditEvents} />
+              </aside>
+            </div>
+          )}
+
+          {activeView === 'research' && <ResearchPanel plan={researchPlan} busy={researchBusy} onPlan={createResearchPlan} />}
+
+          {activeView === 'security' && (
+            <div className="security-layout">
+              <SecurityScanPanel workspace={workspaceStatus} plan={securityScanPlan} busy={securityScanBusy} onPlan={createSecurityScanPlan} />
+              <aside className="side-stack">
+                <section className="panel boundary-card boundary-card--guarded">
+                  <p className="eyebrow">DEFENSIVE POSTURE ONLY</p>
+                  <h2>No scan means no scan.</h2>
+                  <p>This gate makes a bounded review plan. It does not enumerate targets, read files, scan Git history, validate credentials or contact any system.</p>
+                  <div className="boundary-card__list"><span>Authorisation required</span><span>Findings stay masked</span><span>No network verification</span></div>
+                </section>
+                <AuditTrail events={auditEvents} />
+              </aside>
+            </div>
+          )}
+
+          {activeView === 'memory' && (
+            <MemoryVault
+              memories={memories}
+              available={memoryAvailable}
+              busy={memoryBusy}
+              onCreate={createMemory}
+              onUpdate={updateMemory}
+              onDelete={deleteMemory}
+              onRefresh={() => loadMemories(true)}
+            />
+          )}
+
+          {activeView === 'interaction' && <InteractionLab frameworks={frameworks} onOpenRegistry={() => navigate('registry')} />}
+
+          {activeView === 'registry' && (
+            <div className="registry-layout">
+              <FrameworkPanel frameworks={frameworks} dryRun={frameworkDryRun} busy={frameworkBusy} onDryRun={runFrameworkDryRun} />
+              <aside className="side-stack">
+                <section className="panel registry-summary">
+                  <p className="eyebrow">REGISTRY SUMMARY</p>
+                  <h2>{frameworks.length} controlled lanes</h2>
+                  <p>Presence in this list is not installation, permission or activation. Every external route remains under Jinwoo policy, approval, workspace and audit controls.</p>
+                  <div className="registry-summary__counts">
+                    <span><b>{frameworks.filter((framework) => framework.implementationStatus === 'contract-ready').length}</b> contract ready</span>
+                    <span><b>{frameworks.filter((framework) => framework.implementationStatus === 'license-review-required').length}</b> licence gates</span>
+                    <span><b>{frameworks.filter((framework) => framework.implementationStatus === 'source-review-required').length}</b> source intake</span>
+                  </div>
+                </section>
+                <section className="panel boundary-card">
+                  <p className="eyebrow">ACTIVATION STANDARD</p>
+                  <h2>One lane at a time.</h2>
+                  <p>A future adapter needs a pinned version, source/licence review, typed contract, consent, workspace confinement, audit, offline tests and a disable path.</p>
+                </section>
+              </aside>
+            </div>
+          )}
+
+          {activeView === 'control' && (
+            <div className="control-layout">
+              <ControlReviewPanel review={controlReview} busy={controlReviewBusy} onRun={runControlReview} />
+              <aside className="side-stack">
+                <AuditTrail events={auditEvents} />
+                <section className="panel boundary-card">
+                  <p className="eyebrow">AUDIT PROMISE</p>
+                  <h2>Record decisions, not secrets.</h2>
+                  <p>The local audit trail retains redacted control metadata. It does not need to expose raw prompts, provider credentials, media, camera data or workspace contents.</p>
+                </section>
+              </aside>
+            </div>
+          )}
+
+          {activeView === 'settings' && (
+            <div className="settings-hub">
+              <section className="panel settings-hub__hero">
+                <div>
+                  <p className="eyebrow">ROUTING POLICY</p>
+                  <h1>Local first, cloud by choice.</h1>
+                  <p>Jinwoo keeps the local mission engine, consent, workspace boundary and audit trail in command. Cloud providers remain per-request choices and optional frameworks stay non-executing until individually reviewed.</p>
+                </div>
+                <div className="settings-hub__actions">
+                  <button className="button button--ghost" type="button" onClick={() => navigate('workspace')}>Open Workspace Guard</button>
+                  <button className="button button--ghost" type="button" onClick={() => navigate('registry')}>Review registry</button>
+                </div>
+              </section>
+              <div className="settings-hub__grid">
+                <ProviderPanel providers={providers} />
+                <section className="panel settings-card">
+                  <p className="eyebrow">DELIVERY CONSTRAINTS</p>
+                  <h2>Safe by architecture.</h2>
+                  <p>Providers, adapters and future device lanes are designed to return proposals through the Jinwoo policy. No browser bundle stores cloud keys, and no optional tool can take control merely because it appears in the interface.</p>
+                  <div className="settings-list"><span>Python FastAPI mission control</span><span>TypeScript command dashboard</span><span>SQLite consent-based memory</span><span>User-selected workspace confinement</span><span>Explicit cloud and action approval</span><span>External runtimes disabled by default</span></div>
+                </section>
+              </div>
+            </div>
+          )}
+        </section>
       </main>
     </div>
   )

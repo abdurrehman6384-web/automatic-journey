@@ -6,7 +6,7 @@ An original, local-first desktop assistant foundation for the **Jinwoo AI / Shad
 
 - React + TypeScript Army HQ dashboard with all 15 requested commander roles;
 - dynamic logical hierarchy: 15 commanders × 3 sub-departments × 10 agent roles × 3 workers;
-- responsive Shadow Gate UI, commander directory, mission console and provider panel;
+- responsive Command Center UI with original Shadow Gate/status-orb visuals, expanded navigation, commander directory, Army Explorer, mission console, Interaction Lab, searchable framework registry and provider panel;
 - deterministic local/demo mission routing and local-first chat — no API key required to explore either;
 - explicit per-message cloud approval before a configured cloud chat provider can be used;
 - Python FastAPI backend with typed mission contracts, routing, approval gate and local SQLite memory;
@@ -14,8 +14,8 @@ An original, local-first desktop assistant foundation for the **Jinwoo AI / Shad
 - redacted local audit trail for mission routing, approvals, completion and Memory Vault changes;
 - Igris Workspace Guard: user-selected, read-only folder listing and bounded source diagnostics with path-escape protection;
 - provider registry for Ollama, LM Studio, Claude, GLM/Z.ai, Hugging Face and optional Mem0;
-- controlled Batch 01–05 adapter/advanced-skill registry: core orchestration, coding, research, memory, security, media, document, connector, browser, MCP, science and mobile-companion lanes all remain policy-gated and non-executing in V1;
-- Batch 05 registers lawful AI-video, defensive-security, document/research, engineering, connector/MCP, browser, multi-agent and science skill contracts; IRIS-AI, IRIS-X, Awesome MCP Servers and 500 AI Agents Projects remain reference-only, while the required licence/source gates stay locked;
+- controlled Batch 01–06 adapter/advanced-skill registry: core orchestration, coding, research, memory, security, media, document, connector, browser, MCP, science, interaction and mobile-companion lanes all remain policy-gated and non-executing in V1;
+- Batch 05 registers lawful AI-video, defensive-security, document/research, engineering, connector/MCP, browser, multi-agent and science skill contracts; Batch 06 adds gesture/orb and physical-hardware safety-intake contracts plus an original CSS-only command orb; IRIS-AI, IRIS-X, Awesome MCP Servers and 500 AI Agents Projects remain reference-only, while required licence/source gates stay locked;
 - Tank's no-fetch Research Gate for validating explicit public HTTPS source plans without opening a URL, starting a browser or calling a crawler;
 - Greed's no-scan secret-review preflight for selected workspaces, with no file/history read, scanner launch or credential disclosure;
 - Jinwoo Native Control & Audit Review for zero-side-effect local checks of capacity, disabled runtimes, licence gates, workspace containment and audit availability;
@@ -95,12 +95,14 @@ contains the owner-requested advanced-skill lanes Goose, Orkas, Bytebot,
 OpenDesktop, Hermes Agent, OpenAgent, IRIS-GO, IRIS-Mini, IRIS-Zero, Zoey and the
 reference-only IRIS-AI / IRIS-X records. Batch 05 contains lawful media,
 defensive-security, document/research, engineering, connector/MCP, browser,
-science and mobile-companion skill lanes; see
-[`docs/INTEGRATION_BATCH_05.md`](docs/INTEGRATION_BATCH_05.md) for the full
-source matrix and excluded CapCut patcher boundary. External adapters can
-prepare a bounded, policy-screened dry run through
-`POST /api/frameworks/{id}/dry-run`, but no upstream runtime is invoked or
-enabled in V1.
+science and mobile-companion skill lanes. Batch 06 adds the licence-gated
+Barehands gesture-interface contract, the MIT Ultron Orb UI design contract,
+and a source-gated physical cutter/robotics safety intake. See
+[`docs/INTEGRATION_BATCH_05.md`](docs/INTEGRATION_BATCH_05.md) and
+[`docs/INTEGRATION_BATCH_06.md`](docs/INTEGRATION_BATCH_06.md) for source
+matrices and activation boundaries. External adapters can prepare a bounded,
+policy-screened dry run through `POST /api/frameworks/{id}/dry-run`, but no
+upstream runtime is invoked or enabled in V1.
 
 `POST /api/control/review` runs the native control lane: a zero-side-effect local
 control check that cannot enable a runtime, scan files or modify policy.
@@ -118,11 +120,15 @@ Bytebot is marked archived-upstream; IRIS-AI and IRIS-X are reference-only.
 Batch 05 also locks Anthropic Skills, WordPress Agent Skill Prototypes and
 Official MCP Servers pending individual licence/component review; it leaves
 Open-AutoGLM queued for a separate Android phase and EnvAgent pending an exact
-source URL. See [`docs/INTEGRATION_BATCH_01.md`](docs/INTEGRATION_BATCH_01.md),
+source URL. Batch 06 locks Barehands pending an AGPL-3.0 compatibility decision
+and keeps all camera, gesture, Android and physical-device paths disabled;
+physical cutter/robotics input needs exact machine and safety evidence. See
+[`docs/INTEGRATION_BATCH_01.md`](docs/INTEGRATION_BATCH_01.md),
 [`docs/INTEGRATION_BATCH_02.md`](docs/INTEGRATION_BATCH_02.md),
 [`docs/INTEGRATION_BATCH_03.md`](docs/INTEGRATION_BATCH_03.md),
 [`docs/INTEGRATION_BATCH_04.md`](docs/INTEGRATION_BATCH_04.md),
-[`docs/INTEGRATION_BATCH_05.md`](docs/INTEGRATION_BATCH_05.md), and
+[`docs/INTEGRATION_BATCH_05.md`](docs/INTEGRATION_BATCH_05.md),
+[`docs/INTEGRATION_BATCH_06.md`](docs/INTEGRATION_BATCH_06.md), and
 [`docs/FRAMEWORK_ADAPTERS.md`](docs/FRAMEWORK_ADAPTERS.md) before enabling any
 adapter.
 

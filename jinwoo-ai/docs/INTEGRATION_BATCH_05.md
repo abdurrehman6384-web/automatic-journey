@@ -162,8 +162,10 @@ unrelated projects use that name, and Jinwoo will not guess, clone or install an
 ambiguous package. The provided source will then need its own licence and
 security review.
 
-## Final boundary
+## Continuing boundary
 
-Batch 05 expands the visible **skills catalogue**, not Jinwoo's default power.
+Batch 05 remains a controlled skills catalogue. The subsequently owner-requested
+Batch 06 gesture, orb and physical-interaction safety catalogue is documented in
+[`INTEGRATION_BATCH_06.md`](INTEGRATION_BATCH_06.md) and remains non-executing.
 The application remains local-first, explicit-approval-gated,
 workspace-confined and auditable. No external runtime has been activated.

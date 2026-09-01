@@ -4,7 +4,7 @@ Jinwoo's local mission engine remains the one canonical orchestrator. An
 installed package or sidecar never receives a mission automatically and cannot
 bypass the policy, approval, workspace, or audit boundaries owned by Jinwoo.
 
-Batches 01–05 contain owner-requested integration lanes. Their adapter
+Batches 01–06 contain owner-requested integration lanes. Their adapter
 contracts are real and testable now; upstream runtimes remain non-executable
 until a version-pinned, local compatibility and licence review is complete.
 """
@@ -1005,6 +1005,66 @@ class FrameworkRegistry:
                 guardrails=(
                     "Do not infer an EnvAgent repository from its name or install any package, container or code runner before the owner supplies an exact source URL.",
                     "Any later code execution must use a separately reviewed disposable sandbox with no host credentials, network or workspace write access by default.",
+                ),
+            ),
+            # Owner-requested interaction-design batch 6. The upstream projects
+            # are represented as capability contracts only. Jinwoo does not copy
+            # their source, request camera access, load CDN scripts, or control a
+            # desktop, phone, physical tool or robotic device.
+            FrameworkAdapter(
+                id="barehands",
+                label="Barehands Gesture Interface",
+                runtime="desktop-client",
+                category="computer-use",
+                integration_batch=6,
+                owner_commander="Nox",
+                license="AGPL-3.0-or-later",
+                source_url="https://github.com/jaredrhod/barehands",
+                purpose="Reserved for a future local hand-gesture, spatial-board and accessibility interaction design review.",
+                capabilities=("Gesture interaction design", "Spatial-board safety review", "Camera-consent UX planning"),
+                activation_boundary="sandboxed",
+                implementation_status="license-review-required",
+                guardrails=(
+                    "Do not copy, bundle, install or run upstream code until AGPL-3.0 compatibility, notices and deployment terms are approved.",
+                    "Do not request webcam permission, load MediaPipe/Three.js CDNs, read/write local state files, call localhost or trigger board actions.",
+                    "Any later camera route needs an explicit in-app consent, camera-off default, local-only processing evidence, visible gesture preview and an emergency stop.",
+                ),
+            ),
+            FrameworkAdapter(
+                id="ultron-orb-ui",
+                label="Ultron Orb UI (Sagar Builds)",
+                runtime="desktop-client",
+                category="computer-use",
+                integration_batch=6,
+                owner_commander="Tusk",
+                license="MIT",
+                source_url="https://github.com/SAGAR-TAMANG/ultron-by-sagar-builds",
+                purpose="Reserved for independently designed orb, HUD and optional hand-gesture interaction pattern review.",
+                capabilities=("Orb/HUD design patterns", "Gesture-control UX review", "Visual system-status concepts"),
+                activation_boundary="sandboxed",
+                guardrails=(
+                    "This registry does not copy the Next.js, Three.js or MediaPipe implementation or use Iron Man/JARVIS assets, names or trade dress.",
+                    "Do not request camera permission, start hand tracking, connect an Android device or permit an autonomous device action from this lane.",
+                    "Any future interaction implementation must be original, camera-off by default, consented, locally processed where feasible and individually approval-gated.",
+                ),
+            ),
+            FrameworkAdapter(
+                id="physical-cutter-safety-intake",
+                label="Physical Cutter / Robotics Safety Intake",
+                runtime="skill-catalog",
+                category="computer-use",
+                integration_batch=6,
+                owner_commander="Nox",
+                license="No upstream or machine documentation selected; hardware safety review required",
+                source_url=None,
+                purpose="Records the owner-requested physical cutter or robotics concept without selecting hardware, a controller, firmware or a device protocol.",
+                capabilities=("Hardware safety requirements", "Operator-consent design", "Device-isolation planning"),
+                activation_boundary="sandboxed",
+                implementation_status="source-review-required",
+                guardrails=(
+                    "Do not connect USB, serial, Bluetooth, Wi-Fi, GPIO, cameras, motors, blades, lasers, actuators or industrial control interfaces.",
+                    "Do not generate a device-control route, bypass an interlock, remove a guard or perform any physical action from Jinwoo.",
+                    "A later concept review needs the exact machine/manual, lawful use case, local operator, emergency stop, physical guarding, risk assessment and independent safety sign-off.",
                 ),
             ),
             FrameworkAdapter(

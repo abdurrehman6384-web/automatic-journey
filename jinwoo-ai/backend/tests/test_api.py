@@ -51,9 +51,9 @@ class ApiTests(unittest.TestCase):
         response = self.client.get("/api/frameworks")
         self.assertEqual(response.status_code, 200)
         framework_items = response.json()["frameworks"]
-        self.assertEqual(len(framework_items), 49)
+        self.assertEqual(len(framework_items), 52)
         frameworks = {item["id"]: item for item in framework_items}
-        self.assertEqual(len(frameworks), 49)
+        self.assertEqual(len(frameworks), 52)
         self.assertEqual(
             set(frameworks),
             {
@@ -66,6 +66,7 @@ class ApiTests(unittest.TestCase):
                 "anthropic-skills", "ai-research-skills", "addy-osmani-agent-skills", "wordpress-agent-skills", "composio", "stagehand",
                 "langchain-community", "official-mcp-servers", "awesome-mcp-servers", "metagpt", "autogen", "pydantic-ai",
                 "scientific-agent-skills", "open-autoglm", "500-ai-agent-projects", "envagent-source-intake",
+                "barehands", "ultron-orb-ui", "physical-cutter-safety-intake",
             },
         )
         self.assertTrue(frameworks["jinwoo-native"]["execution_enabled"])
@@ -120,6 +121,14 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(frameworks["awesome-mcp-servers"]["state"], "reference-only")
         self.assertEqual(frameworks["open-autoglm"]["implementation_status"], "queued")
         self.assertEqual(frameworks["envagent-source-intake"]["implementation_status"], "source-review-required")
+        batch_six = ("barehands", "ultron-orb-ui", "physical-cutter-safety-intake")
+        for adapter in batch_six:
+            self.assertFalse(frameworks[adapter]["execution_enabled"])
+            self.assertEqual(frameworks[adapter]["integration_batch"], 6)
+            self.assertTrue(frameworks[adapter]["capabilities"])
+        self.assertEqual(frameworks["barehands"]["implementation_status"], "license-review-required")
+        self.assertEqual(frameworks["ultron-orb-ui"]["runtime"], "desktop-client")
+        self.assertEqual(frameworks["physical-cutter-safety-intake"]["implementation_status"], "source-review-required")
         self.assertNotIn("capcut-patcher", frameworks)
         self.assertTrue(frameworks["jinwoo-native-control-audit"]["execution_enabled"])
         self.assertEqual(frameworks["jinwoo-native-control-audit"]["state"], "canonical")
@@ -238,13 +247,36 @@ class ApiTests(unittest.TestCase):
         self.assertIn("source-intake", source_intake.json()["summary"])
         self.assertFalse(source_intake.json()["external_runtime_invoked"])
 
+    def test_batch_six_interaction_contracts_remain_camera_and_hardware_free(self) -> None:
+        barehands = self.client.post(
+            "/api/frameworks/barehands/dry-run",
+            json={"prompt": "Prepare a local hand-gesture accessibility design", "requested_agents": 3},
+        )
+        orb = self.client.post(
+            "/api/frameworks/ultron-orb-ui/dry-run",
+            json={"prompt": "Prepare an original orb command-center visual design", "requested_agents": 3},
+        )
+        hardware = self.client.post(
+            "/api/frameworks/physical-cutter-safety-intake/dry-run",
+            json={"prompt": "Plan a physical cutter safety review", "requested_agents": 3},
+        )
+        self.assertEqual(barehands.status_code, 200)
+        self.assertFalse(barehands.json()["external_runtime_invoked"])
+        self.assertIn("webcam permission", " ".join(barehands.json()["next_steps"]).casefold())
+        self.assertEqual(orb.status_code, 200)
+        self.assertFalse(orb.json()["external_runtime_invoked"])
+        self.assertIn("camera permission", " ".join(orb.json()["next_steps"]).casefold())
+        self.assertEqual(hardware.status_code, 200)
+        self.assertFalse(hardware.json()["external_runtime_invoked"])
+        self.assertIn("source-intake", hardware.json()["summary"])
+
     def test_native_control_review_reports_invariants_and_writes_redacted_metadata(self) -> None:
         response = self.client.post("/api/control/review")
         self.assertEqual(response.status_code, 200)
         payload = response.json()
         self.assertTrue(payload["all_passed"])
         self.assertFalse(payload["external_runtime_invoked"])
-        self.assertEqual(len(payload["checks"]), 9)
+        self.assertEqual(len(payload["checks"]), 10)
         self.assertTrue(all(check["passed"] for check in payload["checks"]))
         self.assertIn("external runtime", payload["summary"].casefold())
         audit = self.client.get("/api/audit").json()
