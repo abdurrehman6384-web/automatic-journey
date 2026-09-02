@@ -39,7 +39,9 @@ Batch 09 records NEXA AI Assistant as a source-review-required desktop-assistant
 intake and independently adds only a bounded native filename locator inside the
 selected workspace. Batch 10 records Jarvis One-Click Setup and Control PC Using
 Hand Gesture as source-gated desktop/gesture intakes and adds only their original
-locked-state status UX to Interaction Lab. They can prepare bounded,
+locked-state status UX to Interaction Lab. Batch 11 adds a ranked, original
+status catalogue for requested skill collections; their reported counts do not
+add agents and their payloads are not loaded. They can prepare bounded,
 policy-screened plans, but the backend will not install
 or execute an upstream runtime. OpenHands has no container/sandbox path; OpenClaw
 has no gateway/channel/skill path; Batch 04/05/06 computer-use lanes have no
@@ -50,7 +52,9 @@ NEXA intake has no upstream source/configuration/model, voice, screen, camera,
 vision, browser, OS/window, input, device, messaging, media or automation path;
 the Batch 10 Jarvis/hand-gesture lanes have no installer, provider, voice,
 external-tool, camera, hand model/data, pointer, keyboard, desktop or device
-path; secret scanners have no file or Git-history scan path. Firecrawl,
+path; the Batch 11 source catalogue has no skill-file loader, installer, local
+skills-path reader, agent process, provider, browser, GitHub, cloud, model or
+self-upgrade route; secret scanners have no file or Git-history scan path. Firecrawl,
 TruffleHog, IRIS-GO, IRIS-Mini, IRIS-Zero, Anthropic Skills, WordPress Agent
 Skill Prototypes, Official MCP Servers, Barehands, ROMA and God's Eye View are
 `license-review-required`; Bytebot is archived-upstream; IRIS-AI, IRIS-X,
@@ -60,7 +64,9 @@ and physical hardware need exact source/machine evidence; NEXA has an exact
 reviewed source URL but no verified licence and must remain source-review-required;
 Jarvis lacks a verified root/CLI/Python reuse licence, and the PC hand-gesture
 repository lacks a verified licence and exposes a bundled model/camera/pointer
-surface. Any future adapter
+surface. Batch 11 aggregates named catalogue records only; `NOASSERTION`
+sources have no verified reuse grant, and even MIT/Apache metadata remains
+subtree/dependency/prompt/asset review-gated. Any future adapter
 must return proposed work through Jinwoo's policy, approval, workspace and audit
 boundaries. See
 [`FRAMEWORK_ADAPTERS.md`](FRAMEWORK_ADAPTERS.md),
@@ -72,8 +78,9 @@ boundaries. See
 [`INTEGRATION_BATCH_06.md`](INTEGRATION_BATCH_06.md),
 [`INTEGRATION_BATCH_07.md`](INTEGRATION_BATCH_07.md),
 [`INTEGRATION_BATCH_08.md`](INTEGRATION_BATCH_08.md),
-[`INTEGRATION_BATCH_09.md`](INTEGRATION_BATCH_09.md), and
-[`INTEGRATION_BATCH_10.md`](INTEGRATION_BATCH_10.md).
+[`INTEGRATION_BATCH_09.md`](INTEGRATION_BATCH_09.md),
+[`INTEGRATION_BATCH_10.md`](INTEGRATION_BATCH_10.md), and
+[`INTEGRATION_BATCH_11.md`](INTEGRATION_BATCH_11.md).
 
 ## Tank research gate
 
@@ -99,7 +106,7 @@ controls.
 
 The Jinwoo-native lane is a zero-side-effect `POST /api/control/review`
 report. It verifies capacity, native ownership, disabled external runtimes,
-Batch 03/04/05/06/07/08/09/10 inventory, restricted source/licence/review gates,
+Batch 03/04/05/06/07/08/09/10/11 inventory, restricted source/licence/review gates,
 read-only workspace status and local audit availability. It cannot enable a
 runtime or read workspace data; its audit entry contains aggregate metadata only.
 

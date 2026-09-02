@@ -331,6 +331,10 @@ Jinwoo Native Mission Engine
 ├── Barehands gesture lane           → AGPL-gated future camera/gesture accessibility design
 ├── Original orb/HUD lane            → independently designed visual command-state concepts
 ├── Physical cutter/robotics intake  → source/machine safety-gated, no hardware control
+├── Batch 07 multi-agent sources     → native topology references; no external worker/runtime
+├── God's Eye View intake             → non-live geospatial safety contract; no globe/feed/tracking
+├── NEXA / Jarvis / hand-gesture      → source-gated desktop/camera/input safety intakes
+├── Batch 11 skill catalogue          → ranked source metadata; no SKILL.md/prompt/agent/installer loading
 └── Native Control & Audit Review    → active zero-side-effect local invariant review
 ```
 
@@ -365,6 +369,11 @@ Jinwoo Native Mission Engine
 | Scientific Agent Skills | lawful scientific research, reproducibility and database-boundary planning only |
 | Open-AutoGLM | queued separate Android-companion screen/device-action design; no desktop V1 device control |
 | Awesome MCP / 500 AI Agents Projects | reference-only catalogues; every downstream source needs a new individual review |
+| Batch 07 (Agent Swarm / ROMA / Open Multi-Agent / Awesome Agent Orchestration / Microsoft Agent Framework) | native topology/planner/executor/verifier pattern references; no external runtime or worker start |
+| God's Eye View | licence/data/asset/privacy-gated geospatial reference; no live globe, feed, tracking, camera, location, voice or provider path |
+| NEXA AI Assistant | source-gated desktop-assistant intake plus an original filename-only workspace locator; no upstream source/config/model/runtime |
+| Jarvis One-Click Setup / Control PC Using Hand Gesture | source-gated setup/desktop/gesture records; no installer, provider, camera, model, pointer, keyboard, desktop or device runtime |
+| Batch 11 requested skill collections | ranked source-review catalogue only; reported counts do not add agents and no SKILL.md, .agent.md, prompt, installer or external agent is loaded |
 | EnvAgent | sandbox/runtime-bug capability intake pending an exact source URL and licence |
 | Barehands Gesture Interface | AGPL-gated future local hand-gesture, spatial-board and accessibility contract; no camera/CDN/state/localhost/gesture action |
 | Ultron Orb UI | independently designed orb/HUD and gesture UX concepts; no upstream source, camera or autonomous-device implementation |
@@ -394,8 +403,13 @@ inside that hierarchy, not fifteen replacement commander departments.
 | 04 — complete | Goose, Orkas, Bytebot, OpenDesktop, Hermes Agent, OpenAgent, IRIS-GO, IRIS-Mini, IRIS-Zero, Zoey, IRIS-AI and IRIS-X | typed advanced-skill capability contracts and source-gate review; all external execution disabled; Bytebot is archived-upstream; IRIS-GO/Mini/Zero need licence decisions; IRIS-AI/X are reference-only |
 | 05 — complete | Lawful media, defensive security, document/research, engineering, connector/MCP, browser, orchestration, science, Android and source-intake lanes | typed specialist-skill contracts; all external execution disabled; CapCut patcher excluded; source/licence/reference/queued boundaries are individually enforced |
 | 06 — complete | Barehands gesture interface, Ultron Orb UI concepts and physical cutter/robotics safety intake | typed interaction contracts plus original CSS-only dashboard orb; all camera, CDN, device and physical actions disabled; Barehands awaits AGPL compatibility and hardware awaits exact machine/safety evidence |
+| 07 — complete | Agent Swarm, ROMA, Open Multi-Agent, Awesome Agent Orchestration and Microsoft Agent Framework | native, mobile-first Shadow Army topology/planning API; 450 logical seats stay visible while all upstream runtimes remain disabled |
+| 08 — complete | God's Eye View geospatial source intake | licence/data/asset/privacy-gated reference only; no globe, map, live feed, tracking, camera, location, voice or provider runtime |
+| 09 — complete | NEXA AI Assistant source intake | original selected-workspace filename locator only; no NEXA source/config/model, voice, vision, browser, desktop, device or automation runtime |
+| 10 — complete | Jarvis One-Click Setup and Control PC Using Hand Gesture intakes | original responsive safety status UX; no upstream installer, voice, MCP, provider, webcam, model, pointer, keyboard, desktop or device runtime |
+| 11 — complete | Requested skill-source collections and specialist methods | 27 new source-review/reference-only records plus existing 500-project catalogue visibility; no `SKILL.md`, `.agent.md`, prompt, agent, installer, local path, provider, GitHub, cloud or self-upgrade runtime |
 
-A Batch 01/02/03/04/05/06 dry run may represent up to 450 logical agents but caps runtime
+A Batch 01–11 dry run may represent up to 450 logical agents but caps runtime
 planning at three Planner/Executor/Verifier workers. It never starts an
 upstream framework, network crawl, shell, browser, container, code patch,
 secret scan, messaging gateway, or tool action. Tank's Batch 02 source-plan
@@ -403,12 +417,13 @@ gate validates at most ten explicit public HTTPS domain targets without opening 
 or resolving DNS; future retrieval remains separately approval-, policy-,
 licence- and limit-gated. Batch 03's native control review verifies capacity,
 external-runtime locks, licence gates, read-only workspace state and audit
-availability without changing any execution state. Batches 04, 05 and 06 expand
-the visible capability catalogue and dashboard only: no CLI, desktop/container
+availability without changing any execution state. Batches 04–11 expand the
+visible capability catalogue and dashboard only: no CLI, desktop/container
 controller, browser, camera, voice/vision capture, CDN, provider, MCP server,
-agent loop, media processor, mobile runtime, hardware controller or physical
-action is activated by a dry-run plan. Batch 06 does not change the three-phase
-V1 delivery hierarchy.
+agent loop, media processor, mobile runtime, hardware controller, skill loader,
+installer, local skills-path reader, GitHub actor, self-modification or physical
+action is activated by a dry-run plan. Batch 11 does not change the three-phase
+V1 delivery hierarchy or the fixed 450 logical-agent capacity.
 
 ---
 
@@ -776,9 +791,14 @@ IRIS-AI and IRIS-X registered as reference-only UX sources; their proprietary co
 Controlled Batch 05 specialist-skill registry/dry-run contracts for lawful media, defensive security, documents/research, engineering, connectors/MCP, browser, multi-agent, science and Android-companion lanes; all external execution remains disabled
 CapCut patcher explicitly excluded; Anthropic Skills, WordPress prototypes and Official MCP Servers remain licence-gated; Awesome MCP / 500 project catalogues remain reference-only; EnvAgent source intake awaits an exact URL
 Controlled Batch 06 contracts for Barehands, Ultron Orb UI and physical cutter/robotics safety intake; Barehands remains AGPL-gated, and no camera, CDN, desktop/mobile device or physical hardware is enabled
-Responsive Command Center UI upgrade with Commander Army Explorer, searchable framework registry, original CSS-only status orb, Interaction Lab, expanded guardrail navigation and clear no-execution states
+Controlled Batch 07 native Shadow Army Core with 450 logical seats, Planner/Executor/Verifier topology, visible plan API and no started external workers
+Controlled Batch 08 God's Eye View source/data/asset/privacy-gated geospatial safety intake with no live map, feed, camera, tracking, location, voice or provider path
+Controlled Batch 09 NEXA source intake plus original bounded filename-only workspace locator; no upstream assistant/configuration/model/runtime activation
+Controlled Batch 10 Jarvis setup and PC hand-gesture source safety records plus responsive Interaction Lab locks; no installer, provider, camera, model, pointer, desktop or device control
+Controlled Batch 11 ranked skill-source catalogue with 27 new metadata contracts and existing 500-project catalogue visibility; no skill payload, prompt, agent profile, installer, local skills path, cloud/GitHub route or automatic upgrade loop
+Responsive Command Center UI upgrade with Commander Army Explorer, searchable framework registry, source-catalogue cards, original CSS-only status orb, Interaction Lab, expanded guardrail navigation and clear no-execution states
 Greed no-scan secret-review preflight that requires a selected workspace/authorisation but reads no files or Git history
-Jinwoo Native Control & Audit Review with zero-side-effect local invariant checks, Batch 04/05/06 source-gate verification and aggregate-only audit records
+Jinwoo Native Control & Audit Review with zero-side-effect local invariant checks, Batch 04–11 source-gate verification and aggregate-only audit records
 Whitespace-only API input rejection and hardened regular-file workspace reads
 Docker Compose foundation
 Electron shell foundation
@@ -802,11 +822,12 @@ Add Claude, GLM and HF live-provider integration tests with user-owned keys
 Add approved Igris workspace write/patch tools after the read-only guard review
 Implement Tank approved retrieval/source citation flow after the no-fetch gate, including runtime DNS/SSRF checks and source/rate/depth/size limits
 Add local vector retrieval and Memory Vault search
-Complete individual activation reviews before enabling any Batch 01/02/03/04/05/06 external runtime; decide Firecrawl, TruffleHog and Barehands AGPL-3.0 compatibility before any related code, service, binary or container work; resolve IRIS-GO/Mini/Zero, Anthropic Skills, WordPress prototypes and Official MCP licence evidence before source use; keep Bytebot archived-upstream and IRIS-AI/X, Awesome MCP and 500-project catalogues reference-only; keep Mem0 optional until “memo API” is explicitly confirmed
+Complete individual activation reviews before enabling any Batch 01–11 external runtime; decide Firecrawl, TruffleHog and Barehands AGPL-3.0 compatibility before any related code, service, binary or container work; resolve IRIS-GO/Mini/Zero, Anthropic Skills, WordPress prototypes and Official MCP licence evidence before source use; keep Bytebot archived-upstream and IRIS-AI/X, Awesome MCP, 500-project and Batch 11 catalogue records reference-only/source-gated; keep Mem0 optional until “memo API” is explicitly confirmed
 Design computer-use and external-tool activation separately for Goose, Bytebot, OpenDesktop, Hermes Agent, OpenAgent, Composio, Stagehand, LangChain Community, MCP, Open-AutoGLM, Barehands, Ultron Orb UI and any CLI/desktop/browser/camera/mobile/voice/vision lane: disposable sandbox, no host credentials/capture by default, visible per-step preview, per-action approval, audit, timeout and rollback
 Implement lawful local media workflows only after a user-authorised media root, model/dependency licence review, no-download/no-upload default, retention plan and per-edit/render/export approval; retain cybersecurity skills for defensive authorised guidance only
 Keep physical cutter/robotics work at source-and-machine safety intake only: no controller, device protocol, remote operation, interlock bypass or physical action without exact manufacturer documentation, trained local operator, emergency stop, physical safeguards, risk assessment and independent safety sign-off
 Obtain the exact EnvAgent GitHub URL and licence before selecting it for source review or sandbox integration
+Select one Batch 11 source at a time for an exact licence/subtree/provenance/dependency/privacy review; do not clone a collection, copy `SKILL.md`/`.agent.md`, read local skills paths, run installers, auto-activate skills or perform an unattended internet-upgrade loop
 Add Electron packaging and Windows installer
 Add Rust/Go sidecars only after profiling
 ```

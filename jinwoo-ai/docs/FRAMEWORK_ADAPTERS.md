@@ -71,6 +71,7 @@ authorise a network, shell, browser, desktop or mobile action.
 | 09 | NEXA AI Assistant — Source Review Intake | Igris | Native filename-only workspace navigation concept and future consented desktop-assistant safety design | **Source review required**; no upstream code/configuration/model, voice, vision, browser, desktop, device or automation runtime |
 | 10 | Jarvis One-Click Setup — Source Review Intake | Nox | Original local assistant-setup, configuration-hygiene and desktop-consent patterns | **Source review required**; no root/CLI/Python reuse, installer, provider, voice, browser, MCP, file/window or process runtime |
 | 10 | Control PC Using Hand Gesture — Source Review Intake | Nox | Original camera-off gesture accessibility, pointer-approval and emergency-stop patterns | **Source review required**; no model, webcam, hand data, vision, pointer, keyboard, desktop or automation runtime |
+| 11 | Requested Skill Collection Catalogue (27 source records) | Jinwoo / assigned commander | Ranked source metadata for collections, provider lanes and specialist methods | **Source review/reference only**; no `SKILL.md`, `.agent.md`, installer, agent, model, provider, GitHub or desktop runtime |
 
 `GET /api/frameworks` exposes each record's runtime/category, discovery state,
 licence, source URL, owner, capability tags, activation boundary and contract
@@ -124,6 +125,21 @@ safe relative paths and file size metadata, and never reads content, launches a 
 root or records the search term in audit. It is not a NEXA source/runtime
 integration; see [`INTEGRATION_BATCH_09.md`](INTEGRATION_BATCH_09.md).
 
+### Batch 11 requested skill-source catalogue
+
+The Batch 11 catalogue displays the requested review order, reported scope,
+categories and source link for the 500 AI Agents Projects record plus 27 newly
+registered source lanes. The 500-project catalogue remains the existing Batch 05
+reference-only record. The other records are either `source-review-required` or
+`reference-only`, with `execution_enabled: false` and a `reference-only`
+activation boundary.
+
+A collection count is never added to Jinwoo's 450 logical-agent capacity. No
+repository, `SKILL.md`, `.agent.md`, prompt, profile, installer, local skills
+folder, CLI, provider, model, media, GitHub actor, browser, desktop or device
+route is loaded by viewing it. The complete ranked evidence table and individual
+commit/licence results are in [`INTEGRATION_BATCH_11.md`](INTEGRATION_BATCH_11.md).
+
 ### Nox desktop and hand-gesture safety intake
 
 Batch 10 adds two original status-UX records to the responsive Interaction Lab:
@@ -141,8 +157,8 @@ webcam, hand-data or input-control path is imported. See
 local review. It makes no network request, file read, tool call or
 execution-state change. It verifies final Army capacity, native ownership,
 external-runtime locks, Batch 03, Batch 04, Batch 05, Batch 06, Batch 07 and
-Batch 08, Batch 09 and Batch 10 inventories, restricted source/licence/review
-gates, read-only Workspace Guard and audit availability.
+Batch 08, Batch 09, Batch 10 and Batch 11 inventories, restricted
+source/licence/review gates, read-only Workspace Guard and audit availability.
 
 ## Why detection is not activation
 
@@ -175,13 +191,16 @@ The following restrictions are specifically enforced in the registry:
   has no verified repository licence plus model/camera/pointer surfaces. Jinwoo
   will not guess a repository, hardware controller or machine protocol, and will
   not copy their code/configuration/models or install a package until exact
-  evidence passes source/licence/safety review.
+  evidence passes source/licence/safety review. Batch 11 adds individually
+  pinned source records for named skill collections plus pending vendor/local
+  path requests; a collection, `SKILL.md` or `.agent.md` is not native code and
+  cannot bypass the same review.
 - **Queued companion phase:** Open-AutoGLM does not belong to desktop V1 and
   has no phone, Accessibility, screen-capture or input capability.
 - **Computer-use, execution or external-tool lanes:** Goose, Bytebot,
   OpenDesktop, Hermes Agent, OpenAgent, IRIS-Mini, IRIS-Zero, Composio,
   Stagehand, LangChain Community, Jarvis One-Click Setup, Control PC Using Hand
-  Gesture and MCP sources receive no terminal, desktop,
+  Gesture, desktop-agent, Batch 11 skill collections and MCP sources receive no terminal, desktop,
   browser, capture, plugin, schedule, provider, account or credential access
   simply by being listed here.
 - **Camera, gestures and physical hardware:** Barehands, Ultron Orb UI and the
@@ -245,6 +264,7 @@ See [`INTEGRATION_BATCH_01.md`](INTEGRATION_BATCH_01.md),
 [`INTEGRATION_BATCH_06.md`](INTEGRATION_BATCH_06.md),
 [`INTEGRATION_BATCH_07.md`](INTEGRATION_BATCH_07.md),
 [`INTEGRATION_BATCH_08.md`](INTEGRATION_BATCH_08.md),
-[`INTEGRATION_BATCH_09.md`](INTEGRATION_BATCH_09.md), and
-[`INTEGRATION_BATCH_10.md`](INTEGRATION_BATCH_10.md) for the source-review
+[`INTEGRATION_BATCH_09.md`](INTEGRATION_BATCH_09.md),
+[`INTEGRATION_BATCH_10.md`](INTEGRATION_BATCH_10.md), and
+[`INTEGRATION_BATCH_11.md`](INTEGRATION_BATCH_11.md) for the source-review
 records and adapter-specific activation requirements.

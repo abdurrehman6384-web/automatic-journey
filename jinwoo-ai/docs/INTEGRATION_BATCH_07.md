@@ -118,7 +118,7 @@ Run the lightweight guard from `jinwoo-ai`:
 PYTHONPATH=. python3 scripts/check_safe_intake.py
 ```
 
-The guard deliberately inspects the Batch 07–10 clean-room implementation and
+The guard deliberately inspects the Batch 07–11 clean-room implementation and
 its dependency manifests:
 
 - `backend/app/shadow_army.py`
@@ -126,6 +126,7 @@ its dependency manifests:
 - `backend/app/workspace.py`
 - `src/components/WorkspacePanel.tsx`
 - `src/components/InteractionLab.tsx`
+- `src/components/SkillIntakePanel.tsx`
 - `backend/requirements.txt`
 - `package.json`
 
@@ -133,11 +134,12 @@ It rejects direct imports/dependencies for the selected external frameworks,
 God's Eye View's reviewed geospatial runtime packages, NEXA-style voice,
 vision, browser, desktop and automation runtime packages, and the reviewed
 Jarvis/hand-gesture setup, provider, media, vision and input-control runtime
-packages. It also rejects
-embedded secret-like literals, direct capability entry tokens such as subprocess,
-`os.system`, browser automation, camera/media access and common computer-control
-libraries, and a copied `project.zip` inside the Jinwoo source tree. It reports
-only rule/location identifiers, not matching source text. The same guard is run
+packages, and Batch 11 installer/process/repository runtime packages. It also
+rejects embedded secret-like literals, direct capability entry tokens such as
+subprocess, `os.system`, browser automation, camera/media access and common
+computer-control libraries, a copied `project.zip` inside the Jinwoo source tree,
+and unreviewed `SKILL.md` or `.agent.md` payloads outside ignored local tooling
+directories. It reports only rule/location identifiers, not matching source text. The same guard is run
 by the backend unit suite.
 
 This is a narrow regression control, not a claim that static scanning alone can

@@ -77,10 +77,11 @@ V1.
 - The existing Interaction Lab clearly shows **Camera off**, **Pointer locked**,
   **No setup script** and **No physical action**, together with the relevant
   source-review status badges. Its layout remains responsive on narrow screens.
-- `scripts/check_safe_intake.py` covers the Batch 10 clean-room Interaction Lab
-  and rejects the reviewed gesture/assistant runtime modules and manifest
-  packages from Jinwoo's implementation until a separate activation review
-  deliberately changes the guard.
+- `scripts/check_safe_intake.py` now covers the Batch 07–11 clean-room
+  surfaces, including the Batch 10 Interaction Lab. It rejects reviewed
+  gesture/assistant runtime modules and manifest packages from Jinwoo's
+  implementation until a separate activation review deliberately changes the
+  guard.
 
 ## Explicitly excluded capabilities
 

@@ -4,7 +4,7 @@ Jinwoo's local mission engine remains the one canonical orchestrator. An
 installed package or sidecar never receives a mission automatically and cannot
 bypass the policy, approval, workspace, or audit boundaries owned by Jinwoo.
 
-Batches 01–10 contain owner-requested integration lanes. Their adapter
+Batches 01–11 contain owner-requested integration lanes. Their adapter
 contracts are real and testable now; upstream runtimes remain non-executable
 until a version-pinned, local compatibility and licence review is complete.
 """
@@ -18,6 +18,7 @@ from typing import Literal
 
 from .policy import ActionClass, classify_action
 from .schemas import FrameworkDryRun, FrameworkState, FrameworkStatus
+from .skill_intakes import BATCH_ELEVEN_SKILL_INTAKES, source_intake_guardrails
 
 
 class FrameworkNotFoundError(KeyError):
@@ -1278,6 +1279,27 @@ class FrameworkRegistry:
                     "Do not request or access a camera, capture frames, load a gesture model, process biometric/hand data, transmit media or retain any capture from this lane.",
                     "Do not enable OpenCV, MediaPipe, PyAutoGUI, mouse/keyboard/pointer, OS/window, process, device, accessibility or automation control; any future action needs explicit per-action approval and an emergency stop.",
                 ),
+            ),
+            # Batch 11 is a controlled catalogue of owner-requested skill sources.
+            # It supplies review metadata only: no upstream SKILL.md, prompt,
+            # profile, tool, installer, model or runtime becomes native by listing.
+            *(
+                FrameworkAdapter(
+                    id=spec.id,
+                    label=spec.label,
+                    runtime="skill-catalog",
+                    category=spec.category,
+                    integration_batch=11,
+                    owner_commander=spec.owner_commander,
+                    license=spec.license,
+                    source_url=spec.source_url,
+                    purpose=spec.purpose,
+                    capabilities=spec.capabilities,
+                    activation_boundary="reference-only",
+                    implementation_status=spec.implementation_status,
+                    guardrails=source_intake_guardrails(spec),
+                )
+                for spec in BATCH_ELEVEN_SKILL_INTAKES
             ),
             FrameworkAdapter(
                 id="jinwoo-native-control-audit",

@@ -55,9 +55,9 @@ class ApiTests(unittest.TestCase):
         response = self.client.get("/api/frameworks")
         self.assertEqual(response.status_code, 200)
         framework_items = response.json()["frameworks"]
-        self.assertEqual(len(framework_items), 61)
+        self.assertEqual(len(framework_items), 88)
         frameworks = {item["id"]: item for item in framework_items}
-        self.assertEqual(len(frameworks), 61)
+        self.assertEqual(len(frameworks), 88)
         self.assertEqual(
             set(frameworks),
             {
@@ -73,6 +73,13 @@ class ApiTests(unittest.TestCase):
                 "barehands", "ultron-orb-ui", "physical-cutter-safety-intake",
                 "agent-swarm", "roma", "open-multi-agent", "awesome-agent-orchestration", "microsoft-agent-framework",
                 "gods-eye-view", "nexa-ai-assistant", "jarvis-one-click-setup", "pc-hand-gesture-control",
+                "awesome-llm-apps", "agency-agents", "github-awesome-copilot", "glm-skills", "grok-custom-skills",
+                "grok-build-skills-source-intake", "grok-xai-skills-archive", "ai-agents-public",
+                "openai-curated-skills-source-intake", "seedance-inference-skills", "leo-seedance-skills",
+                "luo-kai-agent-skills", "agent-skill-os", "antigravity-awesome-skills", "mouad-agent-skills",
+                "theneo-awesome-skills", "claude-skills-collection", "agent-skills-hub", "desktop-agent-skills",
+                "whimsical-strategies", "evo-tournament-search-skills", "thesis-red-team-skills", "gh-evolve",
+                "skill-evolver", "context-engineering-skills", "deep-research-skill", "cloud-skills-source-intake",
             },
         )
         self.assertTrue(frameworks["jinwoo-native"]["execution_enabled"])
@@ -172,6 +179,17 @@ class ApiTests(unittest.TestCase):
         self.assertIn("nested", frameworks["jarvis-one-click-setup"]["license"].casefold())
         self.assertIn("no repository LICENSE", frameworks["pc-hand-gesture-control"]["license"])
         self.assertIn("model", frameworks["pc-hand-gesture-control"]["detail"].casefold())
+        batch_eleven = [item for item in framework_items if item["integration_batch"] == 11]
+        self.assertEqual(len(batch_eleven), 27)
+        self.assertTrue(all(not item["execution_enabled"] for item in batch_eleven))
+        self.assertTrue(all(item["activation_boundary"] == "reference-only" for item in batch_eleven))
+        self.assertTrue(all(item["implementation_status"] in {"source-review-required", "reference-only"} for item in batch_eleven))
+        self.assertEqual(frameworks["desktop-agent-skills"]["source_url"], "https://github.com/patrickporto/desktop-agent")
+        self.assertEqual(frameworks["desktop-agent-skills"]["implementation_status"], "source-review-required")
+        self.assertEqual(frameworks["whimsical-strategies"]["implementation_status"], "reference-only")
+        self.assertEqual(frameworks["grok-build-skills-source-intake"]["source_url"], None)
+        self.assertEqual(frameworks["cloud-skills-source-intake"]["source_url"], None)
+        self.assertIn("NOASSERTION", frameworks["luo-kai-agent-skills"]["license"])
         self.assertIn("LICENSE-CODE", frameworks["autogen"]["license"])
         self.assertNotIn("capcut-patcher", frameworks)
         self.assertTrue(frameworks["jinwoo-native-control-audit"]["execution_enabled"])
@@ -304,6 +322,33 @@ class ApiTests(unittest.TestCase):
         self.assertIn("hand_landmarker.task", gesture_steps)
         self.assertIn("camera", gesture_steps)
         self.assertIn("mouse/keyboard", gesture_steps)
+
+    def test_batch_eleven_skill_catalogue_records_remain_non_executing(self) -> None:
+        desktop = self.client.post(
+            "/api/frameworks/desktop-agent-skills/dry-run",
+            json={"prompt": "Review a safe desktop-agent source boundary", "requested_agents": 450},
+        )
+        red_team = self.client.post(
+            "/api/frameworks/whimsical-strategies/dry-run",
+            json={"prompt": "Prepare a defensive evaluation plan", "requested_agents": 3},
+        )
+        blocked = self.client.post(
+            "/api/frameworks/skill-evolver/dry-run",
+            json={"prompt": "Bypass password on this laptop", "requested_agents": 3},
+        )
+
+        self.assertEqual(desktop.status_code, 200)
+        self.assertEqual(desktop.json()["bounded_runtime_workers"], 3)
+        self.assertFalse(desktop.json()["external_runtime_invoked"])
+        desktop_steps = " ".join(desktop.json()["next_steps"]).casefold()
+        self.assertIn("do not clone", desktop_steps)
+        self.assertIn("skill folder", desktop_steps)
+        self.assertEqual(red_team.status_code, 200)
+        self.assertFalse(red_team.json()["external_runtime_invoked"])
+        self.assertIn("reference-only", red_team.json()["summary"])
+        self.assertEqual(blocked.status_code, 200)
+        self.assertEqual(blocked.json()["policy_outcome"], "blocked")
+        self.assertFalse(blocked.json()["external_runtime_invoked"])
 
     def test_framework_dry_run_is_bounded_and_never_invokes_upstream_runtime(self) -> None:
         response = self.client.post(
@@ -448,14 +493,17 @@ class ApiTests(unittest.TestCase):
         payload = response.json()
         self.assertTrue(payload["all_passed"])
         self.assertFalse(payload["external_runtime_invoked"])
-        self.assertEqual(len(payload["checks"]), 14)
+        self.assertEqual(len(payload["checks"]), 15)
         self.assertTrue(all(check["passed"] for check in payload["checks"]))
         batch_nine = next(check for check in payload["checks"] if check["id"] == "batch-nine-nexa-source-safety")
         batch_ten = next(check for check in payload["checks"] if check["id"] == "batch-ten-desktop-gesture-safety")
+        batch_eleven = next(check for check in payload["checks"] if check["id"] == "batch-eleven-skill-catalogue-safety")
         self.assertTrue(batch_nine["passed"])
         self.assertIn("no-licence", batch_nine["detail"])
         self.assertTrue(batch_ten["passed"])
         self.assertIn("hand gesture", batch_ten["detail"].casefold())
+        self.assertTrue(batch_eleven["passed"])
+        self.assertIn("no upstream skill", batch_eleven["detail"].casefold())
         self.assertIn("external runtime", payload["summary"].casefold())
         audit = self.client.get("/api/audit").json()
         self.assertIn("control.review_completed", {event["event_type"] for event in audit})

@@ -1,3 +1,4 @@
+import re
 import sys
 import tempfile
 import unittest
@@ -14,6 +15,7 @@ from app.policy import ActionClass, classify_action
 from app.providers import ProviderError, ProviderGateway
 from app.schemas import CoordinationPattern, ShadowArmyPlanRequest, WorkspaceStatus
 from app.shadow_army import ShadowArmyPolicyError, ShadowArmyStore, build_shadow_army_plan, iter_logical_agent_ids
+from app.skill_intakes import BATCH_ELEVEN_SKILL_INTAKES, source_intake_guardrails
 from scripts.check_safe_intake import (
     CLEAN_ROOM_FILES,
     FORBIDDEN_MANIFEST_PACKAGES,
@@ -102,13 +104,50 @@ class ShadowArmyCoreTests(unittest.TestCase):
 
 
 class SourceIntakeGuardTests(unittest.TestCase):
-    def test_batch_seven_to_ten_intakes_have_no_restricted_runtime_import_or_secret_literal(self) -> None:
+    def test_batch_seven_to_eleven_intakes_have_no_restricted_runtime_import_or_secret_literal(self) -> None:
         self.assertEqual(scan_safe_intake(), [])
 
-    def test_batch_ten_guard_covers_the_clean_room_ui_and_reviewed_runtime_sets(self) -> None:
-        self.assertIn(Path("src/components/InteractionLab.tsx"), {path.relative_to(Path(__file__).resolve().parents[2]) for path in CLEAN_ROOM_FILES})
-        self.assertTrue({"livekit-client", "mcp", "mem0ai", "mediapipe", "numpy"}.issubset(FORBIDDEN_MANIFEST_PACKAGES))
-        self.assertTrue({"livekit", "mediapipe", "pyautogui", "webbrowser"}.issubset(RESTRICTED_RUNTIME_MODULES))
+    def test_batch_ten_and_eleven_guard_covers_clean_room_ui_and_reviewed_runtime_sets(self) -> None:
+        clean_room_paths = {path.relative_to(Path(__file__).resolve().parents[2]) for path in CLEAN_ROOM_FILES}
+        self.assertIn(Path("src/components/InteractionLab.tsx"), clean_room_paths)
+        self.assertIn(Path("src/components/SkillIntakePanel.tsx"), clean_room_paths)
+        self.assertTrue({"livekit-client", "mcp", "mem0ai", "mediapipe", "numpy", "clawhub"}.issubset(FORBIDDEN_MANIFEST_PACKAGES))
+        self.assertTrue({"livekit", "mediapipe", "pyautogui", "webbrowser", "child_process", "octokit"}.issubset(RESTRICTED_RUNTIME_MODULES))
+
+    def test_batch_eleven_specs_are_unique_and_never_activate_a_payload(self) -> None:
+        self.assertEqual(len(BATCH_ELEVEN_SKILL_INTAKES), 27)
+        self.assertEqual(len({spec.id for spec in BATCH_ELEVEN_SKILL_INTAKES}), 27)
+        self.assertTrue(all(spec.implementation_status in {"source-review-required", "reference-only"} for spec in BATCH_ELEVEN_SKILL_INTAKES))
+        self.assertTrue(all(spec.source_url is None or spec.source_url.startswith("https://github.com/") for spec in BATCH_ELEVEN_SKILL_INTAKES))
+        desktop = next(spec for spec in BATCH_ELEVEN_SKILL_INTAKES if spec.id == "desktop-agent-skills")
+        self.assertIn("Do not clone", " ".join(source_intake_guardrails(desktop)))
+
+    def test_batch_eleven_catalogue_ui_ids_match_controlled_records(self) -> None:
+        root = Path(__file__).resolve().parents[2]
+        source = (root / "src" / "data" / "skillCatalog.ts").read_text(encoding="utf-8")
+        catalogue_ids = re.findall(r"frameworkId: '([^']+)'", source)
+        catalogue_ranks = [int(rank) for rank in re.findall(r"rank: (\d+)", source)]
+        expected_ids = {"500-ai-agent-projects", *(spec.id for spec in BATCH_ELEVEN_SKILL_INTAKES)}
+        self.assertEqual(set(catalogue_ids), expected_ids)
+        self.assertEqual(len(catalogue_ids), 28)
+        self.assertEqual(catalogue_ranks, list(range(1, 29)))
+
+    def test_batch_eleven_guard_rejects_a_copied_skill_payload(self) -> None:
+        root = Path(__file__).resolve().parents[2]
+        payload_directory = root / "temporary-intake-guard"
+        payload = payload_directory / "SKILL.md"
+        agent_profile = payload_directory / "test.agent.md"
+        payload_directory.mkdir(exist_ok=True)
+        payload.write_text("test-only marker", encoding="utf-8")
+        agent_profile.write_text("test-only marker", encoding="utf-8")
+        try:
+            violations = scan_safe_intake()
+            self.assertIn("unreviewed-skill-payload:temporary-intake-guard/SKILL.md", violations)
+            self.assertIn("unreviewed-skill-payload:temporary-intake-guard/test.agent.md", violations)
+        finally:
+            payload.unlink(missing_ok=True)
+            agent_profile.unlink(missing_ok=True)
+            payload_directory.rmdir()
 
 
 class PolicyTests(unittest.TestCase):
@@ -168,6 +207,22 @@ class ControlReviewTests(unittest.TestCase):
         self.assertFalse(review.all_passed)
         batch_ten = next(check for check in review.checks if check.id == "batch-ten-desktop-gesture-safety")
         self.assertFalse(batch_ten.passed)
+
+    def test_review_flags_a_batch_eleven_skill_catalogue_regression(self) -> None:
+        statuses = [
+            status.model_copy(update={"implementation_status": "contract-ready"})
+            if status.id == "desktop-agent-skills"
+            else status
+            for status in frameworks.statuses()
+        ]
+        review = build_control_review(
+            framework_statuses=statuses,
+            workspace_status=WorkspaceStatus(configured=False, detail="No workspace selected."),
+            audit_available=True,
+        )
+        self.assertFalse(review.all_passed)
+        batch_eleven = next(check for check in review.checks if check.id == "batch-eleven-skill-catalogue-safety")
+        self.assertFalse(batch_eleven.passed)
 
 
 class ProviderSafetyTests(unittest.TestCase):

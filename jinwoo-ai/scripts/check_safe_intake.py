@@ -2,7 +2,7 @@
 """Static no-import guard for controlled Shadow Army source intakes.
 
 This intentionally checks only the clean-room files and dependency manifests
-that implement or expose Batch 07–10. It does not unpack, execute, import, or
+that implement or expose Batch 07–11. It does not unpack, execute, import, or
 inspect an archive payload. A failing check prints file locations and rule
 names, never matching source text that might contain sensitive material.
 """
@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import ast
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -22,6 +23,7 @@ CLEAN_ROOM_FILES = (
     ROOT / "backend" / "app" / "workspace.py",
     ROOT / "src" / "components" / "WorkspacePanel.tsx",
     ROOT / "src" / "components" / "InteractionLab.tsx",
+    ROOT / "src" / "components" / "SkillIntakePanel.tsx",
 )
 MANIFESTS = (ROOT / "backend" / "requirements.txt", ROOT / "package.json")
 
@@ -98,12 +100,17 @@ JARVIS_RUNTIME_PACKAGES = {
     "python-dotenv",
 }
 HAND_GESTURE_RUNTIME_PACKAGES = {"mediapipe", "numpy"}
+# Batch 11 collection/installer requests remain metadata-only. A catalogue name
+# or a SKILL.md file is never an installation grant; explicit package/CLI paths
+# are blocked until a future source-specific activation review changes this guard.
+SKILL_COLLECTION_RUNTIME_PACKAGES = {"clawhub", "execa", "simple-git"}
 FORBIDDEN_MANIFEST_PACKAGES = (
     EXTERNAL_FRAMEWORK_MODULES
     | GEOSPATIAL_RUNTIME_PACKAGES
     | NEXA_RUNTIME_PACKAGES
     | JARVIS_RUNTIME_PACKAGES
     | HAND_GESTURE_RUNTIME_PACKAGES
+    | SKILL_COLLECTION_RUNTIME_PACKAGES
 )
 
 # Import-level checks complement manifest scanning. These are package/module
@@ -111,15 +118,20 @@ FORBIDDEN_MANIFEST_PACKAGES = (
 # runtimes and must not be imported by a clean-room native feature.
 RESTRICTED_RUNTIME_MODULES = {
     "@livekit",
+    "@octokit",
+    "child_process",
+    "clawhub",
     "cv2",
     "dotenv",
     "edge_tts",
+    "execa",
     "fuzzywuzzy",
     "google",
     "livekit",
     "mcp",
     "mediapipe",
     "mem0",
+    "octokit",
     "numpy",
     "next",
     "openai",
@@ -129,6 +141,7 @@ RESTRICTED_RUNTIME_MODULES = {
     "pynput",
     "requests",
     "selenium",
+    "simple_git",
     "speech_recognition",
     "ultralytics",
     "webdriver_manager",
@@ -170,11 +183,19 @@ FORBIDDEN_RUNTIME_TOKENS = (
     "@livekit",
     "mcp.client",
     "webbrowser.open",
+    "node:child_process",
+    "child_process",
+    "npx clawhub",
+    "simple-git",
+    "@octokit",
 )
 SECRET_LITERAL = re.compile(
     r"(?i)(?:api[_-]?key|access[_-]?token|secret|password)\s*[:=]\s*['\"][^'\"]{8,}['\"]"
 )
 TS_IMPORT = re.compile(r"(?im)^\s*(?:import|export)\b[^;\n]*?\bfrom\s*['\"]([^'\"]+)['\"]|\brequire\(\s*['\"]([^'\"]+)['\"]\s*\)")
+_SKILL_PAYLOAD_NAMES = {"skill.md"}
+_SKILL_PAYLOAD_SUFFIX = ".agent.md"
+_IGNORED_PAYLOAD_DIRECTORIES = {".git", ".venv", "node_modules", "dist", "coverage", "__pycache__", ".vite", "data"}
 
 
 def _module_root(module: str) -> str:
@@ -190,6 +211,19 @@ def _python_imports(path: Path, text: str) -> set[str]:
         elif isinstance(node, ast.ImportFrom) and node.module:
             modules.add(node.module)
     return modules
+
+
+def _upstream_skill_payloads() -> list[Path]:
+    """Find copied upstream skill/instruction files while skipping local tooling."""
+
+    payloads: list[Path] = []
+    for directory, directories, filenames in os.walk(ROOT):
+        directories[:] = [name for name in directories if name not in _IGNORED_PAYLOAD_DIRECTORIES]
+        for filename in filenames:
+            lowered_name = filename.casefold()
+            if lowered_name in _SKILL_PAYLOAD_NAMES or lowered_name.endswith(_SKILL_PAYLOAD_SUFFIX):
+                payloads.append(Path(directory) / filename)
+    return payloads
 
 
 def scan() -> list[str]:
@@ -245,13 +279,16 @@ def scan() -> list[str]:
     if any(ROOT.rglob("project.zip")):
         violations.append("archive-copied-into-jinwoo-source-tree")
 
+    for payload in _upstream_skill_payloads():
+        violations.append(f"unreviewed-skill-payload:{payload.relative_to(ROOT)}")
+
     return sorted(set(violations))
 
 
 def main() -> int:
     violations = scan()
     report = {
-        "check": "controlled-source-intake-batch-07-10",
+        "check": "controlled-source-intake-batch-07-11",
         "clean_room_files": [str(path.relative_to(ROOT)) for path in CLEAN_ROOM_FILES],
         "manifest_files": [str(path.relative_to(ROOT)) for path in MANIFESTS],
         "passed": not violations,

@@ -13,6 +13,7 @@ import { ProviderPanel } from './components/ProviderPanel'
 import { ResearchPanel } from './components/ResearchPanel'
 import { SecurityScanPanel } from './components/SecurityScanPanel'
 import { ShadowArmyCore } from './components/ShadowArmyCore'
+import { SkillIntakePanel } from './components/SkillIntakePanel'
 import { WorkspacePanel } from './components/WorkspacePanel'
 import { commanders, buildArmyStats, defaultFrameworks, defaultProviders } from './data/army'
 import { buildMission, isBlockedPrompt } from './lib/mission'
@@ -43,7 +44,7 @@ const viewMeta: Record<ViewId, { eyebrow: string; title: string; description: st
   security: { eyebrow: 'GREED // DEFENSIVE ONLY', title: 'Security Gate', description: 'Prepare an authorised no-scan boundary review.' },
   memory: { eyebrow: 'LOCAL MEMORY // CONSENT FIRST', title: 'Memory Vault', description: 'Inspect and control locally stored memories.' },
   interaction: { eyebrow: 'BATCH 06 // SAFETY-LOCKED', title: 'Interaction Lab', description: 'Review gesture and hardware concepts without capture or control.' },
-  registry: { eyebrow: 'ADAPTERS // EXPLICIT BOUNDARIES', title: 'Framework registry', description: 'Review capability contracts before any runtime can exist.' },
+  registry: { eyebrow: 'ADAPTERS & SKILL CATALOGUES // EXPLICIT BOUNDARIES', title: 'Framework & skill registry', description: 'Review source and capability contracts before any runtime can exist.' },
   control: { eyebrow: 'JINWOO NATIVE // ZERO SIDE EFFECT', title: 'Control & audit', description: 'Verify locks, capacity and local audit availability.' },
   settings: { eyebrow: 'LOCAL-FIRST // CONFIGURATION', title: 'Command settings', description: 'Provider visibility and delivery constraints.' },
 }
@@ -72,7 +73,7 @@ const navigationGroups: Array<{ label: string; items: NavigationItem[] }> = [
     label: 'SYSTEM',
     items: [
       { id: 'interaction', label: 'Interaction Lab', icon: '⌁' },
-      { id: 'registry', label: 'Framework registry', icon: '✧' },
+      { id: 'registry', label: 'Frameworks & skills', icon: '✧' },
       { id: 'control', label: 'Control & audit', icon: '✓' },
       { id: 'settings', label: 'Settings', icon: '⚙' },
     ],
@@ -1224,26 +1225,29 @@ function App() {
           {activeView === 'interaction' && <InteractionLab frameworks={frameworks} onOpenRegistry={() => navigate('registry')} />}
 
           {activeView === 'registry' && (
-            <div className="registry-layout">
-              <FrameworkPanel frameworks={frameworks} dryRun={frameworkDryRun} busy={frameworkBusy} onDryRun={runFrameworkDryRun} />
-              <aside className="side-stack">
-                <section className="panel registry-summary">
-                  <p className="eyebrow">REGISTRY SUMMARY</p>
-                  <h2>{frameworks.length} controlled lanes</h2>
-                  <p>Presence in this list is not installation, permission or activation. Every external route remains under Jinwoo policy, approval, workspace and audit controls.</p>
-                  <div className="registry-summary__counts">
-                    <span><b>{frameworks.filter((framework) => framework.implementationStatus === 'contract-ready').length}</b> contract ready</span>
-                    <span><b>{frameworks.filter((framework) => framework.implementationStatus === 'license-review-required').length}</b> licence gates</span>
-                    <span><b>{frameworks.filter((framework) => framework.implementationStatus === 'source-review-required').length}</b> source intake</span>
-                  </div>
-                </section>
-                <section className="panel boundary-card">
-                  <p className="eyebrow">ACTIVATION STANDARD</p>
-                  <h2>One lane at a time.</h2>
-                  <p>A future adapter needs a pinned version, source/licence review, typed contract, consent, workspace confinement, audit, offline tests and a disable path.</p>
-                </section>
-              </aside>
-            </div>
+            <>
+              <SkillIntakePanel frameworks={frameworks} />
+              <div className="registry-layout">
+                <FrameworkPanel frameworks={frameworks} dryRun={frameworkDryRun} busy={frameworkBusy} onDryRun={runFrameworkDryRun} />
+                <aside className="side-stack">
+                  <section className="panel registry-summary">
+                    <p className="eyebrow">REGISTRY SUMMARY</p>
+                    <h2>{frameworks.length} controlled lanes</h2>
+                    <p>Presence in this list is not installation, permission or activation. Every external route remains under Jinwoo policy, approval, workspace and audit controls.</p>
+                    <div className="registry-summary__counts">
+                      <span><b>{frameworks.filter((framework) => framework.implementationStatus === 'contract-ready').length}</b> contract ready</span>
+                      <span><b>{frameworks.filter((framework) => framework.implementationStatus === 'license-review-required').length}</b> licence gates</span>
+                      <span><b>{frameworks.filter((framework) => framework.implementationStatus === 'source-review-required').length}</b> source intake</span>
+                    </div>
+                  </section>
+                  <section className="panel boundary-card">
+                    <p className="eyebrow">ACTIVATION STANDARD</p>
+                    <h2>One lane at a time.</h2>
+                    <p>A future adapter needs a pinned version, source/licence review, typed contract, consent, workspace confinement, audit, offline tests and a disable path.</p>
+                  </section>
+                </aside>
+              </div>
+            </>
           )}
 
           {activeView === 'control' && (
