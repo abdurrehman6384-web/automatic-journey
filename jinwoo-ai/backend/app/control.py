@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from .army import army_summary
 from .schemas import ControlReview, ControlReviewCheck, FrameworkStatus, WorkspaceStatus
-from .skill_intakes import BATCH_ELEVEN_SKILL_INTAKES
+from .skill_intakes import BATCH_ELEVEN_SKILL_INTAKES, BATCH_TWELVE_UPGRADE_INTAKES
 
 
 _EXPECTED_CAPACITY = {
@@ -36,6 +36,7 @@ _BATCH_EIGHT_IDS = {"gods-eye-view"}
 _BATCH_NINE_IDS = {"nexa-ai-assistant"}
 _BATCH_TEN_IDS = {"jarvis-one-click-setup", "pc-hand-gesture-control"}
 _BATCH_ELEVEN_IDS = {spec.id for spec in BATCH_ELEVEN_SKILL_INTAKES}
+_BATCH_TWELVE_IDS = {spec.id for spec in BATCH_TWELVE_UPGRADE_INTAKES}
 _LICENSE_REVIEW_IDS = {
     "firecrawl", "trufflehog", "iris-go", "iris-mini", "iris-zero", "anthropic-skills", "wordpress-agent-skills",
     "official-mcp-servers", "barehands", "roma", "gods-eye-view",
@@ -70,6 +71,7 @@ def build_control_review(
     batch_nine = [by_id[framework_id] for framework_id in _BATCH_NINE_IDS if framework_id in by_id]
     batch_ten = [by_id[framework_id] for framework_id in _BATCH_TEN_IDS if framework_id in by_id]
     batch_eleven = [by_id[framework_id] for framework_id in _BATCH_ELEVEN_IDS if framework_id in by_id]
+    batch_twelve = [by_id[framework_id] for framework_id in _BATCH_TWELVE_IDS if framework_id in by_id]
     licence_gates = [by_id[framework_id] for framework_id in _LICENSE_REVIEW_IDS if framework_id in by_id]
     reference_only = [by_id[framework_id] for framework_id in _REFERENCE_ONLY_IDS if framework_id in by_id]
     archived_upstream = [by_id[framework_id] for framework_id in _ARCHIVED_UPSTREAM_IDS if framework_id in by_id]
@@ -225,6 +227,24 @@ def build_control_review(
             ),
         ),
         ControlReviewCheck(
+            id="batch-twelve-upgrade-queue-safety",
+            label="Batch 12 next-ten upgrade queue safety",
+            passed=(
+                len(batch_twelve) == len(_BATCH_TWELVE_IDS)
+                and all(
+                    framework.integration_batch == 12
+                    and framework.implementation_status in {"source-review-required", "reference-only"}
+                    and framework.activation_boundary == "reference-only"
+                    and not framework.execution_enabled
+                    for framework in batch_twelve
+                )
+            ),
+            detail=(
+                "The next-ten upgrade candidates are source-review records only; no package, converter, graph, provider, policy engine, "
+                "database, evaluator, formatter, scanner, telemetry exporter, background loop or external runtime is installed or started."
+            ),
+        ),
+        ControlReviewCheck(
             id="restricted-source-gates",
             label="Restricted source and licence gates",
             passed=(
@@ -258,7 +278,7 @@ def build_control_review(
             ),
             detail=(
                 "Licence gates remain on Firecrawl, TruffleHog, IRIS-GO/Mini/Zero, Anthropic Skills, WordPress skills, MCP Servers, Barehands and ROMA; "
-                "NEXA, Jarvis, PC hand-gesture, Batch 11 skill catalogues and other source-intake, reference-only, archived, queued-mobile, orchestration-catalogue and physical-hardware boundaries remain locked."
+                "NEXA, Jarvis, PC hand-gesture, Batch 11 skill catalogues, Batch 12 upgrade candidates and other source-intake, reference-only, archived, queued-mobile, orchestration-catalogue and physical-hardware boundaries remain locked."
             ),
         ),
         ControlReviewCheck(

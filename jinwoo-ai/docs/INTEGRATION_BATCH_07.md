@@ -118,15 +118,19 @@ Run the lightweight guard from `jinwoo-ai`:
 PYTHONPATH=. python3 scripts/check_safe_intake.py
 ```
 
-The guard deliberately inspects the Batch 07–11 clean-room implementation and
+The guard deliberately inspects the Batch 07–12 clean-room implementation and
 its dependency manifests:
 
 - `backend/app/shadow_army.py`
-- `src/components/ShadowArmyCore.tsx`
+- `backend/app/skill_intakes.py`
 - `backend/app/workspace.py`
+- `src/components/ShadowArmyCore.tsx`
 - `src/components/WorkspacePanel.tsx`
 - `src/components/InteractionLab.tsx`
 - `src/components/SkillIntakePanel.tsx`
+- `src/components/UpgradeReviewPanel.tsx`
+- `src/data/skillCatalog.ts`
+- `src/data/upgradeReview.ts`
 - `backend/requirements.txt`
 - `package.json`
 
@@ -134,8 +138,8 @@ It rejects direct imports/dependencies for the selected external frameworks,
 God's Eye View's reviewed geospatial runtime packages, NEXA-style voice,
 vision, browser, desktop and automation runtime packages, and the reviewed
 Jarvis/hand-gesture setup, provider, media, vision and input-control runtime
-packages, and Batch 11 installer/process/repository runtime packages. It also
-rejects embedded secret-like literals, direct capability entry tokens such as
+packages, Batch 11 installer/process/repository runtime packages, and Batch 12
+candidate package/module families. It also rejects embedded secret-like literals, direct capability entry tokens such as
 subprocess, `os.system`, browser automation, camera/media access and common
 computer-control libraries, a copied `project.zip` inside the Jinwoo source tree,
 and unreviewed `SKILL.md` or `.agent.md` payloads outside ignored local tooling

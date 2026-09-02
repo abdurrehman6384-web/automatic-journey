@@ -72,9 +72,10 @@ authorise a network, shell, browser, desktop or mobile action.
 | 10 | Jarvis One-Click Setup — Source Review Intake | Nox | Original local assistant-setup, configuration-hygiene and desktop-consent patterns | **Source review required**; no root/CLI/Python reuse, installer, provider, voice, browser, MCP, file/window or process runtime |
 | 10 | Control PC Using Hand Gesture — Source Review Intake | Nox | Original camera-off gesture accessibility, pointer-approval and emergency-stop patterns | **Source review required**; no model, webcam, hand data, vision, pointer, keyboard, desktop or automation runtime |
 | 11 | Requested Skill Collection Catalogue (27 source records) | Jinwoo / assigned commander | Ranked source metadata for collections, provider lanes and specialist methods | **Source review/reference only**; no `SKILL.md`, `.agent.md`, installer, agent, model, provider, GitHub or desktop runtime |
+| 12 | Bounded Next-Ten Upgrade Review Queue (10 source records) | Jinwoo / assigned commander | Revision-pinned metadata review for document, retrieval, provider, policy, quality, security and observability concepts | **Source review/reference only**; no source retrieval, package, service, scan, telemetry or unattended discovery loop |
 
 `GET /api/frameworks` exposes each record's runtime/category, discovery state,
-licence, source URL, owner, capability tags, activation boundary and contract
+licence, source URL, recorded review commit, owner, capability tags, activation boundary and contract
 state. `POST /api/frameworks/{framework_id}/dry-run` produces a typed,
 policy-screened plan without importing, starting, downloading or calling an
 upstream project.
@@ -140,6 +141,25 @@ folder, CLI, provider, model, media, GitHub actor, browser, desktop or device
 route is loaded by viewing it. The complete ranked evidence table and individual
 commit/licence results are in [`INTEGRATION_BATCH_11.md`](INTEGRATION_BATCH_11.md).
 
+### Batch 12 bounded next-ten upgrade review queue
+
+Batch 12 records ten deliberately selected candidate lanes for a **finite**
+metadata-only review pass: MarkItDown, GraphRAG, LiteLLM, Open Policy Agent,
+LanceDB, Promptfoo, Ruff, Syft, Trivy and OpenTelemetry Python. Each API record
+has an observed default-branch revision, `execution_enabled: false` and a
+`reference-only` activation boundary. LiteLLM is additionally `reference-only`
+because GitHub metadata reported `NOASSERTION` at review time.
+
+The responsive Framework Registry queue shows the candidate, future review
+target, review categories, observed revision, metadata licence signal, owner and
+locked state. It does not inspect a repository tree or source, install a
+package/binary/SDK, parse a document, create a graph/index/database, send a
+provider request, apply policy/formatting, scan a target, emit telemetry or
+start a background discovery worker. `batch-twelve-upgrade-queue-safety` fails
+if any record leaves this controlled state. See
+[`INTEGRATION_BATCH_12.md`](INTEGRATION_BATCH_12.md) for the complete metadata
+matrix and per-candidate activation gates.
+
 ### Nox desktop and hand-gesture safety intake
 
 Batch 10 adds two original status-UX records to the responsive Interaction Lab:
@@ -157,7 +177,7 @@ webcam, hand-data or input-control path is imported. See
 local review. It makes no network request, file read, tool call or
 execution-state change. It verifies final Army capacity, native ownership,
 external-runtime locks, Batch 03, Batch 04, Batch 05, Batch 06, Batch 07 and
-Batch 08, Batch 09, Batch 10 and Batch 11 inventories, restricted
+Batch 08, Batch 09, Batch 10, Batch 11 and Batch 12 inventories, restricted
 source/licence/review gates, read-only Workspace Guard and audit availability.
 
 ## Why detection is not activation
@@ -179,7 +199,7 @@ The following restrictions are specifically enforced in the registry:
 - **Archived upstream:** Bytebot cannot be adopted until a maintained source,
   security and support review passes.
 - **Reference-only:** IRIS-AI, IRIS-X, Awesome MCP Servers, 500 AI Agents
-  Projects and Awesome Agent Orchestration cannot be used as source/runtime
+  Projects, Awesome Agent Orchestration and Batch 12 LiteLLM cannot be used as source/runtime
   integrations. Their downstream or
   proprietary sources need their own review; any Jinwoo feature must be
   independently designed.
@@ -194,7 +214,14 @@ The following restrictions are specifically enforced in the registry:
   evidence passes source/licence/safety review. Batch 11 adds individually
   pinned source records for named skill collections plus pending vendor/local
   path requests; a collection, `SKILL.md` or `.agent.md` is not native code and
-  cannot bypass the same review.
+  cannot bypass the same review. Batch 12 adds revision-pinned metadata records
+  only; every candidate still needs an exact source/licence/dependency/privacy/
+  permission/sandbox/approval/audit review before any later activation.
+- **Batch 12 upgrade queue:** MarkItDown, GraphRAG, LiteLLM, Open Policy Agent,
+  LanceDB, Promptfoo, Ruff, Syft, Trivy and OpenTelemetry Python are finite
+  metadata-review records, not approved dependencies. They receive no source
+  retrieval, converter/parser, graph/index/database, gateway/key, policy engine,
+  evaluator/formatter, scan/SBOM, collector/exporter or unattended loop.
 - **Queued companion phase:** Open-AutoGLM does not belong to desktop V1 and
   has no phone, Accessibility, screen-capture or input capability.
 - **Computer-use, execution or external-tool lanes:** Goose, Bytebot,

@@ -14,6 +14,7 @@ import { ResearchPanel } from './components/ResearchPanel'
 import { SecurityScanPanel } from './components/SecurityScanPanel'
 import { ShadowArmyCore } from './components/ShadowArmyCore'
 import { SkillIntakePanel } from './components/SkillIntakePanel'
+import { UpgradeReviewPanel } from './components/UpgradeReviewPanel'
 import { WorkspacePanel } from './components/WorkspacePanel'
 import { commanders, buildArmyStats, defaultFrameworks, defaultProviders } from './data/army'
 import { buildMission, isBlockedPrompt } from './lib/mission'
@@ -88,7 +89,8 @@ interface ApiFrameworkStatus {
   integration_batch: number
   owner_commander: string
   license: string
-  source_url?: string
+  source_url?: string | null
+  review_commit?: string | null
   state: FrameworkStatus['state']
   implementation_status: FrameworkStatus['implementationStatus']
   execution_enabled: boolean
@@ -418,7 +420,8 @@ const frameworkFromApi = (framework: ApiFrameworkStatus): FrameworkStatus => ({
   integrationBatch: framework.integration_batch,
   ownerCommander: framework.owner_commander,
   license: framework.license,
-  sourceUrl: framework.source_url,
+  sourceUrl: framework.source_url ?? undefined,
+  reviewCommit: framework.review_commit ?? undefined,
   state: framework.state,
   implementationStatus: framework.implementation_status,
   executionEnabled: framework.execution_enabled,
@@ -1227,6 +1230,7 @@ function App() {
           {activeView === 'registry' && (
             <>
               <SkillIntakePanel frameworks={frameworks} />
+              <UpgradeReviewPanel frameworks={frameworks} />
               <div className="registry-layout">
                 <FrameworkPanel frameworks={frameworks} dryRun={frameworkDryRun} busy={frameworkBusy} onDryRun={runFrameworkDryRun} />
                 <aside className="side-stack">

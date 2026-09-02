@@ -15,7 +15,7 @@ This works without Docker, PostgreSQL, Redis, GPU hardware or cloud API keys.
 
 | Profile | Add only when needed |
 |---|---|
-| Standard | Ollama or LM Studio plus local LanceDB/Chroma document retrieval |
+| Standard | Ollama or LM Studio plus a separately reviewed local retrieval implementation (for example, LanceDB/Chroma) |
 | Power | PostgreSQL, Redis and vLLM on a suitable GPU/Linux system |
 | Observability | Prometheus and Grafana containers |
 | Cloud hybrid | Claude, GLM or Hugging Face enabled from secure local settings |
@@ -41,7 +41,9 @@ selected workspace. Batch 10 records Jarvis One-Click Setup and Control PC Using
 Hand Gesture as source-gated desktop/gesture intakes and adds only their original
 locked-state status UX to Interaction Lab. Batch 11 adds a ranked, original
 status catalogue for requested skill collections; their reported counts do not
-add agents and their payloads are not loaded. They can prepare bounded,
+add agents and their payloads are not loaded. Batch 12 adds a separate finite,
+revision-pinned metadata review queue for ten possible future upgrade lanes; it
+runs no unattended discovery process and retrieves no source content. They can prepare bounded,
 policy-screened plans, but the backend will not install
 or execute an upstream runtime. OpenHands has no container/sandbox path; OpenClaw
 has no gateway/channel/skill path; Batch 04/05/06 computer-use lanes have no
@@ -54,7 +56,9 @@ the Batch 10 Jarvis/hand-gesture lanes have no installer, provider, voice,
 external-tool, camera, hand model/data, pointer, keyboard, desktop or device
 path; the Batch 11 source catalogue has no skill-file loader, installer, local
 skills-path reader, agent process, provider, browser, GitHub, cloud, model or
-self-upgrade route; secret scanners have no file or Git-history scan path. Firecrawl,
+self-upgrade route; Batch 12 candidates have no package, parser, graph/index,
+gateway, policy engine, database, evaluator, formatter, scanner, collector,
+exporter, network telemetry or background-loop route; secret scanners have no file or Git-history scan path. Firecrawl,
 TruffleHog, IRIS-GO, IRIS-Mini, IRIS-Zero, Anthropic Skills, WordPress Agent
 Skill Prototypes, Official MCP Servers, Barehands, ROMA and God's Eye View are
 `license-review-required`; Bytebot is archived-upstream; IRIS-AI, IRIS-X,
@@ -79,8 +83,9 @@ boundaries. See
 [`INTEGRATION_BATCH_07.md`](INTEGRATION_BATCH_07.md),
 [`INTEGRATION_BATCH_08.md`](INTEGRATION_BATCH_08.md),
 [`INTEGRATION_BATCH_09.md`](INTEGRATION_BATCH_09.md),
-[`INTEGRATION_BATCH_10.md`](INTEGRATION_BATCH_10.md), and
-[`INTEGRATION_BATCH_11.md`](INTEGRATION_BATCH_11.md).
+[`INTEGRATION_BATCH_10.md`](INTEGRATION_BATCH_10.md),
+[`INTEGRATION_BATCH_11.md`](INTEGRATION_BATCH_11.md), and
+[`INTEGRATION_BATCH_12.md`](INTEGRATION_BATCH_12.md).
 
 ## Tank research gate
 

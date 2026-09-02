@@ -168,6 +168,7 @@ class FrameworkStatus(BaseModel):
     owner_commander: str
     license: str
     source_url: str | None = None
+    review_commit: str | None = None
     state: FrameworkState
     implementation_status: Literal[
         "active", "contract-ready", "license-review-required", "source-review-required", "reference-only", "archived-upstream", "queued",

@@ -99,7 +99,7 @@ and visible limits.
   review; it never invokes an upstream runtime.
 - `POST /api/control/review` includes `batch-nine-nexa-source-safety`, verifying
   the record remains source-review-required, reference-only and non-executing.
-- `scripts/check_safe_intake.py` now guards the Batch 07–11 clean-room files and
+- `scripts/check_safe_intake.py` now guards the Batch 07–12 clean-room files and
   rejects NEXA-style voice, browser, automation, vision and desktop runtime
   packages from application manifests until a distinct activation review changes
   that policy deliberately.

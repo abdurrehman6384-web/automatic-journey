@@ -14,8 +14,8 @@ An original, local-first desktop assistant foundation for the **Jinwoo AI / Shad
 - redacted local audit trail for mission routing, approvals, completion and Memory Vault changes;
 - Igris Workspace Guard: user-selected, read-only folder listing, bounded filename-only local locator and source diagnostics with path-escape protection; the locator does not read file contents, open a file, run a process or record search terms in audit;
 - provider registry for Ollama, LM Studio, Claude, GLM/Z.ai, Hugging Face and optional Mem0;
-- controlled Batch 01–11 adapter/advanced-skill registry: core orchestration, coding, research, memory, security, media, document, connector, browser, MCP, science, interaction, geospatial, desktop-assistant, hand-gesture, skill-catalogue and mobile-companion lanes all remain policy-gated and non-executing in V1;
-- Batch 07 adds a native, mobile-first Shadow Army Core: 450 logical seats, visible Planner/Executor/Verifier topology maps, zero started external workers, and reviewed pattern references for Ruflo, CrewAI, AutoGen, MetaGPT, LangGraph, Agent Swarm, ROMA, Open Multi-Agent, Awesome Agent Orchestration and Microsoft Agent Framework; Batch 08 adds God's Eye View as a licence/data/asset-gated, non-live geospatial visualisation safety intake with no map, feed, tracking, camera, location or provider runtime; Batch 09 adds a clean-room filename-only workspace locator and keeps NEXA AI Assistant source/configuration, voice, vision, browser, desktop, device and automation capabilities disabled pending licence/source review; Batch 10 adds source-gated Jarvis setup and PC hand-gesture records plus a mobile-friendly Interaction Lab status update, with no upstream installer, model, webcam, pointer or desktop runtime; Batch 11 adds a ranked, mobile-friendly review catalogue for the requested skill collections without loading their skills, agents, prompts or installers;
+- controlled Batch 01–12 adapter/advanced-skill registry: core orchestration, coding, research, memory, security, media, document, connector, browser, MCP, science, interaction, geospatial, desktop-assistant, hand-gesture, skill-catalogue, upgrade-review and mobile-companion lanes all remain policy-gated and non-executing in V1;
+- Batch 07 adds a native, mobile-first Shadow Army Core: 450 logical seats, visible Planner/Executor/Verifier topology maps, zero started external workers, and reviewed pattern references for Ruflo, CrewAI, AutoGen, MetaGPT, LangGraph, Agent Swarm, ROMA, Open Multi-Agent, Awesome Agent Orchestration and Microsoft Agent Framework; Batch 08 adds God's Eye View as a licence/data/asset-gated, non-live geospatial visualisation safety intake with no map, feed, tracking, camera, location or provider runtime; Batch 09 adds a clean-room filename-only workspace locator and keeps NEXA AI Assistant source/configuration, voice, vision, browser, desktop, device and automation capabilities disabled pending licence/source review; Batch 10 adds source-gated Jarvis setup and PC hand-gesture records plus a mobile-friendly Interaction Lab status update, with no upstream installer, model, webcam, pointer or desktop runtime; Batch 11 adds a ranked, mobile-friendly review catalogue for the requested skill collections without loading their skills, agents, prompts or installers; Batch 12 adds a finite next-ten upgrade review queue based only on public GitHub metadata/default-branch refs, with no cloned source, package, service, model, scan, telemetry route or unattended discovery loop;
 - Batch 05 registers lawful AI-video, defensive-security, document/research, engineering, connector/MCP, browser, multi-agent and science skill contracts; Batch 06 adds gesture/orb and physical-hardware safety-intake contracts plus an original CSS-only command orb; IRIS-AI, IRIS-X, Awesome MCP Servers, 500 AI Agents Projects and Awesome Agent Orchestration remain reference-only, while required licence/source gates stay locked;
 - Tank's no-fetch Research Gate for validating explicit public HTTPS source plans without opening a URL, starting a browser or calling a crawler;
 - Greed's no-scan secret-review preflight for selected workspaces, with no file/history read, scanner launch or credential disclosure;
@@ -116,13 +116,17 @@ Interaction Lab shows their camera-off, pointer-locked and setup-locked state
 without importing a script, model or runtime. Batch 11 records 27 requested
 skill-source lanes and shows their requested rank, reported scope, categories
 and links in the Framework Registry; collection counts do not add agents or
-create skill permissions. See [`docs/INTEGRATION_BATCH_05.md`](docs/INTEGRATION_BATCH_05.md),
+create skill permissions. Batch 12 adds a separate ten-record upgrade-review
+queue showing observed revisions and GitHub metadata licence signals only; it
+is a finite review pass, not a fetch/install/execute or unattended discovery
+mechanism. See [`docs/INTEGRATION_BATCH_05.md`](docs/INTEGRATION_BATCH_05.md),
 [`docs/INTEGRATION_BATCH_06.md`](docs/INTEGRATION_BATCH_06.md),
 [`docs/INTEGRATION_BATCH_07.md`](docs/INTEGRATION_BATCH_07.md),
 [`docs/INTEGRATION_BATCH_08.md`](docs/INTEGRATION_BATCH_08.md),
 [`docs/INTEGRATION_BATCH_09.md`](docs/INTEGRATION_BATCH_09.md),
-[`docs/INTEGRATION_BATCH_10.md`](docs/INTEGRATION_BATCH_10.md), and
-[`docs/INTEGRATION_BATCH_11.md`](docs/INTEGRATION_BATCH_11.md) for source
+[`docs/INTEGRATION_BATCH_10.md`](docs/INTEGRATION_BATCH_10.md),
+[`docs/INTEGRATION_BATCH_11.md`](docs/INTEGRATION_BATCH_11.md), and
+[`docs/INTEGRATION_BATCH_12.md`](docs/INTEGRATION_BATCH_12.md) for source
 matrices and activation boundaries. External adapters can prepare a bounded,
 policy-screened dry run through `POST /api/frameworks/{id}/dry-run`, but no
 upstream runtime is invoked or enabled in V1.
@@ -160,7 +164,11 @@ run a setup script, provider, voice, browser, MCP, webcam, vision, mouse,
 keyboard, desktop or device route. Batch 11 keeps every requested skill
 collection as a declared review record: no `SKILL.md`, `.agent.md`, prompt,
 local skills path, installer, GitHub actor, cloud SDK, agent, model or external
-runtime can become native merely by appearing in a catalogue. See
+runtime can become native merely by appearing in a catalogue. Batch 12 keeps
+its ten discovered candidates as revision-pinned metadata records only: no
+source, package, converter, graph/index, provider gateway, policy engine,
+database, evaluator, formatter, scanner, telemetry exporter or unattended
+Internet loop is activated. See
 [`docs/INTEGRATION_BATCH_01.md`](docs/INTEGRATION_BATCH_01.md),
 [`docs/INTEGRATION_BATCH_02.md`](docs/INTEGRATION_BATCH_02.md),
 [`docs/INTEGRATION_BATCH_03.md`](docs/INTEGRATION_BATCH_03.md),
@@ -171,7 +179,8 @@ runtime can become native merely by appearing in a catalogue. See
 [`docs/INTEGRATION_BATCH_08.md`](docs/INTEGRATION_BATCH_08.md),
 [`docs/INTEGRATION_BATCH_09.md`](docs/INTEGRATION_BATCH_09.md),
 [`docs/INTEGRATION_BATCH_10.md`](docs/INTEGRATION_BATCH_10.md),
-[`docs/INTEGRATION_BATCH_11.md`](docs/INTEGRATION_BATCH_11.md), and
+[`docs/INTEGRATION_BATCH_11.md`](docs/INTEGRATION_BATCH_11.md),
+[`docs/INTEGRATION_BATCH_12.md`](docs/INTEGRATION_BATCH_12.md), and
 [`docs/FRAMEWORK_ADAPTERS.md`](docs/FRAMEWORK_ADAPTERS.md) before enabling any
 adapter.
 
@@ -204,7 +213,12 @@ reviewed requested skill-source repositories through public GitHub metadata and
 pinned default-branch refs only; it did not clone, load, copy or execute a
 source, `SKILL.md`, `.agent.md`, installer, local skills path or model. The
 ranked catalogue and source findings are in
-[`docs/INTEGRATION_BATCH_11.md`](docs/INTEGRATION_BATCH_11.md).
+[`docs/INTEGRATION_BATCH_11.md`](docs/INTEGRATION_BATCH_11.md). Batch 12
+queried only public repository metadata and default-branch refs for ten future
+upgrade candidates; it did not retrieve source content and did not start a
+continuous discovery, clone, install or execution process. Its immutable
+metadata queue and activation gates are recorded in
+[`docs/INTEGRATION_BATCH_12.md`](docs/INTEGRATION_BATCH_12.md).
 
 For a future source intake, provide one source-only ZIP or a GitHub repository
 with its exact licence and version. Exclude `node_modules`, `.next`, `dist`,

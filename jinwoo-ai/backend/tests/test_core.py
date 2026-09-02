@@ -15,7 +15,7 @@ from app.policy import ActionClass, classify_action
 from app.providers import ProviderError, ProviderGateway
 from app.schemas import CoordinationPattern, ShadowArmyPlanRequest, WorkspaceStatus
 from app.shadow_army import ShadowArmyPolicyError, ShadowArmyStore, build_shadow_army_plan, iter_logical_agent_ids
-from app.skill_intakes import BATCH_ELEVEN_SKILL_INTAKES, source_intake_guardrails
+from app.skill_intakes import BATCH_ELEVEN_SKILL_INTAKES, BATCH_TWELVE_UPGRADE_INTAKES, source_intake_guardrails
 from scripts.check_safe_intake import (
     CLEAN_ROOM_FILES,
     FORBIDDEN_MANIFEST_PACKAGES,
@@ -104,15 +104,17 @@ class ShadowArmyCoreTests(unittest.TestCase):
 
 
 class SourceIntakeGuardTests(unittest.TestCase):
-    def test_batch_seven_to_eleven_intakes_have_no_restricted_runtime_import_or_secret_literal(self) -> None:
+    def test_batch_seven_to_twelve_intakes_have_no_restricted_runtime_import_or_secret_literal(self) -> None:
         self.assertEqual(scan_safe_intake(), [])
 
-    def test_batch_ten_and_eleven_guard_covers_clean_room_ui_and_reviewed_runtime_sets(self) -> None:
+    def test_batch_ten_to_twelve_guard_covers_clean_room_ui_and_reviewed_runtime_sets(self) -> None:
         clean_room_paths = {path.relative_to(Path(__file__).resolve().parents[2]) for path in CLEAN_ROOM_FILES}
         self.assertIn(Path("src/components/InteractionLab.tsx"), clean_room_paths)
         self.assertIn(Path("src/components/SkillIntakePanel.tsx"), clean_room_paths)
-        self.assertTrue({"livekit-client", "mcp", "mem0ai", "mediapipe", "numpy", "clawhub"}.issubset(FORBIDDEN_MANIFEST_PACKAGES))
-        self.assertTrue({"livekit", "mediapipe", "pyautogui", "webbrowser", "child_process", "octokit"}.issubset(RESTRICTED_RUNTIME_MODULES))
+        self.assertIn(Path("src/components/UpgradeReviewPanel.tsx"), clean_room_paths)
+        self.assertIn(Path("src/data/upgradeReview.ts"), clean_room_paths)
+        self.assertTrue({"livekit-client", "mcp", "mem0ai", "mediapipe", "numpy", "clawhub", "markitdown", "graphrag", "litellm", "lancedb", "trivy", "opentelemetry-sdk"}.issubset(FORBIDDEN_MANIFEST_PACKAGES))
+        self.assertTrue({"livekit", "mediapipe", "pyautogui", "webbrowser", "child_process", "octokit", "markitdown", "graphrag", "litellm", "lancedb", "opentelemetry"}.issubset(RESTRICTED_RUNTIME_MODULES))
 
     def test_batch_eleven_specs_are_unique_and_never_activate_a_payload(self) -> None:
         self.assertEqual(len(BATCH_ELEVEN_SKILL_INTAKES), 27)
@@ -131,6 +133,27 @@ class SourceIntakeGuardTests(unittest.TestCase):
         self.assertEqual(set(catalogue_ids), expected_ids)
         self.assertEqual(len(catalogue_ids), 28)
         self.assertEqual(catalogue_ranks, list(range(1, 29)))
+
+    def test_batch_twelve_specs_are_unique_revision_pinned_and_never_activate_a_runtime(self) -> None:
+        self.assertEqual(len(BATCH_TWELVE_UPGRADE_INTAKES), 10)
+        self.assertEqual(len({spec.id for spec in BATCH_TWELVE_UPGRADE_INTAKES}), 10)
+        self.assertTrue(all(re.fullmatch(r"[0-9a-f]{40}", spec.review_commit) for spec in BATCH_TWELVE_UPGRADE_INTAKES))
+        self.assertTrue(all(spec.implementation_status in {"source-review-required", "reference-only"} for spec in BATCH_TWELVE_UPGRADE_INTAKES))
+        self.assertTrue(all(spec.source_url.startswith("https://github.com/") for spec in BATCH_TWELVE_UPGRADE_INTAKES))
+        gateway = next(spec for spec in BATCH_TWELVE_UPGRADE_INTAKES if spec.id == "litellm-upgrade-intake")
+        self.assertEqual(gateway.implementation_status, "reference-only")
+        self.assertIn("Do not install/start a gateway", " ".join(source_intake_guardrails(gateway)))
+
+    def test_batch_twelve_queue_ui_ids_and_revisions_match_controlled_records(self) -> None:
+        root = Path(__file__).resolve().parents[2]
+        source = (root / "src" / "data" / "upgradeReview.ts").read_text(encoding="utf-8")
+        queue_ids = re.findall(r"frameworkId: '([^']+)'", source)
+        queue_sequences = [int(sequence) for sequence in re.findall(r"sequence: (\d+)", source)]
+        self.assertEqual(set(queue_ids), {spec.id for spec in BATCH_TWELVE_UPGRADE_INTAKES})
+        self.assertEqual(len(queue_ids), 10)
+        self.assertEqual(queue_sequences, list(range(1, 11)))
+        self.assertTrue(all(spec.review_commit in source for spec in BATCH_TWELVE_UPGRADE_INTAKES))
+        self.assertTrue(all(spec.source_url in source for spec in BATCH_TWELVE_UPGRADE_INTAKES))
 
     def test_batch_eleven_guard_rejects_a_copied_skill_payload(self) -> None:
         root = Path(__file__).resolve().parents[2]
@@ -223,6 +246,22 @@ class ControlReviewTests(unittest.TestCase):
         self.assertFalse(review.all_passed)
         batch_eleven = next(check for check in review.checks if check.id == "batch-eleven-skill-catalogue-safety")
         self.assertFalse(batch_eleven.passed)
+
+    def test_review_flags_a_batch_twelve_upgrade_queue_regression(self) -> None:
+        statuses = [
+            status.model_copy(update={"execution_enabled": True})
+            if status.id == "markitdown-upgrade-intake"
+            else status
+            for status in frameworks.statuses()
+        ]
+        review = build_control_review(
+            framework_statuses=statuses,
+            workspace_status=WorkspaceStatus(configured=False, detail="No workspace selected."),
+            audit_available=True,
+        )
+        self.assertFalse(review.all_passed)
+        batch_twelve = next(check for check in review.checks if check.id == "batch-twelve-upgrade-queue-safety")
+        self.assertFalse(batch_twelve.passed)
 
 
 class ProviderSafetyTests(unittest.TestCase):

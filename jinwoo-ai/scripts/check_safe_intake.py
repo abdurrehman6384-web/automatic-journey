@@ -2,7 +2,7 @@
 """Static no-import guard for controlled Shadow Army source intakes.
 
 This intentionally checks only the clean-room files and dependency manifests
-that implement or expose Batch 07–11. It does not unpack, execute, import, or
+that implement or expose Batch 07–12. It does not unpack, execute, import, or
 inspect an archive payload. A failing check prints file locations and rule
 names, never matching source text that might contain sensitive material.
 """
@@ -19,11 +19,15 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 CLEAN_ROOM_FILES = (
     ROOT / "backend" / "app" / "shadow_army.py",
+    ROOT / "backend" / "app" / "skill_intakes.py",
     ROOT / "src" / "components" / "ShadowArmyCore.tsx",
     ROOT / "backend" / "app" / "workspace.py",
     ROOT / "src" / "components" / "WorkspacePanel.tsx",
     ROOT / "src" / "components" / "InteractionLab.tsx",
     ROOT / "src" / "components" / "SkillIntakePanel.tsx",
+    ROOT / "src" / "components" / "UpgradeReviewPanel.tsx",
+    ROOT / "src" / "data" / "skillCatalog.ts",
+    ROOT / "src" / "data" / "upgradeReview.ts",
 )
 MANIFESTS = (ROOT / "backend" / "requirements.txt", ROOT / "package.json")
 
@@ -104,6 +108,23 @@ HAND_GESTURE_RUNTIME_PACKAGES = {"mediapipe", "numpy"}
 # or a SKILL.md file is never an installation grant; explicit package/CLI paths
 # are blocked until a future source-specific activation review changes this guard.
 SKILL_COLLECTION_RUNTIME_PACKAGES = {"clawhub", "execa", "simple-git"}
+# Batch 12 records a finite, metadata-only next-ten review queue. These candidate
+# package, binary and observability lanes may not appear in either manifest until
+# a separate exact source/licence/dependency/privacy/approval review is accepted.
+BATCH_TWELVE_RUNTIME_PACKAGES = {
+    "markitdown",
+    "graphrag",
+    "litellm",
+    "opa",
+    "lancedb",
+    "promptfoo",
+    "ruff",
+    "syft",
+    "trivy",
+    "opentelemetry-api",
+    "opentelemetry-sdk",
+    "opentelemetry-exporter-otlp",
+}
 FORBIDDEN_MANIFEST_PACKAGES = (
     EXTERNAL_FRAMEWORK_MODULES
     | GEOSPATIAL_RUNTIME_PACKAGES
@@ -111,6 +132,7 @@ FORBIDDEN_MANIFEST_PACKAGES = (
     | JARVIS_RUNTIME_PACKAGES
     | HAND_GESTURE_RUNTIME_PACKAGES
     | SKILL_COLLECTION_RUNTIME_PACKAGES
+    | BATCH_TWELVE_RUNTIME_PACKAGES
 )
 
 # Import-level checks complement manifest scanning. These are package/module
@@ -149,6 +171,22 @@ RESTRICTED_RUNTIME_MODULES = {
     "win32api",
     "win32gui",
 }
+# Do not import an evaluated Batch 12 candidate just because its metadata is
+# listed in a review queue. Any future exception must be intentionally reviewed
+# and accompanied by a scope-specific guard revision.
+BATCH_TWELVE_RUNTIME_MODULES = {
+    "graphrag",
+    "lancedb",
+    "litellm",
+    "markitdown",
+    "opentelemetry",
+    "opa",
+    "promptfoo",
+    "ruff",
+    "syft",
+    "trivy",
+}
+RESTRICTED_RUNTIME_MODULES |= BATCH_TWELVE_RUNTIME_MODULES
 
 # This is intentionally narrow: it flags direct capability-entry APIs, not
 # ordinary words in documentation, status messages, or policy descriptions.
@@ -288,7 +326,7 @@ def scan() -> list[str]:
 def main() -> int:
     violations = scan()
     report = {
-        "check": "controlled-source-intake-batch-07-11",
+        "check": "controlled-source-intake-batch-07-12",
         "clean_room_files": [str(path.relative_to(ROOT)) for path in CLEAN_ROOM_FILES],
         "manifest_files": [str(path.relative_to(ROOT)) for path in MANIFESTS],
         "passed": not violations,

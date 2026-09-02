@@ -335,6 +335,7 @@ Jinwoo Native Mission Engine
 ├── God's Eye View intake             → non-live geospatial safety contract; no globe/feed/tracking
 ├── NEXA / Jarvis / hand-gesture      → source-gated desktop/camera/input safety intakes
 ├── Batch 11 skill catalogue          → ranked source metadata; no SKILL.md/prompt/agent/installer loading
+├── Batch 12 upgrade review queue     → finite revision-pinned metadata; no source/package/runtime/loop
 └── Native Control & Audit Review    → active zero-side-effect local invariant review
 ```
 
@@ -374,6 +375,7 @@ Jinwoo Native Mission Engine
 | NEXA AI Assistant | source-gated desktop-assistant intake plus an original filename-only workspace locator; no upstream source/config/model/runtime |
 | Jarvis One-Click Setup / Control PC Using Hand Gesture | source-gated setup/desktop/gesture records; no installer, provider, camera, model, pointer, keyboard, desktop or device runtime |
 | Batch 11 requested skill collections | ranked source-review catalogue only; reported counts do not add agents and no SKILL.md, .agent.md, prompt, installer or external agent is loaded |
+| Batch 12 next-ten upgrade candidates | finite, revision-pinned metadata-review queue for document, retrieval, provider, policy, quality, security and observability concepts; no source retrieval, package, scan, telemetry or unattended loop |
 | EnvAgent | sandbox/runtime-bug capability intake pending an exact source URL and licence |
 | Barehands Gesture Interface | AGPL-gated future local hand-gesture, spatial-board and accessibility contract; no camera/CDN/state/localhost/gesture action |
 | Ultron Orb UI | independently designed orb/HUD and gesture UX concepts; no upstream source, camera or autonomous-device implementation |
@@ -408,8 +410,9 @@ inside that hierarchy, not fifteen replacement commander departments.
 | 09 — complete | NEXA AI Assistant source intake | original selected-workspace filename locator only; no NEXA source/config/model, voice, vision, browser, desktop, device or automation runtime |
 | 10 — complete | Jarvis One-Click Setup and Control PC Using Hand Gesture intakes | original responsive safety status UX; no upstream installer, voice, MCP, provider, webcam, model, pointer, keyboard, desktop or device runtime |
 | 11 — complete | Requested skill-source collections and specialist methods | 27 new source-review/reference-only records plus existing 500-project catalogue visibility; no `SKILL.md`, `.agent.md`, prompt, agent, installer, local path, provider, GitHub, cloud or self-upgrade runtime |
+| 12 — complete | Bounded next-ten upgrade review queue | 10 revision-pinned public-metadata records for possible document, retrieval, provider, policy, quality, security and observability work; no source retrieval, package, converter, graph/index, gateway, scanner, telemetry or unattended loop |
 
-A Batch 01–11 dry run may represent up to 450 logical agents but caps runtime
+A Batch 01–12 dry run may represent up to 450 logical agents but caps runtime
 planning at three Planner/Executor/Verifier workers. It never starts an
 upstream framework, network crawl, shell, browser, container, code patch,
 secret scan, messaging gateway, or tool action. Tank's Batch 02 source-plan
@@ -417,13 +420,14 @@ gate validates at most ten explicit public HTTPS domain targets without opening 
 or resolving DNS; future retrieval remains separately approval-, policy-,
 licence- and limit-gated. Batch 03's native control review verifies capacity,
 external-runtime locks, licence gates, read-only workspace state and audit
-availability without changing any execution state. Batches 04–11 expand the
+availability without changing any execution state. Batches 04–12 expand the
 visible capability catalogue and dashboard only: no CLI, desktop/container
 controller, browser, camera, voice/vision capture, CDN, provider, MCP server,
 agent loop, media processor, mobile runtime, hardware controller, skill loader,
 installer, local skills-path reader, GitHub actor, self-modification or physical
-action is activated by a dry-run plan. Batch 11 does not change the three-phase
-V1 delivery hierarchy or the fixed 450 logical-agent capacity.
+action is activated by a dry-run plan. Batch 11 and Batch 12 do not change the
+three-phase V1 delivery hierarchy or the fixed 450 logical-agent capacity.
+Batch 12 is a bounded review queue, never an unattended upgrade-discovery loop.
 
 ---
 
@@ -796,9 +800,10 @@ Controlled Batch 08 God's Eye View source/data/asset/privacy-gated geospatial sa
 Controlled Batch 09 NEXA source intake plus original bounded filename-only workspace locator; no upstream assistant/configuration/model/runtime activation
 Controlled Batch 10 Jarvis setup and PC hand-gesture source safety records plus responsive Interaction Lab locks; no installer, provider, camera, model, pointer, desktop or device control
 Controlled Batch 11 ranked skill-source catalogue with 27 new metadata contracts and existing 500-project catalogue visibility; no skill payload, prompt, agent profile, installer, local skills path, cloud/GitHub route or automatic upgrade loop
+Controlled Batch 12 finite next-ten upgrade review queue with observed public-metadata revisions, responsive status cards and static/control gates; no source retrieval, package, converter, graph/index, gateway, scanner, telemetry route or unattended loop
 Responsive Command Center UI upgrade with Commander Army Explorer, searchable framework registry, source-catalogue cards, original CSS-only status orb, Interaction Lab, expanded guardrail navigation and clear no-execution states
 Greed no-scan secret-review preflight that requires a selected workspace/authorisation but reads no files or Git history
-Jinwoo Native Control & Audit Review with zero-side-effect local invariant checks, Batch 04–11 source-gate verification and aggregate-only audit records
+Jinwoo Native Control & Audit Review with zero-side-effect local invariant checks, Batch 04–12 source-gate verification and aggregate-only audit records
 Whitespace-only API input rejection and hardened regular-file workspace reads
 Docker Compose foundation
 Electron shell foundation
@@ -822,12 +827,13 @@ Add Claude, GLM and HF live-provider integration tests with user-owned keys
 Add approved Igris workspace write/patch tools after the read-only guard review
 Implement Tank approved retrieval/source citation flow after the no-fetch gate, including runtime DNS/SSRF checks and source/rate/depth/size limits
 Add local vector retrieval and Memory Vault search
-Complete individual activation reviews before enabling any Batch 01–11 external runtime; decide Firecrawl, TruffleHog and Barehands AGPL-3.0 compatibility before any related code, service, binary or container work; resolve IRIS-GO/Mini/Zero, Anthropic Skills, WordPress prototypes and Official MCP licence evidence before source use; keep Bytebot archived-upstream and IRIS-AI/X, Awesome MCP, 500-project and Batch 11 catalogue records reference-only/source-gated; keep Mem0 optional until “memo API” is explicitly confirmed
+Complete individual activation reviews before enabling any Batch 01–12 external runtime; decide Firecrawl, TruffleHog and Barehands AGPL-3.0 compatibility before any related code, service, binary or container work; resolve IRIS-GO/Mini/Zero, Anthropic Skills, WordPress prototypes and Official MCP licence evidence before source use; keep Bytebot archived-upstream and IRIS-AI/X, Awesome MCP, 500-project, Batch 11 catalogue and Batch 12 upgrade-review records reference-only/source-gated; keep Mem0 optional until “memo API” is explicitly confirmed
 Design computer-use and external-tool activation separately for Goose, Bytebot, OpenDesktop, Hermes Agent, OpenAgent, Composio, Stagehand, LangChain Community, MCP, Open-AutoGLM, Barehands, Ultron Orb UI and any CLI/desktop/browser/camera/mobile/voice/vision lane: disposable sandbox, no host credentials/capture by default, visible per-step preview, per-action approval, audit, timeout and rollback
 Implement lawful local media workflows only after a user-authorised media root, model/dependency licence review, no-download/no-upload default, retention plan and per-edit/render/export approval; retain cybersecurity skills for defensive authorised guidance only
 Keep physical cutter/robotics work at source-and-machine safety intake only: no controller, device protocol, remote operation, interlock bypass or physical action without exact manufacturer documentation, trained local operator, emergency stop, physical safeguards, risk assessment and independent safety sign-off
 Obtain the exact EnvAgent GitHub URL and licence before selecting it for source review or sandbox integration
 Select one Batch 11 source at a time for an exact licence/subtree/provenance/dependency/privacy review; do not clone a collection, copy `SKILL.md`/`.agent.md`, read local skills paths, run installers, auto-activate skills or perform an unattended internet-upgrade loop
+Select one Batch 12 candidate at a time for exact source/branch/subtree/licence/dependency/privacy/permission/sandbox/approval/audit review; do not retrieve code wholesale, install a package/binary/SDK, read data, scan, emit telemetry or start an unattended discovery loop
 Add Electron packaging and Windows installer
 Add Rust/Go sidecars only after profiling
 ```

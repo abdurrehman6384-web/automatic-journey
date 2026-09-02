@@ -1,4 +1,4 @@
-"""Declarative Batch 11 skill-collection intake contracts.
+"""Declarative Batch 11/12 controlled source-review intake contracts.
 
 This module deliberately contains catalogue metadata only. It does not discover,
 parse, load, download, execute, or treat any upstream ``SKILL.md`` as a native
@@ -412,7 +412,156 @@ BATCH_ELEVEN_SKILL_INTAKES: tuple[SkillIntakeSpec, ...] = (
 )
 
 
+# Batch 12 is a bounded, metadata-only upgrade-discovery queue. The entries
+# were selected to address documented local gaps (document handling, retrieval,
+# provider boundaries, policy, quality, software supply-chain and observability)
+# without adding an external runtime or changing the canonical controller.
+BATCH_TWELVE_UPGRADE_INTAKES: tuple[SkillIntakeSpec, ...] = (
+    SkillIntakeSpec(
+        id="markitdown-upgrade-intake",
+        label="MarkItDown — Document Intake Upgrade Review",
+        owner_commander="Jima",
+        category="coding",
+        license="GitHub metadata reports MIT; document parsers, optional dependencies, file types and output handling require individual review",
+        source_url="https://github.com/microsoft/markitdown",
+        review_commit="20d06b6c8508f86bfae3252a979a661a14306287",
+        purpose="Candidate for a future original, selected-workspace document-to-text planning lane with no current file read or conversion.",
+        capabilities=("Document-boundary review", "Format-support planning", "Output-retention design"),
+        guardrails=(
+            "Do not install a converter, read/upload/download a document, run a parser, invoke OCR, retain extracted text, generate a file or access an unselected workspace from this lane.",
+        ),
+    ),
+    SkillIntakeSpec(
+        id="graphrag-upgrade-intake",
+        label="GraphRAG — Knowledge Retrieval Upgrade Review",
+        owner_commander="Blades",
+        category="memory",
+        license="GitHub metadata reports MIT; graph/index/model/provider/data-processing behaviour requires individual review",
+        source_url="https://github.com/microsoft/graphrag",
+        review_commit="f40e9a26ce62ba0b3fef8837d24aafdcc6e6c704",
+        purpose="Candidate for a future original local knowledge-map design; no corpus, graph, embedding, index, model or retrieval process is created.",
+        capabilities=("Knowledge-map planning", "Retrieval-boundary review", "Data-minimisation design"),
+        guardrails=(
+            "Do not ingest workspace data, build a graph/index, compute embeddings, download/use a model, call a provider, search a corpus or retain retrieval content from this lane.",
+        ),
+    ),
+    SkillIntakeSpec(
+        id="litellm-upgrade-intake",
+        label="LiteLLM — Provider Gateway Upgrade Review",
+        owner_commander="Fang",
+        category="automation",
+        license="No GitHub licence metadata detected (NOASSERTION) at review; source reuse and gateway activation are prohibited pending an exact compatible grant",
+        source_url="https://github.com/BerriAI/litellm",
+        review_commit="22cc97fe0a27367d19fdb03a16dbfd497f4360e8",
+        purpose="Reference-only candidate for provider-routing boundary comparison; Jinwoo's explicit per-request provider consent remains canonical.",
+        capabilities=("Provider-boundary review", "Routing-policy comparison", "Credential-safety design"),
+        implementation_status="reference-only",
+        guardrails=(
+            "Do not install/start a gateway, use a provider key, send prompts/data, enable fallback/load balancing, log telemetry, proxy requests or replace Jinwoo's provider approval route.",
+        ),
+    ),
+    SkillIntakeSpec(
+        id="opa-upgrade-intake",
+        label="Open Policy Agent — Policy Upgrade Review",
+        owner_commander="Jinwoo",
+        category="governance",
+        license="GitHub metadata reports Apache-2.0; policy bundles, language/runtime, telemetry and decision semantics require individual review",
+        source_url="https://github.com/open-policy-agent/opa",
+        review_commit="25a1d928d6ff43000c428ccfc1970d54afb5494b",
+        purpose="Candidate for future policy-rule comparison; it cannot replace Jinwoo's current policy classifier or approval ownership.",
+        capabilities=("Policy-rule comparison", "Decision-audit design", "Approval-model review"),
+        guardrails=(
+            "Do not install/run a policy engine, load a policy bundle, fetch remote policy, alter a policy decision, bypass approval, or replace Jinwoo's canonical controller from this lane.",
+        ),
+    ),
+    SkillIntakeSpec(
+        id="lancedb-upgrade-intake",
+        label="LanceDB — Local Retrieval Upgrade Review",
+        owner_commander="Jinwoo",
+        category="memory",
+        license="GitHub metadata reports Apache-2.0; local data layout, embeddings, extensions and retention/deletion behaviour require individual review",
+        source_url="https://github.com/lancedb/lancedb",
+        review_commit="2779b75d0d0252a324bc39ab73c9132d3b212484",
+        purpose="Candidate for a future opt-in local retrieval design; SQLite remains authoritative and no vector database is created now.",
+        capabilities=("Local-retrieval planning", "Retention-model review", "Memory-boundary design"),
+        guardrails=(
+            "Do not install/create a database, ingest/index files or memories, compute embeddings, download a model, read an unselected workspace, or change Memory Vault retention from this lane.",
+        ),
+    ),
+    SkillIntakeSpec(
+        id="promptfoo-upgrade-intake",
+        label="Promptfoo — Evaluation Upgrade Review",
+        owner_commander="Greed",
+        category="security",
+        license="GitHub metadata reports MIT; evaluation targets, red-team behaviour, provider calls, plugins and report retention require individual review",
+        source_url="https://github.com/promptfoo/promptfoo",
+        review_commit="48a71cd0163b01ba8efb2954eb0165dd810a6c6e",
+        purpose="Candidate for original local evaluation-plan design with defensive scope only; no target, test case, red team or report is run.",
+        capabilities=("Evaluation-plan review", "Defensive test design", "Evidence-retention planning"),
+        guardrails=(
+            "Do not install/run an evaluator, send a prompt to a provider, target a third-party system, generate adversarial payloads, scan for vulnerabilities, use a plugin or write a report from this lane.",
+        ),
+    ),
+    SkillIntakeSpec(
+        id="ruff-upgrade-intake",
+        label="Ruff — Python Quality Upgrade Review",
+        owner_commander="Shadow",
+        category="coding",
+        license="GitHub metadata reports MIT; binary provenance, rule configuration, formatting effects and workspace-write policy require individual review",
+        source_url="https://github.com/astral-sh/ruff",
+        review_commit="849bc61d7aea53bf7ded094973b176eb607fe3e5",
+        purpose="Candidate for a future local lint/format review plan; no binary is installed and no source file is read, rewritten or formatted.",
+        capabilities=("Lint-policy planning", "Formatting-impact review", "Quality-gate design"),
+        guardrails=(
+            "Do not install/run a binary, read or scan workspace code, apply formatting/fixes, modify configuration, write a patch or execute an automated quality command from this lane.",
+        ),
+    ),
+    SkillIntakeSpec(
+        id="syft-upgrade-intake",
+        label="Syft — SBOM Upgrade Review",
+        owner_commander="Greed",
+        category="security",
+        license="GitHub metadata reports Apache-2.0; scanner/binary provenance, filesystem/container scope and SBOM retention require individual review",
+        source_url="https://github.com/anchore/syft",
+        review_commit="77031752faf6810edf6d57c8ba798408796ea283",
+        purpose="Candidate for an approved selected-workspace SBOM preflight design; no filesystem/container scan or SBOM creation occurs.",
+        capabilities=("SBOM-boundary review", "Supply-chain planning", "Artifact-retention design"),
+        guardrails=(
+            "Do not install/run a scanner, inspect a filesystem/container/image, download a package database, generate/upload an SBOM, expose dependency inventory or read an unselected workspace from this lane.",
+        ),
+    ),
+    SkillIntakeSpec(
+        id="trivy-upgrade-intake",
+        label="Trivy — Vulnerability Review Upgrade Intake",
+        owner_commander="Greed",
+        category="security",
+        license="GitHub metadata reports Apache-2.0; vulnerability databases, scan targets, cloud/container integration and finding retention require individual review",
+        source_url="https://github.com/aquasecurity/trivy",
+        review_commit="dcfb99218f072d1f54576af3c0b4f6fc8fe843f3",
+        purpose="Candidate for a future authorised vulnerability/misconfiguration scan plan; no scanner, database, target or finding is used now.",
+        capabilities=("Vulnerability-plan review", "Scope-consent design", "Finding-redaction planning"),
+        guardrails=(
+            "Do not install/run a scanner, download a vulnerability database, read a repository/container/cloud target, scan secrets, authenticate a cloud account, expose findings or remediate anything from this lane.",
+        ),
+    ),
+    SkillIntakeSpec(
+        id="opentelemetry-upgrade-intake",
+        label="OpenTelemetry Python — Local Observability Upgrade Review",
+        owner_commander="Nox",
+        category="governance",
+        license="GitHub metadata reports Apache-2.0; instrumentation, exporters, collectors, telemetry data and network destinations require individual review",
+        source_url="https://github.com/open-telemetry/opentelemetry-python",
+        review_commit="eeeaa8f925c2b4430db3c08ef9912249138d7c00",
+        purpose="Candidate for a future local-only observability design; no instrumentation, trace collection, exporter, collector or network telemetry is enabled.",
+        capabilities=("Local-observability planning", "Telemetry-minimisation review", "Audit-vs-trace boundary design"),
+        guardrails=(
+            "Do not install/instrument an SDK, collect traces/metrics/logs, start a collector, configure an exporter, transmit telemetry, retain sensitive spans or alter the redacted audit trail from this lane.",
+        ),
+    ),
+)
+
+
 def source_intake_guardrails(spec: SkillIntakeSpec) -> tuple[str, ...]:
-    """Join mandatory Batch 11 boundaries with source-specific restrictions."""
+    """Join mandatory controlled-source boundaries with source-specific restrictions."""
 
     return _SOURCE_REVIEW_GUARDRAILS + spec.guardrails

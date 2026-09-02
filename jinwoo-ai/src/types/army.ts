@@ -61,6 +61,7 @@ export interface FrameworkStatus {
   ownerCommander: string
   license: string
   sourceUrl?: string
+  reviewCommit?: string
   state: 'canonical' | 'not-installed' | 'detected' | 'reference-only'
   implementationStatus: 'active' | 'contract-ready' | 'license-review-required' | 'source-review-required' | 'reference-only' | 'archived-upstream' | 'queued'
   executionEnabled: boolean

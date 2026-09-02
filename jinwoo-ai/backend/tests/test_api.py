@@ -55,9 +55,9 @@ class ApiTests(unittest.TestCase):
         response = self.client.get("/api/frameworks")
         self.assertEqual(response.status_code, 200)
         framework_items = response.json()["frameworks"]
-        self.assertEqual(len(framework_items), 88)
+        self.assertEqual(len(framework_items), 98)
         frameworks = {item["id"]: item for item in framework_items}
-        self.assertEqual(len(frameworks), 88)
+        self.assertEqual(len(frameworks), 98)
         self.assertEqual(
             set(frameworks),
             {
@@ -80,6 +80,9 @@ class ApiTests(unittest.TestCase):
                 "theneo-awesome-skills", "claude-skills-collection", "agent-skills-hub", "desktop-agent-skills",
                 "whimsical-strategies", "evo-tournament-search-skills", "thesis-red-team-skills", "gh-evolve",
                 "skill-evolver", "context-engineering-skills", "deep-research-skill", "cloud-skills-source-intake",
+                "markitdown-upgrade-intake", "graphrag-upgrade-intake", "litellm-upgrade-intake", "opa-upgrade-intake",
+                "lancedb-upgrade-intake", "promptfoo-upgrade-intake", "ruff-upgrade-intake", "syft-upgrade-intake",
+                "trivy-upgrade-intake", "opentelemetry-upgrade-intake",
             },
         )
         self.assertTrue(frameworks["jinwoo-native"]["execution_enabled"])
@@ -191,6 +194,17 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(frameworks["cloud-skills-source-intake"]["source_url"], None)
         self.assertIn("NOASSERTION", frameworks["luo-kai-agent-skills"]["license"])
         self.assertIn("LICENSE-CODE", frameworks["autogen"]["license"])
+        batch_twelve = [item for item in framework_items if item["integration_batch"] == 12]
+        self.assertEqual(len(batch_twelve), 10)
+        self.assertTrue(all(not item["execution_enabled"] for item in batch_twelve))
+        self.assertTrue(all(item["activation_boundary"] == "reference-only" for item in batch_twelve))
+        self.assertTrue(all(item["implementation_status"] in {"source-review-required", "reference-only"} for item in batch_twelve))
+        self.assertTrue(all(item["runtime"] == "skill-catalog" for item in batch_twelve))
+        self.assertEqual(frameworks["markitdown-upgrade-intake"]["source_url"], "https://github.com/microsoft/markitdown")
+        self.assertEqual(frameworks["markitdown-upgrade-intake"]["review_commit"], "20d06b6c8508f86bfae3252a979a661a14306287")
+        self.assertEqual(frameworks["litellm-upgrade-intake"]["implementation_status"], "reference-only")
+        self.assertIn("NOASSERTION", frameworks["litellm-upgrade-intake"]["license"])
+        self.assertIn("local-only", frameworks["opentelemetry-upgrade-intake"]["detail"].casefold())
         self.assertNotIn("capcut-patcher", frameworks)
         self.assertTrue(frameworks["jinwoo-native-control-audit"]["execution_enabled"])
         self.assertEqual(frameworks["jinwoo-native-control-audit"]["state"], "canonical")
@@ -350,6 +364,33 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(blocked.json()["policy_outcome"], "blocked")
         self.assertFalse(blocked.json()["external_runtime_invoked"])
 
+    def test_batch_twelve_upgrade_queue_dry_runs_remain_metadata_only_and_non_executing(self) -> None:
+        document = self.client.post(
+            "/api/frameworks/markitdown-upgrade-intake/dry-run",
+            json={"prompt": "Plan a selected-workspace document intake boundary", "requested_agents": 450},
+        )
+        provider_reference = self.client.post(
+            "/api/frameworks/litellm-upgrade-intake/dry-run",
+            json={"prompt": "Compare provider consent boundaries", "requested_agents": 3},
+        )
+        blocked = self.client.post(
+            "/api/frameworks/trivy-upgrade-intake/dry-run",
+            json={"prompt": "Bypass password on this laptop", "requested_agents": 3},
+        )
+
+        self.assertEqual(document.status_code, 200)
+        self.assertEqual(document.json()["bounded_runtime_workers"], 3)
+        self.assertFalse(document.json()["external_runtime_invoked"])
+        self.assertIn("source-intake", document.json()["summary"])
+        self.assertIn("Do not install a converter", " ".join(document.json()["next_steps"]))
+        self.assertEqual(provider_reference.status_code, 200)
+        self.assertFalse(provider_reference.json()["external_runtime_invoked"])
+        self.assertIn("reference-only", provider_reference.json()["summary"])
+        self.assertIn("Do not install/start a gateway", " ".join(provider_reference.json()["next_steps"]))
+        self.assertEqual(blocked.status_code, 200)
+        self.assertEqual(blocked.json()["policy_outcome"], "blocked")
+        self.assertFalse(blocked.json()["external_runtime_invoked"])
+
     def test_framework_dry_run_is_bounded_and_never_invokes_upstream_runtime(self) -> None:
         response = self.client.post(
             "/api/frameworks/swarms/dry-run",
@@ -493,17 +534,20 @@ class ApiTests(unittest.TestCase):
         payload = response.json()
         self.assertTrue(payload["all_passed"])
         self.assertFalse(payload["external_runtime_invoked"])
-        self.assertEqual(len(payload["checks"]), 15)
+        self.assertEqual(len(payload["checks"]), 16)
         self.assertTrue(all(check["passed"] for check in payload["checks"]))
         batch_nine = next(check for check in payload["checks"] if check["id"] == "batch-nine-nexa-source-safety")
         batch_ten = next(check for check in payload["checks"] if check["id"] == "batch-ten-desktop-gesture-safety")
         batch_eleven = next(check for check in payload["checks"] if check["id"] == "batch-eleven-skill-catalogue-safety")
+        batch_twelve = next(check for check in payload["checks"] if check["id"] == "batch-twelve-upgrade-queue-safety")
         self.assertTrue(batch_nine["passed"])
         self.assertIn("no-licence", batch_nine["detail"])
         self.assertTrue(batch_ten["passed"])
         self.assertIn("hand gesture", batch_ten["detail"].casefold())
         self.assertTrue(batch_eleven["passed"])
         self.assertIn("no upstream skill", batch_eleven["detail"].casefold())
+        self.assertTrue(batch_twelve["passed"])
+        self.assertIn("next-ten", batch_twelve["detail"].casefold())
         self.assertIn("external runtime", payload["summary"].casefold())
         audit = self.client.get("/api/audit").json()
         self.assertIn("control.review_completed", {event["event_type"] for event in audit})

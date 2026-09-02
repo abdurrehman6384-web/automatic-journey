@@ -4,7 +4,7 @@ Jinwoo's local mission engine remains the one canonical orchestrator. An
 installed package or sidecar never receives a mission automatically and cannot
 bypass the policy, approval, workspace, or audit boundaries owned by Jinwoo.
 
-Batches 01–11 contain owner-requested integration lanes. Their adapter
+Batches 01–12 contain owner-requested integration lanes. Their adapter
 contracts are real and testable now; upstream runtimes remain non-executable
 until a version-pinned, local compatibility and licence review is complete.
 """
@@ -18,7 +18,7 @@ from typing import Literal
 
 from .policy import ActionClass, classify_action
 from .schemas import FrameworkDryRun, FrameworkState, FrameworkStatus
-from .skill_intakes import BATCH_ELEVEN_SKILL_INTAKES, source_intake_guardrails
+from .skill_intakes import BATCH_ELEVEN_SKILL_INTAKES, BATCH_TWELVE_UPGRADE_INTAKES, source_intake_guardrails
 
 
 class FrameworkNotFoundError(KeyError):
@@ -44,6 +44,7 @@ class FrameworkAdapter:
     license: str
     source_url: str | None
     purpose: str
+    review_commit: str | None = None
     capabilities: tuple[str, ...] = ()
     activation_boundary: Literal["read-only", "approval-required", "sandboxed", "reference-only"] = "approval-required"
     native_adapter: bool = False
@@ -77,6 +78,7 @@ class FrameworkAdapter:
                 owner_commander=self.owner_commander,
                 license=self.license,
                 source_url=self.source_url,
+                review_commit=self.review_commit,
                 state=FrameworkState.CANONICAL,
                 implementation_status=self.implementation_status,
                 execution_enabled=self.implementation_status == "active",
@@ -118,6 +120,7 @@ class FrameworkAdapter:
             owner_commander=self.owner_commander,
             license=self.license,
             source_url=self.source_url,
+            review_commit=self.review_commit,
             state=state,
             implementation_status=self.implementation_status,
             execution_enabled=False,
@@ -1294,12 +1297,34 @@ class FrameworkRegistry:
                     license=spec.license,
                     source_url=spec.source_url,
                     purpose=spec.purpose,
+                    review_commit=spec.review_commit,
                     capabilities=spec.capabilities,
                     activation_boundary="reference-only",
                     implementation_status=spec.implementation_status,
                     guardrails=source_intake_guardrails(spec),
                 )
                 for spec in BATCH_ELEVEN_SKILL_INTAKES
+            ),
+            # Batch 12 is a bounded next-ten upgrade discovery queue. These are
+            # source-review contracts, not auto-upgrades, packages or workers.
+            *(
+                FrameworkAdapter(
+                    id=spec.id,
+                    label=spec.label,
+                    runtime="skill-catalog",
+                    category=spec.category,
+                    integration_batch=12,
+                    owner_commander=spec.owner_commander,
+                    license=spec.license,
+                    source_url=spec.source_url,
+                    purpose=spec.purpose,
+                    review_commit=spec.review_commit,
+                    capabilities=spec.capabilities,
+                    activation_boundary="reference-only",
+                    implementation_status=spec.implementation_status,
+                    guardrails=source_intake_guardrails(spec),
+                )
+                for spec in BATCH_TWELVE_UPGRADE_INTAKES
             ),
             FrameworkAdapter(
                 id="jinwoo-native-control-audit",
