@@ -37,7 +37,10 @@ plus a native non-executing Shadow Army topology planner. Batch 08 registers
 God's Eye View as a licence/data/asset-gated, non-live geospatial safety intake.
 Batch 09 records NEXA AI Assistant as a source-review-required desktop-assistant
 intake and independently adds only a bounded native filename locator inside the
-selected workspace. They can prepare bounded, policy-screened plans, but the backend will not install
+selected workspace. Batch 10 records Jarvis One-Click Setup and Control PC Using
+Hand Gesture as source-gated desktop/gesture intakes and adds only their original
+locked-state status UX to Interaction Lab. They can prepare bounded,
+policy-screened plans, but the backend will not install
 or execute an upstream runtime. OpenHands has no container/sandbox path; OpenClaw
 has no gateway/channel/skill path; Batch 04/05/06 computer-use lanes have no
 container, device, screen, camera, input, voice, vision, browser, CDN,
@@ -45,15 +48,19 @@ local-service or shell path; the Batch 08 geospatial lane has no globe, live
 feed, map, camera, location, tracking, voice or provider path; the Batch 09
 NEXA intake has no upstream source/configuration/model, voice, screen, camera,
 vision, browser, OS/window, input, device, messaging, media or automation path;
-secret scanners have no file or Git-history scan path. Firecrawl,
+the Batch 10 Jarvis/hand-gesture lanes have no installer, provider, voice,
+external-tool, camera, hand model/data, pointer, keyboard, desktop or device
+path; secret scanners have no file or Git-history scan path. Firecrawl,
 TruffleHog, IRIS-GO, IRIS-Mini, IRIS-Zero, Anthropic Skills, WordPress Agent
 Skill Prototypes, Official MCP Servers, Barehands, ROMA and God's Eye View are
 `license-review-required`; Bytebot is archived-upstream; IRIS-AI, IRIS-X,
 Awesome MCP Servers, 500 AI Agents Projects and Awesome Agent Orchestration are
 reference-only; Open-AutoGLM is queued for a separate Android phase; EnvAgent
 and physical hardware need exact source/machine evidence; NEXA has an exact
-reviewed source URL but no verified licence and must remain source-review-required.
-Any future adapter
+reviewed source URL but no verified licence and must remain source-review-required;
+Jarvis lacks a verified root/CLI/Python reuse licence, and the PC hand-gesture
+repository lacks a verified licence and exposes a bundled model/camera/pointer
+surface. Any future adapter
 must return proposed work through Jinwoo's policy, approval, workspace and audit
 boundaries. See
 [`FRAMEWORK_ADAPTERS.md`](FRAMEWORK_ADAPTERS.md),
@@ -64,8 +71,9 @@ boundaries. See
 [`INTEGRATION_BATCH_05.md`](INTEGRATION_BATCH_05.md),
 [`INTEGRATION_BATCH_06.md`](INTEGRATION_BATCH_06.md),
 [`INTEGRATION_BATCH_07.md`](INTEGRATION_BATCH_07.md),
-[`INTEGRATION_BATCH_08.md`](INTEGRATION_BATCH_08.md), and
-[`INTEGRATION_BATCH_09.md`](INTEGRATION_BATCH_09.md).
+[`INTEGRATION_BATCH_08.md`](INTEGRATION_BATCH_08.md),
+[`INTEGRATION_BATCH_09.md`](INTEGRATION_BATCH_09.md), and
+[`INTEGRATION_BATCH_10.md`](INTEGRATION_BATCH_10.md).
 
 ## Tank research gate
 
@@ -91,7 +99,7 @@ controls.
 
 The Jinwoo-native lane is a zero-side-effect `POST /api/control/review`
 report. It verifies capacity, native ownership, disabled external runtimes,
-Batch 03/04/05/06/07/08/09 inventory, restricted source/licence/review gates,
+Batch 03/04/05/06/07/08/09/10 inventory, restricted source/licence/review gates,
 read-only workspace status and local audit availability. It cannot enable a
 runtime or read workspace data; its audit entry contains aggregate metadata only.
 
@@ -106,10 +114,11 @@ cost without making missions better.
 
 Igris can perform bounded, read-only diagnostics only after the user selects a
 project folder in Settings. The guard canonicalises the root and every requested
-child path, rejects path escapes and excludes discovered symlinks from the locator, lists at most 200
-entries, offers a filename-and-metadata-only recursive locator bounded to 120
-directories, 500 immediate entries per directory and 100 results, and only analyses common regular text/source files
-up to 500 KB when the separate diagnostic endpoint is chosen. The locator never
+child path, rejects path escapes and excludes discovered symlinks from the
+locator, lists at most 200 entries, offers a filename-and-metadata-only recursive
+locator bounded to 120 directories, 500 immediate entries per directory and 100
+results, and only analyses common regular text/source files up to 500 KB when
+the separate diagnostic endpoint is chosen. The locator never
 reads file content, opens a file/process or records its search term in audit. It
 uses no-follow/non-blocking reads where supported and returns a safe error for
 special files or read races. It has no write, delete, terminal or package-install

@@ -14,8 +14,8 @@ An original, local-first desktop assistant foundation for the **Jinwoo AI / Shad
 - redacted local audit trail for mission routing, approvals, completion and Memory Vault changes;
 - Igris Workspace Guard: user-selected, read-only folder listing, bounded filename-only local locator and source diagnostics with path-escape protection; the locator does not read file contents, open a file, run a process or record search terms in audit;
 - provider registry for Ollama, LM Studio, Claude, GLM/Z.ai, Hugging Face and optional Mem0;
-- controlled Batch 01–09 adapter/advanced-skill registry: core orchestration, coding, research, memory, security, media, document, connector, browser, MCP, science, interaction, geospatial, desktop-assistant and mobile-companion lanes all remain policy-gated and non-executing in V1;
-- Batch 07 adds a native, mobile-first Shadow Army Core: 450 logical seats, visible Planner/Executor/Verifier topology maps, zero started external workers, and reviewed pattern references for Ruflo, CrewAI, AutoGen, MetaGPT, LangGraph, Agent Swarm, ROMA, Open Multi-Agent, Awesome Agent Orchestration and Microsoft Agent Framework; Batch 08 adds God's Eye View as a licence/data/asset-gated, non-live geospatial visualisation safety intake with no map, feed, tracking, camera, location or provider runtime; Batch 09 adds a clean-room filename-only workspace locator and keeps NEXA AI Assistant source/configuration, voice, vision, browser, desktop, device and automation capabilities disabled pending licence/source review;
+- controlled Batch 01–10 adapter/advanced-skill registry: core orchestration, coding, research, memory, security, media, document, connector, browser, MCP, science, interaction, geospatial, desktop-assistant, hand-gesture and mobile-companion lanes all remain policy-gated and non-executing in V1;
+- Batch 07 adds a native, mobile-first Shadow Army Core: 450 logical seats, visible Planner/Executor/Verifier topology maps, zero started external workers, and reviewed pattern references for Ruflo, CrewAI, AutoGen, MetaGPT, LangGraph, Agent Swarm, ROMA, Open Multi-Agent, Awesome Agent Orchestration and Microsoft Agent Framework; Batch 08 adds God's Eye View as a licence/data/asset-gated, non-live geospatial visualisation safety intake with no map, feed, tracking, camera, location or provider runtime; Batch 09 adds a clean-room filename-only workspace locator and keeps NEXA AI Assistant source/configuration, voice, vision, browser, desktop, device and automation capabilities disabled pending licence/source review; Batch 10 adds source-gated Jarvis setup and PC hand-gesture records plus a mobile-friendly Interaction Lab status update, with no upstream installer, model, webcam, pointer or desktop runtime;
 - Batch 05 registers lawful AI-video, defensive-security, document/research, engineering, connector/MCP, browser, multi-agent and science skill contracts; Batch 06 adds gesture/orb and physical-hardware safety-intake contracts plus an original CSS-only command orb; IRIS-AI, IRIS-X, Awesome MCP Servers, 500 AI Agents Projects and Awesome Agent Orchestration remain reference-only, while required licence/source gates stay locked;
 - Tank's no-fetch Research Gate for validating explicit public HTTPS source plans without opening a URL, starting a browser or calling a crawler;
 - Greed's no-scan secret-review preflight for selected workspaces, with no file/history read, scanner launch or credential disclosure;
@@ -110,11 +110,15 @@ live data/camera/location feed, tracker, voice service, API proxy or browser
 permission path. Batch 09 records NEXA AI Assistant as a source-review-required
 desktop-assistant intake with no upstream code/configuration/model/runtime;
 Jinwoo's original workspace locator searches names and metadata only inside the
-user-selected folder. See [`docs/INTEGRATION_BATCH_05.md`](docs/INTEGRATION_BATCH_05.md),
+user-selected folder. Batch 10 records Jarvis One-Click Setup and Control PC
+Using Hand Gesture as unlicensed, source-gated desktop/gesture intakes; the
+Interaction Lab shows their camera-off, pointer-locked and setup-locked state
+without importing a script, model or runtime. See [`docs/INTEGRATION_BATCH_05.md`](docs/INTEGRATION_BATCH_05.md),
 [`docs/INTEGRATION_BATCH_06.md`](docs/INTEGRATION_BATCH_06.md),
 [`docs/INTEGRATION_BATCH_07.md`](docs/INTEGRATION_BATCH_07.md),
-[`docs/INTEGRATION_BATCH_08.md`](docs/INTEGRATION_BATCH_08.md), and
-[`docs/INTEGRATION_BATCH_09.md`](docs/INTEGRATION_BATCH_09.md) for source
+[`docs/INTEGRATION_BATCH_08.md`](docs/INTEGRATION_BATCH_08.md),
+[`docs/INTEGRATION_BATCH_09.md`](docs/INTEGRATION_BATCH_09.md), and
+[`docs/INTEGRATION_BATCH_10.md`](docs/INTEGRATION_BATCH_10.md) for source
 matrices and activation boundaries. External adapters can prepare a bounded,
 policy-screened dry run through `POST /api/frameworks/{id}/dry-run`, but no
 upstream runtime is invoked or enabled in V1.
@@ -144,7 +148,12 @@ reviewed; it has no live globe, tracking, camera, location or voice route.
 Batch 09 locks NEXA AI Assistant because no verified repository licence was
 found and its public tree exposes a configuration-risk desktop-assistant surface;
 no upstream code, `.env`, model, provider, voice, vision, browser, screen,
-input, OS/window, device, messaging or automation capability is activated. See
+input, OS/window, device, messaging or automation capability is activated.
+Batch 10 locks Jarvis One-Click Setup because its root/CLI/Python source lacks a
+verified reuse licence, and locks Control PC Using Hand Gesture because it lacks
+a verified licence and exposes camera/model/pointer control. Neither record can
+run a setup script, provider, voice, browser, MCP, webcam, vision, mouse,
+keyboard, desktop or device route. See
 [`docs/INTEGRATION_BATCH_01.md`](docs/INTEGRATION_BATCH_01.md),
 [`docs/INTEGRATION_BATCH_02.md`](docs/INTEGRATION_BATCH_02.md),
 [`docs/INTEGRATION_BATCH_03.md`](docs/INTEGRATION_BATCH_03.md),
@@ -153,7 +162,8 @@ input, OS/window, device, messaging or automation capability is activated. See
 [`docs/INTEGRATION_BATCH_06.md`](docs/INTEGRATION_BATCH_06.md),
 [`docs/INTEGRATION_BATCH_07.md`](docs/INTEGRATION_BATCH_07.md),
 [`docs/INTEGRATION_BATCH_08.md`](docs/INTEGRATION_BATCH_08.md),
-[`docs/INTEGRATION_BATCH_09.md`](docs/INTEGRATION_BATCH_09.md), and
+[`docs/INTEGRATION_BATCH_09.md`](docs/INTEGRATION_BATCH_09.md),
+[`docs/INTEGRATION_BATCH_10.md`](docs/INTEGRATION_BATCH_10.md), and
 [`docs/FRAMEWORK_ADAPTERS.md`](docs/FRAMEWORK_ADAPTERS.md) before enabling any
 adapter.
 
@@ -177,7 +187,11 @@ reviewed God's Eye View GitHub intake is documented in
 non-executing. The separately reviewed NEXA AI Assistant GitHub intake is
 recorded in [`docs/INTEGRATION_BATCH_09.md`](docs/INTEGRATION_BATCH_09.md): it
 adds no upstream payload and remains source-review-required because no verified
-licence was found.
+licence was found. Batch 10 separately reviewed the Jarvis and PC hand-gesture
+GitHub trees through static metadata/source analysis only; neither upstream was
+cloned, copied, installed, executed or merged because their required licence and
+safety gates remain unresolved. See
+[`docs/INTEGRATION_BATCH_10.md`](docs/INTEGRATION_BATCH_10.md).
 
 For a future source intake, provide one source-only ZIP or a GitHub repository
 with its exact licence and version. Exclude `node_modules`, `.next`, `dist`,

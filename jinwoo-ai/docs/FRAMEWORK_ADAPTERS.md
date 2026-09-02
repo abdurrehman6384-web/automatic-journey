@@ -69,6 +69,8 @@ authorise a network, shell, browser, desktop or mobile action.
 | 07 | Microsoft Agent Framework | Jinwoo | Typed workflow, middleware and human-in-loop patterns | Native topology reference only; no hosted workflow/provider/tool/persistence |
 | 08 | God's Eye View — Geospatial Safety Intake | Tank | Non-live geospatial visualisation, provenance and public-data boundary concepts | **Licence/data/asset review required**; no globe, live feed, tracking, camera, voice, location or provider runtime |
 | 09 | NEXA AI Assistant — Source Review Intake | Igris | Native filename-only workspace navigation concept and future consented desktop-assistant safety design | **Source review required**; no upstream code/configuration/model, voice, vision, browser, desktop, device or automation runtime |
+| 10 | Jarvis One-Click Setup — Source Review Intake | Nox | Original local assistant-setup, configuration-hygiene and desktop-consent patterns | **Source review required**; no root/CLI/Python reuse, installer, provider, voice, browser, MCP, file/window or process runtime |
+| 10 | Control PC Using Hand Gesture — Source Review Intake | Nox | Original camera-off gesture accessibility, pointer-approval and emergency-stop patterns | **Source review required**; no model, webcam, hand data, vision, pointer, keyboard, desktop or automation runtime |
 
 `GET /api/frameworks` exposes each record's runtime/category, discovery state,
 licence, source URL, owner, capability tags, activation boundary and contract
@@ -122,14 +124,25 @@ safe relative paths and file size metadata, and never reads content, launches a 
 root or records the search term in audit. It is not a NEXA source/runtime
 integration; see [`INTEGRATION_BATCH_09.md`](INTEGRATION_BATCH_09.md).
 
+### Nox desktop and hand-gesture safety intake
+
+Batch 10 adds two original status-UX records to the responsive Interaction Lab:
+**Camera off**, **Pointer locked**, **No setup script** and **No physical action**.
+The Jarvis root/CLI/Python source has no verified root reuse licence (its nested
+MIT starter is not a grant for the root), while Control PC Using Hand Gesture has
+no verified repository licence and includes a hand model plus camera/pointer
+runtime. Neither source, model, installer, provider, voice, browser, MCP,
+webcam, hand-data or input-control path is imported. See
+[`INTEGRATION_BATCH_10.md`](INTEGRATION_BATCH_10.md).
+
 ### Jinwoo native control & audit review
 
 `POST /api/control/review` and its Settings panel provide a zero-side-effect
 local review. It makes no network request, file read, tool call or
 execution-state change. It verifies final Army capacity, native ownership,
 external-runtime locks, Batch 03, Batch 04, Batch 05, Batch 06, Batch 07 and
-Batch 08 and Batch 09 inventories, restricted source/licence/review gates,
-read-only Workspace Guard and audit availability.
+Batch 08, Batch 09 and Batch 10 inventories, restricted source/licence/review
+gates, read-only Workspace Guard and audit availability.
 
 ## Why detection is not activation
 
@@ -157,14 +170,18 @@ The following restrictions are specifically enforced in the registry:
 - **Source-review-required:** EnvAgent and the Physical Cutter / Robotics Safety
   Intake have no selected upstream source/runtime. NEXA AI Assistant has an
   exact reviewed URL but no verified repository licence and a configuration-risk
-  surface. Jinwoo will not guess a repository, hardware controller or machine
-  protocol, and will not copy NEXA code/configuration/models or install a package
-  until the exact evidence passes source/licence/safety review.
+  surface. Jarvis One-Click Setup has no verified root/CLI/Python reuse licence
+  (a nested MIT starter is not a root grant), and Control PC Using Hand Gesture
+  has no verified repository licence plus model/camera/pointer surfaces. Jinwoo
+  will not guess a repository, hardware controller or machine protocol, and will
+  not copy their code/configuration/models or install a package until exact
+  evidence passes source/licence/safety review.
 - **Queued companion phase:** Open-AutoGLM does not belong to desktop V1 and
   has no phone, Accessibility, screen-capture or input capability.
 - **Computer-use, execution or external-tool lanes:** Goose, Bytebot,
   OpenDesktop, Hermes Agent, OpenAgent, IRIS-Mini, IRIS-Zero, Composio,
-  Stagehand, LangChain Community and MCP sources receive no terminal, desktop,
+  Stagehand, LangChain Community, Jarvis One-Click Setup, Control PC Using Hand
+  Gesture and MCP sources receive no terminal, desktop,
   browser, capture, plugin, schedule, provider, account or credential access
   simply by being listed here.
 - **Camera, gestures and physical hardware:** Barehands, Ultron Orb UI and the
@@ -227,6 +244,7 @@ See [`INTEGRATION_BATCH_01.md`](INTEGRATION_BATCH_01.md),
 [`INTEGRATION_BATCH_05.md`](INTEGRATION_BATCH_05.md),
 [`INTEGRATION_BATCH_06.md`](INTEGRATION_BATCH_06.md),
 [`INTEGRATION_BATCH_07.md`](INTEGRATION_BATCH_07.md),
-[`INTEGRATION_BATCH_08.md`](INTEGRATION_BATCH_08.md), and
-[`INTEGRATION_BATCH_09.md`](INTEGRATION_BATCH_09.md) for the source-review
+[`INTEGRATION_BATCH_08.md`](INTEGRATION_BATCH_08.md),
+[`INTEGRATION_BATCH_09.md`](INTEGRATION_BATCH_09.md), and
+[`INTEGRATION_BATCH_10.md`](INTEGRATION_BATCH_10.md) for the source-review
 records and adapter-specific activation requirements.

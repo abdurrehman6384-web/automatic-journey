@@ -4,7 +4,7 @@ Jinwoo's local mission engine remains the one canonical orchestrator. An
 installed package or sidecar never receives a mission automatically and cannot
 bypass the policy, approval, workspace, or audit boundaries owned by Jinwoo.
 
-Batches 01–09 contain owner-requested integration lanes. Their adapter
+Batches 01–10 contain owner-requested integration lanes. Their adapter
 contracts are real and testable now; upstream runtimes remain non-executable
 until a version-pinned, local compatibility and licence review is complete.
 """
@@ -1218,6 +1218,65 @@ class FrameworkRegistry:
                     "Do not clone, copy, install, import, execute or redistribute NEXA source, prompts, models, dependencies or tracked configuration without a verified licence and a version-pinned review.",
                     "Do not invoke voice, microphone, camera, screen, vision, browser, web search, weather, messaging, shopping, media, OS/window, keyboard, mouse, device or automation capabilities from this lane.",
                     "The native filename-only workspace search reads names and metadata only within the explicit Igris workspace; it never reads content, follows a discovered symlink, opens a file, runs a process or stores search terms in audit logs.",
+                ),
+            ),
+            # Owner-requested desktop-assistant and hand-gesture source intakes
+            # (Batch 10). Their roots lack verified reuse licences and expose
+            # installer, media, camera, input, model and external-tool surfaces.
+            # These records never import, copy or activate upstream code.
+            FrameworkAdapter(
+                id="jarvis-one-click-setup",
+                label="Jarvis One-Click Setup — Source Review Intake",
+                runtime="desktop-client",
+                category="computer-use",
+                integration_batch=10,
+                owner_commander="Nox",
+                license=(
+                    "Unverified for Jarvis root/CLI/Python content — no root LICENSE; "
+                    "the nested agent-starter-react subtree's MIT file is scoped to that subtree only"
+                ),
+                source_url="https://github.com/Gauravsachdeva23e/Jarvis-One-Click-Set-Up",
+                purpose=(
+                    "Reserved for independently designed local assistant setup, configuration-hygiene and "
+                    "desktop-consent pattern review; no upstream installer, LiveKit, voice, MCP, browser, provider or desktop runtime is imported."
+                ),
+                capabilities=(
+                    "Local assistant setup UX review",
+                    "Configuration and secret-hygiene design",
+                    "Desktop-action consent boundary planning",
+                ),
+                activation_boundary="reference-only",
+                implementation_status="source-review-required",
+                guardrails=(
+                    "Do not clone, copy, install, import, execute or redistribute the Jarvis root, CLI, Python source, assistant.bat, bootstrap scripts, prompts, media, configuration or nested starter payload without an exact compatible licence review.",
+                    "Do not treat the nested agent-starter-react MIT file as a licence grant for the unlicensed Jarvis root/CLI/Python content or its bundled dependencies/assets.",
+                    "Do not invoke setup/install actions, LiveKit, voice/audio, camera, browser, Google search/weather, Mem0, MCP, provider credentials, windows, file opening, shell/process or desktop-control capabilities from this lane.",
+                ),
+            ),
+            FrameworkAdapter(
+                id="pc-hand-gesture-control",
+                label="Control PC Using Hand Gesture — Source Review Intake",
+                runtime="desktop-client",
+                category="computer-use",
+                integration_batch=10,
+                owner_commander="Nox",
+                license="Unverified — no repository LICENSE file or verified reuse grant at review",
+                source_url="https://github.com/Gauravsachdeva23e/Control_pc_using_Hand-Gesture",
+                purpose=(
+                    "Reserved for independently designed camera-off gesture accessibility and pointer-action safety review; "
+                    "no upstream hand model, webcam, vision library or pointer-control runtime is imported."
+                ),
+                capabilities=(
+                    "No-capture gesture UX review",
+                    "Pointer-action approval design",
+                    "Accessibility and emergency-stop planning",
+                ),
+                activation_boundary="reference-only",
+                implementation_status="source-review-required",
+                guardrails=(
+                    "Do not clone, copy, install, import, execute or redistribute upstream Python, compiled cache, hand_landmarker.task model or dependency manifest without a verified licence and version-pinned review.",
+                    "Do not request or access a camera, capture frames, load a gesture model, process biometric/hand data, transmit media or retain any capture from this lane.",
+                    "Do not enable OpenCV, MediaPipe, PyAutoGUI, mouse/keyboard/pointer, OS/window, process, device, accessibility or automation control; any future action needs explicit per-action approval and an emergency stop.",
                 ),
             ),
             FrameworkAdapter(

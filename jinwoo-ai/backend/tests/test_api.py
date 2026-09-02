@@ -55,9 +55,9 @@ class ApiTests(unittest.TestCase):
         response = self.client.get("/api/frameworks")
         self.assertEqual(response.status_code, 200)
         framework_items = response.json()["frameworks"]
-        self.assertEqual(len(framework_items), 59)
+        self.assertEqual(len(framework_items), 61)
         frameworks = {item["id"]: item for item in framework_items}
-        self.assertEqual(len(frameworks), 59)
+        self.assertEqual(len(frameworks), 61)
         self.assertEqual(
             set(frameworks),
             {
@@ -72,7 +72,7 @@ class ApiTests(unittest.TestCase):
                 "scientific-agent-skills", "open-autoglm", "500-ai-agent-projects", "envagent-source-intake",
                 "barehands", "ultron-orb-ui", "physical-cutter-safety-intake",
                 "agent-swarm", "roma", "open-multi-agent", "awesome-agent-orchestration", "microsoft-agent-framework",
-                "gods-eye-view", "nexa-ai-assistant",
+                "gods-eye-view", "nexa-ai-assistant", "jarvis-one-click-setup", "pc-hand-gesture-control",
             },
         )
         self.assertTrue(frameworks["jinwoo-native"]["execution_enabled"])
@@ -160,6 +160,18 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(nexa["runtime"], "desktop-client")
         self.assertIn("no repository LICENSE", nexa["license"])
         self.assertIn("filename-search", nexa["detail"].casefold())
+        batch_ten = ("jarvis-one-click-setup", "pc-hand-gesture-control")
+        for adapter in batch_ten:
+            self.assertFalse(frameworks[adapter]["execution_enabled"])
+            self.assertEqual(frameworks[adapter]["integration_batch"], 10)
+            self.assertEqual(frameworks[adapter]["implementation_status"], "source-review-required")
+            self.assertEqual(frameworks[adapter]["activation_boundary"], "reference-only")
+            self.assertEqual(frameworks[adapter]["runtime"], "desktop-client")
+            self.assertTrue(frameworks[adapter]["capabilities"])
+        self.assertIn("no root LICENSE", frameworks["jarvis-one-click-setup"]["license"])
+        self.assertIn("nested", frameworks["jarvis-one-click-setup"]["license"].casefold())
+        self.assertIn("no repository LICENSE", frameworks["pc-hand-gesture-control"]["license"])
+        self.assertIn("model", frameworks["pc-hand-gesture-control"]["detail"].casefold())
         self.assertIn("LICENSE-CODE", frameworks["autogen"]["license"])
         self.assertNotIn("capcut-patcher", frameworks)
         self.assertTrue(frameworks["jinwoo-native-control-audit"]["execution_enabled"])
@@ -267,6 +279,31 @@ class ApiTests(unittest.TestCase):
         self.assertIn("licence", steps)
         self.assertIn("voice", steps)
         self.assertIn("filename-only", steps)
+
+    def test_batch_ten_desktop_and_hand_gesture_intakes_remain_non_executing(self) -> None:
+        jarvis = self.client.post(
+            "/api/frameworks/jarvis-one-click-setup/dry-run",
+            json={"prompt": "Review a local assistant setup safety boundary", "requested_agents": 450},
+        )
+        gesture = self.client.post(
+            "/api/frameworks/pc-hand-gesture-control/dry-run",
+            json={"prompt": "Review an opt-in gesture accessibility safety boundary", "requested_agents": 3},
+        )
+
+        self.assertEqual(jarvis.status_code, 200)
+        self.assertEqual(jarvis.json()["bounded_runtime_workers"], 3)
+        self.assertFalse(jarvis.json()["external_runtime_invoked"])
+        jarvis_steps = " ".join(jarvis.json()["next_steps"]).casefold()
+        self.assertIn("licence", jarvis_steps)
+        self.assertIn("setup/install", jarvis_steps)
+        self.assertIn("voice/audio", jarvis_steps)
+        self.assertEqual(gesture.status_code, 200)
+        self.assertEqual(gesture.json()["bounded_runtime_workers"], 3)
+        self.assertFalse(gesture.json()["external_runtime_invoked"])
+        gesture_steps = " ".join(gesture.json()["next_steps"]).casefold()
+        self.assertIn("hand_landmarker.task", gesture_steps)
+        self.assertIn("camera", gesture_steps)
+        self.assertIn("mouse/keyboard", gesture_steps)
 
     def test_framework_dry_run_is_bounded_and_never_invokes_upstream_runtime(self) -> None:
         response = self.client.post(
@@ -411,11 +448,14 @@ class ApiTests(unittest.TestCase):
         payload = response.json()
         self.assertTrue(payload["all_passed"])
         self.assertFalse(payload["external_runtime_invoked"])
-        self.assertEqual(len(payload["checks"]), 13)
+        self.assertEqual(len(payload["checks"]), 14)
         self.assertTrue(all(check["passed"] for check in payload["checks"]))
         batch_nine = next(check for check in payload["checks"] if check["id"] == "batch-nine-nexa-source-safety")
+        batch_ten = next(check for check in payload["checks"] if check["id"] == "batch-ten-desktop-gesture-safety")
         self.assertTrue(batch_nine["passed"])
         self.assertIn("no-licence", batch_nine["detail"])
+        self.assertTrue(batch_ten["passed"])
+        self.assertIn("hand gesture", batch_ten["detail"].casefold())
         self.assertIn("external runtime", payload["summary"].casefold())
         audit = self.client.get("/api/audit").json()
         self.assertIn("control.review_completed", {event["event_type"] for event in audit})

@@ -2,7 +2,7 @@
 """Static no-import guard for controlled Shadow Army source intakes.
 
 This intentionally checks only the clean-room files and dependency manifests
-that implement or expose Batch 07–09. It does not unpack, execute, import, or
+that implement or expose Batch 07–10. It does not unpack, execute, import, or
 inspect an archive payload. A failing check prints file locations and rule
 names, never matching source text that might contain sensitive material.
 """
@@ -21,6 +21,7 @@ CLEAN_ROOM_FILES = (
     ROOT / "src" / "components" / "ShadowArmyCore.tsx",
     ROOT / "backend" / "app" / "workspace.py",
     ROOT / "src" / "components" / "WorkspacePanel.tsx",
+    ROOT / "src" / "components" / "InteractionLab.tsx",
 )
 MANIFESTS = (ROOT / "backend" / "requirements.txt", ROOT / "package.json")
 
@@ -80,7 +81,61 @@ NEXA_RUNTIME_PACKAGES = {
     "webdriver-manager",
     "youtube-search-python",
 }
-FORBIDDEN_MANIFEST_PACKAGES = EXTERNAL_FRAMEWORK_MODULES | GEOSPATIAL_RUNTIME_PACKAGES | NEXA_RUNTIME_PACKAGES
+# Batch 10 adds two unlicensed desktop/gesture source intakes. The nested MIT
+# starter in the Jarvis tree does not license its root/CLI/Python content, so its
+# media, setup, provider and MCP runtime package set remains excluded as well.
+JARVIS_RUNTIME_PACKAGES = {
+    "@livekit/components-react",
+    "@livekit/protocol",
+    "fuzzywuzzy",
+    "livekit-client",
+    "livekit-server-sdk",
+    "livekit-plugins-noise-cancellation",
+    "livekit-plugins-openai",
+    "mcp",
+    "mem0ai",
+    "next",
+    "python-dotenv",
+}
+HAND_GESTURE_RUNTIME_PACKAGES = {"mediapipe", "numpy"}
+FORBIDDEN_MANIFEST_PACKAGES = (
+    EXTERNAL_FRAMEWORK_MODULES
+    | GEOSPATIAL_RUNTIME_PACKAGES
+    | NEXA_RUNTIME_PACKAGES
+    | JARVIS_RUNTIME_PACKAGES
+    | HAND_GESTURE_RUNTIME_PACKAGES
+)
+
+# Import-level checks complement manifest scanning. These are package/module
+# roots that belong to source-gated desktop, media, vision, provider or tool
+# runtimes and must not be imported by a clean-room native feature.
+RESTRICTED_RUNTIME_MODULES = {
+    "@livekit",
+    "cv2",
+    "dotenv",
+    "edge_tts",
+    "fuzzywuzzy",
+    "google",
+    "livekit",
+    "mcp",
+    "mediapipe",
+    "mem0",
+    "numpy",
+    "next",
+    "openai",
+    "pyaudio",
+    "pyautogui",
+    "pygetwindow",
+    "pynput",
+    "requests",
+    "selenium",
+    "speech_recognition",
+    "ultralytics",
+    "webdriver_manager",
+    "webbrowser",
+    "win32api",
+    "win32gui",
+}
 
 # This is intentionally narrow: it flags direct capability-entry APIs, not
 # ordinary words in documentation, status messages, or policy descriptions.
@@ -111,6 +166,10 @@ FORBIDDEN_RUNTIME_TOKENS = (
     "from google import genai",
     "from google.generativeai",
     "win32",
+    "mediapipe",
+    "@livekit",
+    "mcp.client",
+    "webbrowser.open",
 )
 SECRET_LITERAL = re.compile(
     r"(?i)(?:api[_-]?key|access[_-]?token|secret|password)\s*[:=]\s*['\"][^'\"]{8,}['\"]"
@@ -158,13 +217,19 @@ def scan() -> list[str]:
                 violations.append(f"unparseable-python:{path.relative_to(ROOT)}")
                 continue
             for module in imported:
-                if _module_root(module) in EXTERNAL_FRAMEWORK_MODULES:
+                module_root = _module_root(module)
+                if module_root in EXTERNAL_FRAMEWORK_MODULES:
                     violations.append(f"upstream-framework-import:{path.relative_to(ROOT)}:{module}")
+                elif module_root in RESTRICTED_RUNTIME_MODULES:
+                    violations.append(f"restricted-runtime-import:{path.relative_to(ROOT)}:{module}")
         else:
             for match in TS_IMPORT.finditer(text):
                 module = (match.group(1) or match.group(2) or "").casefold()
-                if _module_root(module) in EXTERNAL_FRAMEWORK_MODULES:
+                module_root = _module_root(module)
+                if module_root in EXTERNAL_FRAMEWORK_MODULES:
                     violations.append(f"upstream-framework-import:{path.relative_to(ROOT)}:{module}")
+                elif module_root in RESTRICTED_RUNTIME_MODULES:
+                    violations.append(f"restricted-runtime-import:{path.relative_to(ROOT)}:{module}")
 
     for manifest in MANIFESTS:
         if not manifest.is_file():
@@ -186,7 +251,7 @@ def scan() -> list[str]:
 def main() -> int:
     violations = scan()
     report = {
-        "check": "controlled-source-intake-batch-07-09",
+        "check": "controlled-source-intake-batch-07-10",
         "clean_room_files": [str(path.relative_to(ROOT)) for path in CLEAN_ROOM_FILES],
         "manifest_files": [str(path.relative_to(ROOT)) for path in MANIFESTS],
         "passed": not violations,

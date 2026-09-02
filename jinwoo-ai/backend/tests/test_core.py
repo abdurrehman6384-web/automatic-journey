@@ -14,7 +14,12 @@ from app.policy import ActionClass, classify_action
 from app.providers import ProviderError, ProviderGateway
 from app.schemas import CoordinationPattern, ShadowArmyPlanRequest, WorkspaceStatus
 from app.shadow_army import ShadowArmyPolicyError, ShadowArmyStore, build_shadow_army_plan, iter_logical_agent_ids
-from scripts.check_safe_intake import scan as scan_safe_intake
+from scripts.check_safe_intake import (
+    CLEAN_ROOM_FILES,
+    FORBIDDEN_MANIFEST_PACKAGES,
+    RESTRICTED_RUNTIME_MODULES,
+    scan as scan_safe_intake,
+)
 from app.settings import Settings
 
 
@@ -97,8 +102,13 @@ class ShadowArmyCoreTests(unittest.TestCase):
 
 
 class SourceIntakeGuardTests(unittest.TestCase):
-    def test_batch_seven_to_nine_intakes_have_no_restricted_runtime_import_or_secret_literal(self) -> None:
+    def test_batch_seven_to_ten_intakes_have_no_restricted_runtime_import_or_secret_literal(self) -> None:
         self.assertEqual(scan_safe_intake(), [])
+
+    def test_batch_ten_guard_covers_the_clean_room_ui_and_reviewed_runtime_sets(self) -> None:
+        self.assertIn(Path("src/components/InteractionLab.tsx"), {path.relative_to(Path(__file__).resolve().parents[2]) for path in CLEAN_ROOM_FILES})
+        self.assertTrue({"livekit-client", "mcp", "mem0ai", "mediapipe", "numpy"}.issubset(FORBIDDEN_MANIFEST_PACKAGES))
+        self.assertTrue({"livekit", "mediapipe", "pyautogui", "webbrowser"}.issubset(RESTRICTED_RUNTIME_MODULES))
 
 
 class PolicyTests(unittest.TestCase):
@@ -142,6 +152,22 @@ class ControlReviewTests(unittest.TestCase):
         self.assertFalse(review.all_passed)
         batch_nine = next(check for check in review.checks if check.id == "batch-nine-nexa-source-safety")
         self.assertFalse(batch_nine.passed)
+
+    def test_review_flags_a_batch_ten_desktop_or_gesture_gate_regression(self) -> None:
+        statuses = [
+            status.model_copy(update={"execution_enabled": True})
+            if status.id == "pc-hand-gesture-control"
+            else status
+            for status in frameworks.statuses()
+        ]
+        review = build_control_review(
+            framework_statuses=statuses,
+            workspace_status=WorkspaceStatus(configured=False, detail="No workspace selected."),
+            audit_available=True,
+        )
+        self.assertFalse(review.all_passed)
+        batch_ten = next(check for check in review.checks if check.id == "batch-ten-desktop-gesture-safety")
+        self.assertFalse(batch_ten.passed)
 
 
 class ProviderSafetyTests(unittest.TestCase):
