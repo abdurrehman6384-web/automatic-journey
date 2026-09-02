@@ -55,9 +55,9 @@ class ApiTests(unittest.TestCase):
         response = self.client.get("/api/frameworks")
         self.assertEqual(response.status_code, 200)
         framework_items = response.json()["frameworks"]
-        self.assertEqual(len(framework_items), 58)
+        self.assertEqual(len(framework_items), 59)
         frameworks = {item["id"]: item for item in framework_items}
-        self.assertEqual(len(frameworks), 58)
+        self.assertEqual(len(frameworks), 59)
         self.assertEqual(
             set(frameworks),
             {
@@ -72,7 +72,7 @@ class ApiTests(unittest.TestCase):
                 "scientific-agent-skills", "open-autoglm", "500-ai-agent-projects", "envagent-source-intake",
                 "barehands", "ultron-orb-ui", "physical-cutter-safety-intake",
                 "agent-swarm", "roma", "open-multi-agent", "awesome-agent-orchestration", "microsoft-agent-framework",
-                "gods-eye-view",
+                "gods-eye-view", "nexa-ai-assistant",
             },
         )
         self.assertTrue(frameworks["jinwoo-native"]["execution_enabled"])
@@ -152,6 +152,14 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(gods_eye_view["runtime"], "desktop-client")
         self.assertEqual(gods_eye_view["category"], "reference")
         self.assertIn("third-party", gods_eye_view["license"].casefold())
+        nexa = frameworks["nexa-ai-assistant"]
+        self.assertFalse(nexa["execution_enabled"])
+        self.assertEqual(nexa["integration_batch"], 9)
+        self.assertEqual(nexa["implementation_status"], "source-review-required")
+        self.assertEqual(nexa["activation_boundary"], "reference-only")
+        self.assertEqual(nexa["runtime"], "desktop-client")
+        self.assertIn("no repository LICENSE", nexa["license"])
+        self.assertIn("filename-search", nexa["detail"].casefold())
         self.assertIn("LICENSE-CODE", frameworks["autogen"]["license"])
         self.assertNotIn("capcut-patcher", frameworks)
         self.assertTrue(frameworks["jinwoo-native-control-audit"]["execution_enabled"])
@@ -242,6 +250,23 @@ class ApiTests(unittest.TestCase):
         self.assertIn("licence", " ".join(payload["next_steps"]).casefold())
         self.assertIn("Do not fetch, display or track live flights", " ".join(payload["next_steps"]))
         self.assertIn("Do not request camera, microphone", " ".join(payload["next_steps"]))
+
+    def test_batch_nine_nexa_intake_remains_source_gated_and_non_executing(self) -> None:
+        response = self.client.post(
+            "/api/frameworks/nexa-ai-assistant/dry-run",
+            json={"prompt": "Compare a consented local assistant safety design", "requested_agents": 450},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertEqual(payload["bounded_runtime_workers"], 3)
+        self.assertFalse(payload["external_runtime_invoked"])
+        self.assertIn("source-intake", payload["summary"])
+        steps = " ".join(payload["next_steps"]).casefold()
+        self.assertIn("exact upstream url", steps)
+        self.assertIn("licence", steps)
+        self.assertIn("voice", steps)
+        self.assertIn("filename-only", steps)
 
     def test_framework_dry_run_is_bounded_and_never_invokes_upstream_runtime(self) -> None:
         response = self.client.post(
@@ -386,8 +411,11 @@ class ApiTests(unittest.TestCase):
         payload = response.json()
         self.assertTrue(payload["all_passed"])
         self.assertFalse(payload["external_runtime_invoked"])
-        self.assertEqual(len(payload["checks"]), 12)
+        self.assertEqual(len(payload["checks"]), 13)
         self.assertTrue(all(check["passed"] for check in payload["checks"]))
+        batch_nine = next(check for check in payload["checks"] if check["id"] == "batch-nine-nexa-source-safety")
+        self.assertTrue(batch_nine["passed"])
+        self.assertIn("no-licence", batch_nine["detail"])
         self.assertIn("external runtime", payload["summary"].casefold())
         audit = self.client.get("/api/audit").json()
         self.assertIn("control.review_completed", {event["event_type"] for event in audit})
@@ -494,9 +522,10 @@ class ApiTests(unittest.TestCase):
             json={"content": "   ", "kind": "note", "consent": True},
         )
         blank_research = self.client.post("/api/research/plan", json={"topic": "   "})
+        blank_workspace_search = self.client.post("/api/workspace/search", json={"query": "   "})
         mission = self.client.post("/api/missions", json={"prompt": "Analyze a safe document"}).json()
         blank_actor = self.client.post(f"/api/missions/{mission['id']}/approve", json={"approved_by": "   "})
-        for response in (blank_chat, blank_mission, blank_dry_run, blank_memory, blank_research, blank_actor):
+        for response in (blank_chat, blank_mission, blank_dry_run, blank_memory, blank_research, blank_workspace_search, blank_actor):
             self.assertEqual(response.status_code, 422)
 
     def test_safe_analysis_creates_a_planned_mission(self) -> None:
@@ -516,6 +545,61 @@ class ApiTests(unittest.TestCase):
         self.assertEqual({event["event_type"] for event in events}, {"mission.created", "mission.approved", "mission.completed"})
         self.assertNotIn("Delete the old output folder", str(events))
         self.assertIn("test-user", {event["actor"] for event in events})
+
+    def test_workspace_filename_search_is_recursive_confined_bounded_and_not_audited(self) -> None:
+        project = Path(self.temp_dir.name) / "project-search"
+        nested = project / "src" / "planning"
+        nested.mkdir(parents=True)
+        (nested / "roadmap-alpha.md").write_text("PRIVATE_FILE_CONTENT_MUST_NOT_APPEAR", encoding="utf-8")
+        (project / "roadmap-beta.txt").write_text("second private content", encoding="utf-8")
+        outside = Path(self.temp_dir.name) / "outside-roadmap-secret.txt"
+        outside.write_text("outside private content", encoding="utf-8")
+        (project / "escaped-roadmap-link.txt").symlink_to(outside)
+        dense_directory = project / "dense-directory"
+        dense_directory.mkdir()
+        for index in range(501):
+            (dense_directory / f"entry-{index:03d}.txt").touch()
+
+        without_workspace = self.client.post("/api/workspace/search", json={"query": "roadmap"})
+        self.assertEqual(without_workspace.status_code, 400)
+        self.assertEqual(self.client.put("/api/workspace", json={"path": str(project)}).status_code, 200)
+
+        response = self.client.post(
+            "/api/workspace/search",
+            json={"query": "RoAdMaP", "relative_path": ".", "max_results": 50},
+        )
+        limited = self.client.post(
+            "/api/workspace/search",
+            json={"query": "roadmap", "relative_path": ".", "max_results": 1},
+        )
+        escaped_scope = self.client.post(
+            "/api/workspace/search",
+            json={"query": "roadmap", "relative_path": "../", "max_results": 50},
+        )
+        dense_limit = self.client.post(
+            "/api/workspace/search",
+            json={"query": "does-not-match", "relative_path": "dense-directory", "max_results": 50},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertEqual(payload["query"], "RoAdMaP")
+        self.assertEqual(payload["relative_path"], ".")
+        self.assertEqual({entry["relative_path"] for entry in payload["results"]}, {"roadmap-beta.txt", "src/planning/roadmap-alpha.md"})
+        self.assertLessEqual(payload["scanned_directories"], 120)
+        self.assertNotIn("PRIVATE_FILE_CONTENT_MUST_NOT_APPEAR", str(payload))
+        self.assertNotIn("escaped-roadmap-link.txt", {entry["name"] for entry in payload["results"]})
+        self.assertEqual(limited.status_code, 200)
+        self.assertEqual(len(limited.json()["results"]), 1)
+        self.assertTrue(limited.json()["truncated"])
+        self.assertEqual(escaped_scope.status_code, 400)
+        self.assertEqual(dense_limit.status_code, 200)
+        self.assertEqual(dense_limit.json()["results"], [])
+        self.assertEqual(dense_limit.json()["scanned_directories"], 1)
+        self.assertTrue(dense_limit.json()["truncated"])
+        audit = self.client.get("/api/audit").json()
+        self.assertNotIn("RoAdMaP", str(audit))
+        self.assertNotIn("workspace.search", {event["event_type"] for event in audit})
 
     def test_workspace_selection_confines_read_only_igris_diagnostics(self) -> None:
         project = Path(self.temp_dir.name) / "project"

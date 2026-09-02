@@ -4,7 +4,7 @@ Jinwoo's local mission engine remains the one canonical orchestrator. An
 installed package or sidecar never receives a mission automatically and cannot
 bypass the policy, approval, workspace, or audit boundaries owned by Jinwoo.
 
-Batches 01–08 contain owner-requested integration lanes. Their adapter
+Batches 01–09 contain owner-requested integration lanes. Their adapter
 contracts are real and testable now; upstream runtimes remain non-executable
 until a version-pinned, local compatibility and licence review is complete.
 """
@@ -1189,6 +1189,35 @@ class FrameworkRegistry:
                     "Do not fetch, display or track live flights, vessels, satellites, traffic, radio, cameras, places or other location-linked feeds from this lane.",
                     "Do not request camera, microphone, screen, browser location or device permissions, and do not create an OSINT, surveillance or individual-tracking workflow.",
                     "Do not configure Cesium, Google Maps, OpenAI, OpenSky, AIS, map tiles, API keys, proxy routes, sockets or external services from this record.",
+                ),
+            ),
+            # Owner-requested NEXA AI Assistant source intake batch 9. The
+            # public upstream has no verified licence and tracked configuration;
+            # no NEXA code, dependency, model, prompt or runtime is imported.
+            FrameworkAdapter(
+                id="nexa-ai-assistant",
+                label="NEXA AI Assistant — Source Review Intake",
+                runtime="desktop-client",
+                category="computer-use",
+                integration_batch=9,
+                owner_commander="Igris",
+                license="Unverified — no repository LICENSE file or verified reuse grant at review",
+                source_url="https://github.com/Shashank7275/NEXA_AI_ASSISTANT",
+                purpose=(
+                    "Records a source-gated desktop-assistant review; Jinwoo independently provides only a bounded, "
+                    "selected-workspace filename-search concept and does not import the upstream runtime."
+                ),
+                capabilities=(
+                    "Filename-only workspace navigation concept",
+                    "Local-memory and intent-routing comparison",
+                    "Future consented desktop-assistant safety design",
+                ),
+                activation_boundary="reference-only",
+                implementation_status="source-review-required",
+                guardrails=(
+                    "Do not clone, copy, install, import, execute or redistribute NEXA source, prompts, models, dependencies or tracked configuration without a verified licence and a version-pinned review.",
+                    "Do not invoke voice, microphone, camera, screen, vision, browser, web search, weather, messaging, shopping, media, OS/window, keyboard, mouse, device or automation capabilities from this lane.",
+                    "The native filename-only workspace search reads names and metadata only within the explicit Igris workspace; it never reads content, follows a discovered symlink, opens a file, runs a process or stores search terms in audit logs.",
                 ),
             ),
             FrameworkAdapter(

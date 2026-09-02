@@ -68,6 +68,7 @@ authorise a network, shell, browser, desktop or mobile action.
 | 07 | Awesome Agent Orchestration | Kaisel | Orchestration discovery and comparison catalogue | **Reference only**; every listed downstream source needs individual review |
 | 07 | Microsoft Agent Framework | Jinwoo | Typed workflow, middleware and human-in-loop patterns | Native topology reference only; no hosted workflow/provider/tool/persistence |
 | 08 | God's Eye View — Geospatial Safety Intake | Tank | Non-live geospatial visualisation, provenance and public-data boundary concepts | **Licence/data/asset review required**; no globe, live feed, tracking, camera, voice, location or provider runtime |
+| 09 | NEXA AI Assistant — Source Review Intake | Igris | Native filename-only workspace navigation concept and future consented desktop-assistant safety design | **Source review required**; no upstream code/configuration/model, voice, vision, browser, desktop, device or automation runtime |
 
 `GET /api/frameworks` exposes each record's runtime/category, discovery state,
 licence, source URL, owner, capability tags, activation boundary and contract
@@ -112,14 +113,23 @@ parameters and non-standard ports. Future execution must revalidate DNS and
 connection targets, receive its own approval, honour source rules/robots and
 rate/depth/size/domain limits, and retain cited data locally.
 
+### Igris safe local locator
+
+`POST /api/workspace/search` adds a Batch 09 clean-room filename locator inside
+the explicit selected workspace. It matches names recursively within a
+120-directory, 500-entry-per-directory/100-result ceiling, returns only names,
+safe relative paths and file size metadata, and never reads content, launches a file/process, escapes the
+root or records the search term in audit. It is not a NEXA source/runtime
+integration; see [`INTEGRATION_BATCH_09.md`](INTEGRATION_BATCH_09.md).
+
 ### Jinwoo native control & audit review
 
 `POST /api/control/review` and its Settings panel provide a zero-side-effect
 local review. It makes no network request, file read, tool call or
 execution-state change. It verifies final Army capacity, native ownership,
 external-runtime locks, Batch 03, Batch 04, Batch 05, Batch 06, Batch 07 and
-Batch 08 inventories, restricted source/licence/review gates, read-only Workspace
-Guard and audit availability.
+Batch 08 and Batch 09 inventories, restricted source/licence/review gates,
+read-only Workspace Guard and audit availability.
 
 ## Why detection is not activation
 
@@ -145,9 +155,11 @@ The following restrictions are specifically enforced in the registry:
   proprietary sources need their own review; any Jinwoo feature must be
   independently designed.
 - **Source-review-required:** EnvAgent and the Physical Cutter / Robotics Safety
-  Intake have no selected upstream source/runtime. Jinwoo will not guess a
-  repository, hardware controller or machine protocol or install a package until
-  the owner supplies the exact evidence and it passes source/licence/safety review.
+  Intake have no selected upstream source/runtime. NEXA AI Assistant has an
+  exact reviewed URL but no verified repository licence and a configuration-risk
+  surface. Jinwoo will not guess a repository, hardware controller or machine
+  protocol, and will not copy NEXA code/configuration/models or install a package
+  until the exact evidence passes source/licence/safety review.
 - **Queued companion phase:** Open-AutoGLM does not belong to desktop V1 and
   has no phone, Accessibility, screen-capture or input capability.
 - **Computer-use, execution or external-tool lanes:** Goose, Bytebot,
@@ -214,6 +226,7 @@ See [`INTEGRATION_BATCH_01.md`](INTEGRATION_BATCH_01.md),
 [`INTEGRATION_BATCH_04.md`](INTEGRATION_BATCH_04.md),
 [`INTEGRATION_BATCH_05.md`](INTEGRATION_BATCH_05.md),
 [`INTEGRATION_BATCH_06.md`](INTEGRATION_BATCH_06.md),
-[`INTEGRATION_BATCH_07.md`](INTEGRATION_BATCH_07.md), and
-[`INTEGRATION_BATCH_08.md`](INTEGRATION_BATCH_08.md) for the source-review
+[`INTEGRATION_BATCH_07.md`](INTEGRATION_BATCH_07.md),
+[`INTEGRATION_BATCH_08.md`](INTEGRATION_BATCH_08.md), and
+[`INTEGRATION_BATCH_09.md`](INTEGRATION_BATCH_09.md) for the source-review
 records and adapter-specific activation requirements.

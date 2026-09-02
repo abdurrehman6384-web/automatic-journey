@@ -166,6 +166,14 @@ export interface WorkspaceAnalysis {
   truncated: boolean
 }
 
+export interface WorkspaceSearch {
+  query: string
+  relativePath: string
+  results: WorkspaceEntry[]
+  scannedDirectories: number
+  truncated: boolean
+}
+
 export type MemoryKind = 'preference' | 'project' | 'note' | 'reminder'
 
 export interface MemoryItem {

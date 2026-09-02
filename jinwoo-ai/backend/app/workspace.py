@@ -11,10 +11,11 @@ import hashlib
 import os
 import sqlite3
 import stat
+from collections import deque
 from dataclasses import dataclass
 from pathlib import Path
 
-from .schemas import WorkspaceAnalysis, WorkspaceEntry, WorkspaceStatus
+from .schemas import WorkspaceAnalysis, WorkspaceEntry, WorkspaceSearch, WorkspaceStatus
 
 
 class WorkspaceError(ValueError):
@@ -36,6 +37,11 @@ _LANGUAGE_BY_SUFFIX = {
 }
 _MAX_ANALYSIS_BYTES = 512_000
 _MAX_LIST_ENTRIES = 200
+# NEXA-inspired native filename search limits. They ensure that a convenience
+# search never becomes a whole-device crawl or an unbounded content scanner.
+_MAX_SEARCH_DIRECTORIES = 120
+_MAX_SEARCH_DIRECTORY_ENTRIES = 500
+_MAX_SEARCH_RESULTS = 100
 
 
 @dataclass(frozen=True)
@@ -159,6 +165,105 @@ class WorkspaceStore:
                     )
                 )
         return entries
+
+    def search_entries(self, query: str, relative_path: str = ".", max_results: int = 50) -> WorkspaceSearch:
+        """Search file and folder names only inside a selected workspace.
+
+        The NEXA repository's file-search concept is reimplemented here without
+        importing its code. This method reads no file content, executes no file,
+        opens no application and cannot leave the explicit workspace root.
+        """
+
+        workspace, start_directory = self._resolve_child(relative_path)
+        if not start_directory.is_dir():
+            raise WorkspaceError("Choose a directory to search inside the selected workspace.")
+        normalized_query = query.strip().casefold()
+        if not normalized_query:
+            raise WorkspaceError("Enter a non-blank file or folder name to search.")
+
+        result_limit = min(max(1, max_results), _MAX_SEARCH_RESULTS)
+        pending: deque[Path] = deque([start_directory])
+        visited_directories: set[Path] = {start_directory}
+        results: list[WorkspaceEntry] = []
+        scanned_directories = 0
+        truncated = False
+
+        while pending:
+            if scanned_directories >= _MAX_SEARCH_DIRECTORIES:
+                truncated = True
+                break
+            directory = pending.popleft()
+            scanned_directories += 1
+            try:
+                # Do not materialise an unbounded directory listing: even a
+                # name-only search must stay predictably small on a workspace
+                # with generated dependencies or pathological directory trees.
+                directory_entries: list[Path] = []
+                with os.scandir(directory) as iterator:
+                    for directory_entry in iterator:
+                        if len(directory_entries) >= _MAX_SEARCH_DIRECTORY_ENTRIES:
+                            truncated = True
+                            break
+                        directory_entries.append(Path(directory_entry.path))
+                directory_entries.sort(key=lambda item: item.name.casefold())
+            except OSError:
+                # A disappearing/unreadable child should not broaden the search
+                # or disclose a system-level error outside the selected root.
+                continue
+
+            result_limit_reached = False
+            for entry in directory_entries:
+                try:
+                    # A filename convenience feature has no need to traverse a
+                    # link. Skipping every symlink removes both escape and loop
+                    # paths, including a link that could change during a scan.
+                    if entry.is_symlink():
+                        continue
+                    resolved = entry.resolve(strict=True)
+                    relative = resolved.relative_to(workspace.root)
+                except (OSError, RuntimeError, ValueError):
+                    # Exclude paths that race away from the selected root.
+                    continue
+
+                if resolved.is_dir():
+                    if resolved not in visited_directories:
+                        if len(visited_directories) >= _MAX_SEARCH_DIRECTORIES:
+                            truncated = True
+                        else:
+                            visited_directories.add(resolved)
+                            pending.append(resolved)
+                    result = WorkspaceEntry(name=entry.name, relative_path=relative.as_posix(), kind="directory")
+                elif resolved.is_file():
+                    try:
+                        size_bytes = resolved.stat().st_size
+                    except OSError:
+                        continue
+                    result = WorkspaceEntry(
+                        name=entry.name,
+                        relative_path=relative.as_posix(),
+                        kind="file",
+                        size_bytes=size_bytes,
+                    )
+                else:
+                    # Ignore devices, FIFOs, sockets and other special files.
+                    continue
+
+                if normalized_query in entry.name.casefold():
+                    if len(results) >= result_limit:
+                        truncated = True
+                        result_limit_reached = True
+                        break
+                    results.append(result)
+            if result_limit_reached:
+                break
+
+        return WorkspaceSearch(
+            query=query.strip(),
+            relative_path=start_directory.relative_to(workspace.root).as_posix(),
+            results=results,
+            scanned_directories=scanned_directories,
+            truncated=truncated,
+        )
 
     def analyze_text_file(self, relative_path: str) -> WorkspaceAnalysis:
         workspace, file_path = self._resolve_child(relative_path)

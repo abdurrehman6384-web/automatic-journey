@@ -32,6 +32,7 @@ _BATCH_FIVE_IDS = {
 _BATCH_SIX_IDS = {"barehands", "ultron-orb-ui", "physical-cutter-safety-intake"}
 _BATCH_SEVEN_IDS = {"agent-swarm", "roma", "open-multi-agent", "awesome-agent-orchestration", "microsoft-agent-framework"}
 _BATCH_EIGHT_IDS = {"gods-eye-view"}
+_BATCH_NINE_IDS = {"nexa-ai-assistant"}
 _LICENSE_REVIEW_IDS = {
     "firecrawl", "trufflehog", "iris-go", "iris-mini", "iris-zero", "anthropic-skills", "wordpress-agent-skills",
     "official-mcp-servers", "barehands", "roma", "gods-eye-view",
@@ -39,7 +40,7 @@ _LICENSE_REVIEW_IDS = {
 _REFERENCE_ONLY_IDS = {"iris-ai", "iris-x", "awesome-mcp-servers", "500-ai-agent-projects", "awesome-agent-orchestration"}
 _ARCHIVED_UPSTREAM_IDS = {"bytebot"}
 _QUEUED_IDS = {"open-autoglm"}
-_SOURCE_REVIEW_IDS = {"envagent-source-intake", "physical-cutter-safety-intake"}
+_SOURCE_REVIEW_IDS = {"envagent-source-intake", "physical-cutter-safety-intake", "nexa-ai-assistant"}
 
 
 def build_control_review(
@@ -60,6 +61,7 @@ def build_control_review(
     batch_six = [by_id[framework_id] for framework_id in _BATCH_SIX_IDS if framework_id in by_id]
     batch_seven = [by_id[framework_id] for framework_id in _BATCH_SEVEN_IDS if framework_id in by_id]
     batch_eight = [by_id[framework_id] for framework_id in _BATCH_EIGHT_IDS if framework_id in by_id]
+    batch_nine = [by_id[framework_id] for framework_id in _BATCH_NINE_IDS if framework_id in by_id]
     licence_gates = [by_id[framework_id] for framework_id in _LICENSE_REVIEW_IDS if framework_id in by_id]
     reference_only = [by_id[framework_id] for framework_id in _REFERENCE_ONLY_IDS if framework_id in by_id]
     archived_upstream = [by_id[framework_id] for framework_id in _ARCHIVED_UPSTREAM_IDS if framework_id in by_id]
@@ -161,6 +163,24 @@ def build_control_review(
             ),
         ),
         ControlReviewCheck(
+            id="batch-nine-nexa-source-safety",
+            label="Batch 09 NEXA source-safety inventory",
+            passed=(
+                len(batch_nine) == len(_BATCH_NINE_IDS)
+                and all(
+                    framework.integration_batch == 9
+                    and framework.implementation_status == "source-review-required"
+                    and framework.activation_boundary == "reference-only"
+                    and not framework.execution_enabled
+                    for framework in batch_nine
+                )
+            ),
+            detail=(
+                "NEXA AI Assistant remains a no-licence, configuration-risk source-review intake; no desktop, voice, vision, "
+                "browser, device, model or automation runtime is present in Jinwoo."
+            ),
+        ),
+        ControlReviewCheck(
             id="restricted-source-gates",
             label="Restricted source and licence gates",
             passed=(
@@ -194,7 +214,7 @@ def build_control_review(
             ),
             detail=(
                 "Licence gates remain on Firecrawl, TruffleHog, IRIS-GO/Mini/Zero, Anthropic Skills, WordPress skills, MCP Servers, Barehands and ROMA; "
-                "reference-only, archived, queued-mobile, source-intake, orchestration-catalogue and physical-hardware boundaries remain locked."
+                "NEXA and other source-intake, reference-only, archived, queued-mobile, orchestration-catalogue and physical-hardware boundaries remain locked."
             ),
         ),
         ControlReviewCheck(

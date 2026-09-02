@@ -97,7 +97,7 @@ class ShadowArmyCoreTests(unittest.TestCase):
 
 
 class SourceIntakeGuardTests(unittest.TestCase):
-    def test_batch_seven_and_eight_intakes_have_no_restricted_runtime_import_or_secret_literal(self) -> None:
+    def test_batch_seven_to_nine_intakes_have_no_restricted_runtime_import_or_secret_literal(self) -> None:
         self.assertEqual(scan_safe_intake(), [])
 
 
@@ -126,6 +126,22 @@ class ControlReviewTests(unittest.TestCase):
         self.assertFalse(review.all_passed)
         external_lock = next(check for check in review.checks if check.id == "external-runtime-lock")
         self.assertFalse(external_lock.passed)
+
+    def test_review_flags_a_nexa_source_gate_regression(self) -> None:
+        statuses = [
+            status.model_copy(update={"implementation_status": "contract-ready"})
+            if status.id == "nexa-ai-assistant"
+            else status
+            for status in frameworks.statuses()
+        ]
+        review = build_control_review(
+            framework_statuses=statuses,
+            workspace_status=WorkspaceStatus(configured=False, detail="No workspace selected."),
+            audit_available=True,
+        )
+        self.assertFalse(review.all_passed)
+        batch_nine = next(check for check in review.checks if check.id == "batch-nine-nexa-source-safety")
+        self.assertFalse(batch_nine.passed)
 
 
 class ProviderSafetyTests(unittest.TestCase):

@@ -16,7 +16,7 @@ import { ShadowArmyCore } from './components/ShadowArmyCore'
 import { WorkspacePanel } from './components/WorkspacePanel'
 import { commanders, buildArmyStats, defaultFrameworks, defaultProviders } from './data/army'
 import { buildMission, isBlockedPrompt } from './lib/mission'
-import type { AuditEvent, ChatMessage, Commander, ControlReview, CoordinationPattern, FrameworkDryRun, FrameworkStatus, MemoryItem, MemoryKind, Mission, ProviderStatus, ResearchPlan, SecurityScanPlan, ShadowArmyOverview, ShadowArmyPlan, WorkspaceAnalysis, WorkspaceEntry, WorkspaceStatus } from './types/army'
+import type { AuditEvent, ChatMessage, Commander, ControlReview, CoordinationPattern, FrameworkDryRun, FrameworkStatus, MemoryItem, MemoryKind, Mission, ProviderStatus, ResearchPlan, SecurityScanPlan, ShadowArmyOverview, ShadowArmyPlan, WorkspaceAnalysis, WorkspaceEntry, WorkspaceSearch, WorkspaceStatus } from './types/army'
 
 const starterPrompts = [
   'Analyze my project structure and suggest a clean architecture.',
@@ -195,6 +195,14 @@ interface ApiWorkspaceAnalysis {
   import_count: number
   symbol_count: number
   sha256: string
+  truncated: boolean
+}
+
+interface ApiWorkspaceSearch {
+  query: string
+  relative_path: string
+  results: ApiWorkspaceEntry[]
+  scanned_directories: number
   truncated: boolean
 }
 
@@ -377,6 +385,14 @@ const workspaceAnalysisFromApi = (analysis: ApiWorkspaceAnalysis): WorkspaceAnal
   truncated: analysis.truncated,
 })
 
+const workspaceSearchFromApi = (search: ApiWorkspaceSearch): WorkspaceSearch => ({
+  query: search.query,
+  relativePath: search.relative_path,
+  results: search.results.map(workspaceEntryFromApi),
+  scannedDirectories: search.scanned_directories,
+  truncated: search.truncated,
+})
+
 const auditFromApi = (event: ApiAuditEvent): AuditEvent => ({
   id: event.id,
   eventType: event.event_type,
@@ -495,6 +511,7 @@ function App() {
   const [workspaceStatus, setWorkspaceStatus] = useState<WorkspaceStatus>({ configured: false, readOnly: true, detail: 'No workspace selected. Igris has no file access until you select a project folder.' })
   const [workspaceEntries, setWorkspaceEntries] = useState<WorkspaceEntry[]>([])
   const [workspaceAnalysis, setWorkspaceAnalysis] = useState<WorkspaceAnalysis | null>(null)
+  const [workspaceSearch, setWorkspaceSearch] = useState<WorkspaceSearch | null>(null)
   const [workspaceBusy, setWorkspaceBusy] = useState(false)
   const [memories, setMemories] = useState<MemoryItem[]>([])
   const [memoryAvailable, setMemoryAvailable] = useState(false)
@@ -674,6 +691,7 @@ function App() {
       if (!nextStatus.configured) {
         setWorkspaceEntries([])
         setWorkspaceAnalysis(null)
+        setWorkspaceSearch(null)
         setSecurityScanPlan(null)
       } else {
         void browseWorkspace('.')
@@ -703,6 +721,28 @@ function App() {
     }
   }
 
+  const searchWorkspace = async (query: string, relativePath: string) => {
+    setWorkspaceBusy(true)
+    try {
+      const response = await fetch('/api/workspace/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query, relative_path: relativePath, max_results: 50 }),
+      })
+      const payload = await response.json() as ApiWorkspaceSearch | { detail?: string }
+      if (!response.ok || !('results' in payload)) {
+        setNotice(errorDetail(payload, 'Igris could not complete that filename search.'))
+        return
+      }
+      setWorkspaceSearch(workspaceSearchFromApi(payload))
+      setNotice('Igris completed a bounded filename-only search. No file content was read and the search term was not added to audit logs.')
+    } catch {
+      setNotice('Workspace search is unavailable because the local backend is offline.')
+    } finally {
+      setWorkspaceBusy(false)
+    }
+  }
+
   const selectWorkspace = async (path: string): Promise<boolean> => {
     setWorkspaceBusy(true)
     try {
@@ -719,6 +759,7 @@ function App() {
       setWorkspaceStatus(workspaceStatusFromApi(payload))
       setWorkspaceEntries([])
       setWorkspaceAnalysis(null)
+      setWorkspaceSearch(null)
       setSecurityScanPlan(null)
       void loadAudit()
       setNotice('Workspace selected. Igris can now run read-only diagnostics inside this folder only.')
@@ -742,6 +783,7 @@ function App() {
       setWorkspaceStatus({ configured: false, readOnly: true, detail: 'No workspace selected. Igris has no file access until you select a project folder.' })
       setWorkspaceEntries([])
       setWorkspaceAnalysis(null)
+      setWorkspaceSearch(null)
       setSecurityScanPlan(null)
       void loadAudit()
       setNotice('Workspace boundary cleared. Igris no longer has project-file access.')
@@ -1137,7 +1179,7 @@ function App() {
 
           {activeView === 'workspace' && (
             <div className="guardrail-layout">
-              <WorkspacePanel status={workspaceStatus} entries={workspaceEntries} analysis={workspaceAnalysis} busy={workspaceBusy} onSelect={selectWorkspace} onClear={clearWorkspace} onBrowse={browseWorkspace} onAnalyze={analyzeWorkspaceFile} />
+              <WorkspacePanel status={workspaceStatus} entries={workspaceEntries} analysis={workspaceAnalysis} search={workspaceSearch} busy={workspaceBusy} onSelect={selectWorkspace} onClear={clearWorkspace} onBrowse={browseWorkspace} onSearch={searchWorkspace} onAnalyze={analyzeWorkspaceFile} />
               <aside className="side-stack">
                 <section className="panel boundary-card">
                   <p className="eyebrow">WORKSPACE BOUNDARY</p>

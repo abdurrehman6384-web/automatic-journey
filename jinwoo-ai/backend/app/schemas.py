@@ -327,6 +327,27 @@ class WorkspaceAnalysis(BaseModel):
     truncated: bool
 
 
+class WorkspaceSearchRequest(BaseModel):
+    """A bounded filename-only search inside the selected read-only workspace."""
+
+    query: str = Field(min_length=1, max_length=160)
+    relative_path: str = Field(default=".", min_length=1, max_length=4_096)
+    max_results: int = Field(default=50, ge=1, le=100)
+
+    @field_validator("query", "relative_path")
+    @classmethod
+    def search_text_is_not_blank(cls, value: str) -> str:
+        return _require_non_blank(value)
+
+
+class WorkspaceSearch(BaseModel):
+    query: str
+    relative_path: str
+    results: list[WorkspaceEntry]
+    scanned_directories: int
+    truncated: bool
+
+
 class ResearchPlanRequest(BaseModel):
     topic: str = Field(min_length=2, max_length=2_000)
     framework_id: Literal["firecrawl", "firecrawl-web-agent", "crawl4ai"] = "crawl4ai"

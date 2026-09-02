@@ -12,10 +12,10 @@ An original, local-first desktop assistant foundation for the **Jinwoo AI / Shad
 - Python FastAPI backend with typed mission contracts, routing, approval gate and local SQLite memory;
 - usable Memory Vault with explicit consent, local view/edit/delete/export controls, and credential/one-time-code rejection;
 - redacted local audit trail for mission routing, approvals, completion and Memory Vault changes;
-- Igris Workspace Guard: user-selected, read-only folder listing and bounded source diagnostics with path-escape protection;
+- Igris Workspace Guard: user-selected, read-only folder listing, bounded filename-only local locator and source diagnostics with path-escape protection; the locator does not read file contents, open a file, run a process or record search terms in audit;
 - provider registry for Ollama, LM Studio, Claude, GLM/Z.ai, Hugging Face and optional Mem0;
-- controlled Batch 01–08 adapter/advanced-skill registry: core orchestration, coding, research, memory, security, media, document, connector, browser, MCP, science, interaction, geospatial and mobile-companion lanes all remain policy-gated and non-executing in V1;
-- Batch 07 adds a native, mobile-first Shadow Army Core: 450 logical seats, visible Planner/Executor/Verifier topology maps, zero started external workers, and reviewed pattern references for Ruflo, CrewAI, AutoGen, MetaGPT, LangGraph, Agent Swarm, ROMA, Open Multi-Agent, Awesome Agent Orchestration and Microsoft Agent Framework; Batch 08 adds God's Eye View as a licence/data/asset-gated, non-live geospatial visualisation safety intake with no map, feed, tracking, camera, location or provider runtime;
+- controlled Batch 01–09 adapter/advanced-skill registry: core orchestration, coding, research, memory, security, media, document, connector, browser, MCP, science, interaction, geospatial, desktop-assistant and mobile-companion lanes all remain policy-gated and non-executing in V1;
+- Batch 07 adds a native, mobile-first Shadow Army Core: 450 logical seats, visible Planner/Executor/Verifier topology maps, zero started external workers, and reviewed pattern references for Ruflo, CrewAI, AutoGen, MetaGPT, LangGraph, Agent Swarm, ROMA, Open Multi-Agent, Awesome Agent Orchestration and Microsoft Agent Framework; Batch 08 adds God's Eye View as a licence/data/asset-gated, non-live geospatial visualisation safety intake with no map, feed, tracking, camera, location or provider runtime; Batch 09 adds a clean-room filename-only workspace locator and keeps NEXA AI Assistant source/configuration, voice, vision, browser, desktop, device and automation capabilities disabled pending licence/source review;
 - Batch 05 registers lawful AI-video, defensive-security, document/research, engineering, connector/MCP, browser, multi-agent and science skill contracts; Batch 06 adds gesture/orb and physical-hardware safety-intake contracts plus an original CSS-only command orb; IRIS-AI, IRIS-X, Awesome MCP Servers, 500 AI Agents Projects and Awesome Agent Orchestration remain reference-only, while required licence/source gates stay locked;
 - Tank's no-fetch Research Gate for validating explicit public HTTPS source plans without opening a URL, starting a browser or calling a crawler;
 - Greed's no-scan secret-review preflight for selected workspaces, with no file/history read, scanner launch or credential disclosure;
@@ -31,8 +31,9 @@ terminal command, install software, send/upload content or control a desktop
 must request explicit approval. The included backend intentionally has no raw
 shell execution endpoint, URL-fetch/crawler endpoint, secret-scanner endpoint,
 or external automation gateway. The current Igris Workspace Guard is read-only,
-uses bounded regular-file reads, and resolves every inspected path beneath the
-one folder selected by the user.
+uses bounded regular-file reads only for its separate source diagnostic, offers
+a name/metadata-only bounded locator, and resolves every inspected path beneath
+the one folder selected by the user.
 
 ## Run the dashboard
 
@@ -106,10 +107,14 @@ Framework as controlled records, plus the native Shadow Army planning API:
 it starts no worker or external framework runtime. Batch 08 registers God's Eye
 View as a non-live geospatial safety intake only: it cannot start a Cesium globe,
 live data/camera/location feed, tracker, voice service, API proxy or browser
-permission path. See [`docs/INTEGRATION_BATCH_05.md`](docs/INTEGRATION_BATCH_05.md),
+permission path. Batch 09 records NEXA AI Assistant as a source-review-required
+desktop-assistant intake with no upstream code/configuration/model/runtime;
+Jinwoo's original workspace locator searches names and metadata only inside the
+user-selected folder. See [`docs/INTEGRATION_BATCH_05.md`](docs/INTEGRATION_BATCH_05.md),
 [`docs/INTEGRATION_BATCH_06.md`](docs/INTEGRATION_BATCH_06.md),
-[`docs/INTEGRATION_BATCH_07.md`](docs/INTEGRATION_BATCH_07.md), and
-[`docs/INTEGRATION_BATCH_08.md`](docs/INTEGRATION_BATCH_08.md) for source
+[`docs/INTEGRATION_BATCH_07.md`](docs/INTEGRATION_BATCH_07.md),
+[`docs/INTEGRATION_BATCH_08.md`](docs/INTEGRATION_BATCH_08.md), and
+[`docs/INTEGRATION_BATCH_09.md`](docs/INTEGRATION_BATCH_09.md) for source
 matrices and activation boundaries. External adapters can prepare a bounded,
 policy-screened dry run through `POST /api/frameworks/{id}/dry-run`, but no
 upstream runtime is invoked or enabled in V1.
@@ -135,7 +140,11 @@ and keeps all camera, gesture, Android and physical-device paths disabled;
 physical cutter/robotics input needs exact machine and safety evidence. Batch 08
 locks God's Eye View until its source-code, third-party data, model/asset,
 attribution, provider, privacy and permitted-use boundaries are individually
-reviewed; it has no live globe, tracking, camera, location or voice route. See
+reviewed; it has no live globe, tracking, camera, location or voice route.
+Batch 09 locks NEXA AI Assistant because no verified repository licence was
+found and its public tree exposes a configuration-risk desktop-assistant surface;
+no upstream code, `.env`, model, provider, voice, vision, browser, screen,
+input, OS/window, device, messaging or automation capability is activated. See
 [`docs/INTEGRATION_BATCH_01.md`](docs/INTEGRATION_BATCH_01.md),
 [`docs/INTEGRATION_BATCH_02.md`](docs/INTEGRATION_BATCH_02.md),
 [`docs/INTEGRATION_BATCH_03.md`](docs/INTEGRATION_BATCH_03.md),
@@ -143,7 +152,8 @@ reviewed; it has no live globe, tracking, camera, location or voice route. See
 [`docs/INTEGRATION_BATCH_05.md`](docs/INTEGRATION_BATCH_05.md),
 [`docs/INTEGRATION_BATCH_06.md`](docs/INTEGRATION_BATCH_06.md),
 [`docs/INTEGRATION_BATCH_07.md`](docs/INTEGRATION_BATCH_07.md),
-[`docs/INTEGRATION_BATCH_08.md`](docs/INTEGRATION_BATCH_08.md), and
+[`docs/INTEGRATION_BATCH_08.md`](docs/INTEGRATION_BATCH_08.md),
+[`docs/INTEGRATION_BATCH_09.md`](docs/INTEGRATION_BATCH_09.md), and
 [`docs/FRAMEWORK_ADAPTERS.md`](docs/FRAMEWORK_ADAPTERS.md) before enabling any
 adapter.
 
@@ -164,7 +174,10 @@ copied or activated. See [`docs/INTEGRATION_BATCH_07.md`](docs/INTEGRATION_BATCH
 for the archive hash, intake boundary and static regression guard. The separately
 reviewed God's Eye View GitHub intake is documented in
 [`docs/INTEGRATION_BATCH_08.md`](docs/INTEGRATION_BATCH_08.md) and remains
-non-executing.
+non-executing. The separately reviewed NEXA AI Assistant GitHub intake is
+recorded in [`docs/INTEGRATION_BATCH_09.md`](docs/INTEGRATION_BATCH_09.md): it
+adds no upstream payload and remains source-review-required because no verified
+licence was found.
 
 For a future source intake, provide one source-only ZIP or a GitHub repository
 with its exact licence and version. Exclude `node_modules`, `.next`, `dist`,

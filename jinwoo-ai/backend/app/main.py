@@ -43,6 +43,8 @@ from .schemas import (
     WorkspaceAnalysis,
     WorkspaceAnalysisRequest,
     WorkspaceEntry,
+    WorkspaceSearch,
+    WorkspaceSearchRequest,
     WorkspaceSelectionRequest,
     WorkspaceStatus,
 )
@@ -229,6 +231,15 @@ async def clear_workspace() -> None:
 async def list_workspace_files(relative_path: str = Query(default=".", min_length=1, max_length=4_096)) -> list[WorkspaceEntry]:
     try:
         return workspace.list_entries(relative_path)
+    except WorkspaceError as error:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error)) from error
+
+
+@app.post("/api/workspace/search", response_model=WorkspaceSearch)
+async def search_workspace_entries(request: WorkspaceSearchRequest) -> WorkspaceSearch:
+    """Find matching workspace names without reading contents or opening files."""
+    try:
+        return workspace.search_entries(request.query, request.relative_path, request.max_results)
     except WorkspaceError as error:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error)) from error
 

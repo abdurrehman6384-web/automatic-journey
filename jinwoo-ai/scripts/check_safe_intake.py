@@ -2,7 +2,7 @@
 """Static no-import guard for controlled Shadow Army source intakes.
 
 This intentionally checks only the clean-room files and dependency manifests
-that implement or expose Batch 07/08. It does not unpack, execute, import, or
+that implement or expose Batch 07–09. It does not unpack, execute, import, or
 inspect an archive payload. A failing check prints file locations and rule
 names, never matching source text that might contain sensitive material.
 """
@@ -19,6 +19,8 @@ ROOT = Path(__file__).resolve().parents[1]
 CLEAN_ROOM_FILES = (
     ROOT / "backend" / "app" / "shadow_army.py",
     ROOT / "src" / "components" / "ShadowArmyCore.tsx",
+    ROOT / "backend" / "app" / "workspace.py",
+    ROOT / "src" / "components" / "WorkspacePanel.tsx",
 )
 MANIFESTS = (ROOT / "backend" / "requirements.txt", ROOT / "package.json")
 
@@ -53,7 +55,32 @@ GEOSPATIAL_RUNTIME_PACKAGES = {
     "vite-plugin-cesium",
     "ws",
 }
-FORBIDDEN_MANIFEST_PACKAGES = EXTERNAL_FRAMEWORK_MODULES | GEOSPATIAL_RUNTIME_PACKAGES
+# Batch 09's NEXA source intake has no verified licence and describes a
+# desktop-assistant runtime. These packages must not enter a Jinwoo manifest
+# incidentally; any future exception needs an independent review and guard edit.
+NEXA_RUNTIME_PACKAGES = {
+    "edge-tts",
+    "google-api-python-client",
+    "google-generativeai",
+    "google-genai",
+    "livekit",
+    "livekit-agents",
+    "livekit-plugins-google",
+    "openai",
+    "opencv-python",
+    "pillow",
+    "pyaudio",
+    "pynput",
+    "pyautogui",
+    "pygetwindow",
+    "pywin32",
+    "selenium",
+    "speechrecognition",
+    "ultralytics",
+    "webdriver-manager",
+    "youtube-search-python",
+}
+FORBIDDEN_MANIFEST_PACKAGES = EXTERNAL_FRAMEWORK_MODULES | GEOSPATIAL_RUNTIME_PACKAGES | NEXA_RUNTIME_PACKAGES
 
 # This is intentionally narrow: it flags direct capability-entry APIs, not
 # ordinary words in documentation, status messages, or policy descriptions.
@@ -67,6 +94,23 @@ FORBIDDEN_RUNTIME_TOKENS = (
     "selenium",
     "playwright",
     "browser_use",
+    "pynput",
+    "pywin32",
+    "pygetwindow",
+    "livekit",
+    "google.generativeai",
+    "google_genai",
+    "ultralytics",
+    "speech_recognition",
+    "pyaudio",
+    "cv2.",
+    "import cv2",
+    "from cv2",
+    "import openai",
+    "from openai",
+    "from google import genai",
+    "from google.generativeai",
+    "win32",
 )
 SECRET_LITERAL = re.compile(
     r"(?i)(?:api[_-]?key|access[_-]?token|secret|password)\s*[:=]\s*['\"][^'\"]{8,}['\"]"
@@ -142,7 +186,7 @@ def scan() -> list[str]:
 def main() -> int:
     violations = scan()
     report = {
-        "check": "controlled-source-intake-batch-07-08",
+        "check": "controlled-source-intake-batch-07-09",
         "clean_room_files": [str(path.relative_to(ROOT)) for path in CLEAN_ROOM_FILES],
         "manifest_files": [str(path.relative_to(ROOT)) for path in MANIFESTS],
         "passed": not violations,
