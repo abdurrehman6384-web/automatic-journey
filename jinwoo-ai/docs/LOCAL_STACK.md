@@ -33,14 +33,17 @@ document/research, coding, connector/MCP, browser, multi-agent, science,
 Android and source-intake lanes. Batch 06 registers Barehands, Ultron Orb UI
 and a physical cutter/robotics safety intake. Batch 07 adds Agent Swarm, ROMA,
 Open Multi-Agent, Awesome Agent Orchestration and Microsoft Agent Framework,
-plus a native non-executing Shadow Army topology planner. They can prepare
-bounded, policy-screened plans, but the backend will not install or execute an
-upstream runtime. OpenHands has no container/sandbox path; OpenClaw has no
-gateway/channel/skill path; Batch 04/05/06 computer-use lanes have no container,
-device, screen, camera, input, voice, vision, browser, CDN, local-service or
-shell path; secret scanners have no file or Git-history scan path. Firecrawl,
+plus a native non-executing Shadow Army topology planner. Batch 08 registers
+God's Eye View as a licence/data/asset-gated, non-live geospatial safety intake.
+They can prepare bounded, policy-screened plans, but the backend will not install
+or execute an upstream runtime. OpenHands has no container/sandbox path; OpenClaw
+has no gateway/channel/skill path; Batch 04/05/06 computer-use lanes have no
+container, device, screen, camera, input, voice, vision, browser, CDN,
+local-service or shell path; the Batch 08 geospatial lane has no globe, live
+feed, map, camera, location, tracking, voice or provider path; secret scanners
+have no file or Git-history scan path. Firecrawl,
 TruffleHog, IRIS-GO, IRIS-Mini, IRIS-Zero, Anthropic Skills, WordPress Agent
-Skill Prototypes, Official MCP Servers, Barehands and ROMA are
+Skill Prototypes, Official MCP Servers, Barehands, ROMA and God's Eye View are
 `license-review-required`; Bytebot is archived-upstream; IRIS-AI, IRIS-X,
 Awesome MCP Servers, 500 AI Agents Projects and Awesome Agent Orchestration are
 reference-only; Open-AutoGLM is queued for a separate Android phase; EnvAgent
@@ -53,8 +56,9 @@ boundaries. See
 [`INTEGRATION_BATCH_03.md`](INTEGRATION_BATCH_03.md),
 [`INTEGRATION_BATCH_04.md`](INTEGRATION_BATCH_04.md),
 [`INTEGRATION_BATCH_05.md`](INTEGRATION_BATCH_05.md),
-[`INTEGRATION_BATCH_06.md`](INTEGRATION_BATCH_06.md), and
-[`INTEGRATION_BATCH_07.md`](INTEGRATION_BATCH_07.md).
+[`INTEGRATION_BATCH_06.md`](INTEGRATION_BATCH_06.md),
+[`INTEGRATION_BATCH_07.md`](INTEGRATION_BATCH_07.md), and
+[`INTEGRATION_BATCH_08.md`](INTEGRATION_BATCH_08.md).
 
 ## Tank research gate
 
@@ -80,9 +84,9 @@ controls.
 
 The Jinwoo-native lane is a zero-side-effect `POST /api/control/review`
 report. It verifies capacity, native ownership, disabled external runtimes,
-Batch 03/04/05/06/07 inventory, restricted source/licence/review gates, read-only
-workspace status and local audit availability. It cannot enable a runtime or read
-workspace data; its audit entry contains aggregate metadata only.
+Batch 03/04/05/06/07/08 inventory, restricted source/licence/review gates,
+read-only workspace status and local audit availability. It cannot enable a
+runtime or read workspace data; its audit entry contains aggregate metadata only.
 
 ## Why Rust and Go are not initial services
 

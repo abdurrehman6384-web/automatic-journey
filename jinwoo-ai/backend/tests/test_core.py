@@ -97,7 +97,7 @@ class ShadowArmyCoreTests(unittest.TestCase):
 
 
 class SourceIntakeGuardTests(unittest.TestCase):
-    def test_batch_seven_clean_room_files_have_no_upstream_runtime_import_or_secret_literal(self) -> None:
+    def test_batch_seven_and_eight_intakes_have_no_restricted_runtime_import_or_secret_literal(self) -> None:
         self.assertEqual(scan_safe_intake(), [])
 
 

@@ -31,9 +31,10 @@ _BATCH_FIVE_IDS = {
 }
 _BATCH_SIX_IDS = {"barehands", "ultron-orb-ui", "physical-cutter-safety-intake"}
 _BATCH_SEVEN_IDS = {"agent-swarm", "roma", "open-multi-agent", "awesome-agent-orchestration", "microsoft-agent-framework"}
+_BATCH_EIGHT_IDS = {"gods-eye-view"}
 _LICENSE_REVIEW_IDS = {
     "firecrawl", "trufflehog", "iris-go", "iris-mini", "iris-zero", "anthropic-skills", "wordpress-agent-skills",
-    "official-mcp-servers", "barehands", "roma",
+    "official-mcp-servers", "barehands", "roma", "gods-eye-view",
 }
 _REFERENCE_ONLY_IDS = {"iris-ai", "iris-x", "awesome-mcp-servers", "500-ai-agent-projects", "awesome-agent-orchestration"}
 _ARCHIVED_UPSTREAM_IDS = {"bytebot"}
@@ -58,6 +59,7 @@ def build_control_review(
     batch_five = [by_id[framework_id] for framework_id in _BATCH_FIVE_IDS if framework_id in by_id]
     batch_six = [by_id[framework_id] for framework_id in _BATCH_SIX_IDS if framework_id in by_id]
     batch_seven = [by_id[framework_id] for framework_id in _BATCH_SEVEN_IDS if framework_id in by_id]
+    batch_eight = [by_id[framework_id] for framework_id in _BATCH_EIGHT_IDS if framework_id in by_id]
     licence_gates = [by_id[framework_id] for framework_id in _LICENSE_REVIEW_IDS if framework_id in by_id]
     reference_only = [by_id[framework_id] for framework_id in _REFERENCE_ONLY_IDS if framework_id in by_id]
     archived_upstream = [by_id[framework_id] for framework_id in _ARCHIVED_UPSTREAM_IDS if framework_id in by_id]
@@ -139,6 +141,23 @@ def build_control_review(
             detail=(
                 "Agent Swarm, ROMA, Open Multi-Agent, Awesome Agent Orchestration and Microsoft Agent Framework "
                 "are visible as bounded, non-executing Shadow Army integration lanes."
+            ),
+        ),
+        ControlReviewCheck(
+            id="batch-eight-geospatial-safety",
+            label="Batch 08 geospatial-safety inventory",
+            passed=(
+                len(batch_eight) == len(_BATCH_EIGHT_IDS)
+                and all(
+                    framework.integration_batch == 8
+                    and framework.implementation_status == "license-review-required"
+                    and not framework.execution_enabled
+                    for framework in batch_eight
+                )
+            ),
+            detail=(
+                "God's Eye View is a source/data/licence-gated geospatial reference; it has no map, live-feed, camera, location, "
+                "tracking, voice or external-service runtime in Jinwoo."
             ),
         ),
         ControlReviewCheck(

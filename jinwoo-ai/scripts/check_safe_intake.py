@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Static no-import guard for the project.zip-derived Shadow Army work.
+"""Static no-import guard for controlled Shadow Army source intakes.
 
 This intentionally checks only the clean-room files and dependency manifests
-that implement or expose Batch 07.  It does not unpack, execute, import, or
-inspect the archive payload.  A failing check prints file locations and rule
+that implement or expose Batch 07/08. It does not unpack, execute, import, or
+inspect an archive payload. A failing check prints file locations and rule
 names, never matching source text that might contain sensitive material.
 """
 
@@ -37,6 +37,23 @@ EXTERNAL_FRAMEWORK_MODULES = {
     "microsoft_agent_framework",
     "microsoft-agent-framework",
 }
+
+# Batch 08's reviewed geospatial project is intentionally not a direct
+# dependency. A future exception needs a fresh source/data/privacy review and
+# an explicit update to this guard, rather than a silent package addition.
+GEOSPATIAL_RUNTIME_PACKAGES = {
+    "@mapbox/vector-tile",
+    "cesium",
+    "egm96-universal",
+    "mgrs",
+    "pbf",
+    "puppeteer",
+    "satellite.js",
+    "sharp",
+    "vite-plugin-cesium",
+    "ws",
+}
+FORBIDDEN_MANIFEST_PACKAGES = EXTERNAL_FRAMEWORK_MODULES | GEOSPATIAL_RUNTIME_PACKAGES
 
 # This is intentionally narrow: it flags direct capability-entry APIs, not
 # ordinary words in documentation, status messages, or policy descriptions.
@@ -110,9 +127,9 @@ def scan() -> list[str]:
             violations.append(f"missing-manifest:{manifest.relative_to(ROOT)}")
             continue
         manifest_text = manifest.read_text(encoding="utf-8").casefold()
-        for package in EXTERNAL_FRAMEWORK_MODULES:
-            if re.search(rf"(?<![a-z0-9_-]){re.escape(package)}(?![a-z0-9_-])", manifest_text):
-                violations.append(f"upstream-framework-dependency:{manifest.relative_to(ROOT)}:{package}")
+        for package in FORBIDDEN_MANIFEST_PACKAGES:
+            if re.search(rf"(?<![a-z0-9_@./-]){re.escape(package)}(?![a-z0-9_@./-])", manifest_text):
+                violations.append(f"restricted-upstream-dependency:{manifest.relative_to(ROOT)}:{package}")
 
     # The extraction boundary is enforceable in the application checkout: the
     # archive itself belongs at repository root, never inside Jinwoo's sources.
@@ -125,7 +142,7 @@ def scan() -> list[str]:
 def main() -> int:
     violations = scan()
     report = {
-        "check": "batch-07-safe-intake",
+        "check": "controlled-source-intake-batch-07-08",
         "clean_room_files": [str(path.relative_to(ROOT)) for path in CLEAN_ROOM_FILES],
         "manifest_files": [str(path.relative_to(ROOT)) for path in MANIFESTS],
         "passed": not violations,

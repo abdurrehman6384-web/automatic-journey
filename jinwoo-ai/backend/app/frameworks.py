@@ -4,7 +4,7 @@ Jinwoo's local mission engine remains the one canonical orchestrator. An
 installed package or sidecar never receives a mission automatically and cannot
 bypass the policy, approval, workspace, or audit boundaries owned by Jinwoo.
 
-Batches 01–06 contain owner-requested integration lanes. Their adapter
+Batches 01–08 contain owner-requested integration lanes. Their adapter
 contracts are real and testable now; upstream runtimes remain non-executable
 until a version-pinned, local compatibility and licence review is complete.
 """
@@ -1158,6 +1158,37 @@ class FrameworkRegistry:
                 guardrails=(
                     "Do not install providers, enable hosted deployment, telemetry export, tools, workflows or persistence from this lane.",
                     "Use only a future local, version-pinned adapter that keeps Jinwoo policy, audit, memory and approval controls authoritative.",
+                ),
+            ),
+            # Owner-requested geospatial visualisation intake batch 8. The
+            # upstream MIT source explicitly excludes third-party live data and
+            # assets; this record therefore has no data feed, map or tracker.
+            FrameworkAdapter(
+                id="gods-eye-view",
+                label="God's Eye View — Geospatial Safety Intake",
+                runtime="desktop-client",
+                category="reference",
+                integration_batch=8,
+                owner_commander="Tank",
+                license=(
+                    "MIT source code only; third-party live data, datasets and 3D assets require separate terms/licence review"
+                ),
+                source_url="https://github.com/bilawalsidhu/gods-eye-view",
+                purpose=(
+                    "Reserved for privacy-aware, non-live geospatial visualisation, source-attribution and public-data boundary review."
+                ),
+                capabilities=(
+                    "Static geospatial visualisation concepts",
+                    "Source attribution and provenance UX review",
+                    "Public-data privacy and safety boundary planning",
+                ),
+                activation_boundary="sandboxed",
+                implementation_status="license-review-required",
+                guardrails=(
+                    "Do not copy, bundle, install or invoke upstream code until source-code licence, third-party data, asset, attribution and deployment terms are individually reviewed.",
+                    "Do not fetch, display or track live flights, vessels, satellites, traffic, radio, cameras, places or other location-linked feeds from this lane.",
+                    "Do not request camera, microphone, screen, browser location or device permissions, and do not create an OSINT, surveillance or individual-tracking workflow.",
+                    "Do not configure Cesium, Google Maps, OpenAI, OpenSky, AIS, map tiles, API keys, proxy routes, sockets or external services from this record.",
                 ),
             ),
             FrameworkAdapter(

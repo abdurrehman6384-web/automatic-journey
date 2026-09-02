@@ -55,9 +55,9 @@ class ApiTests(unittest.TestCase):
         response = self.client.get("/api/frameworks")
         self.assertEqual(response.status_code, 200)
         framework_items = response.json()["frameworks"]
-        self.assertEqual(len(framework_items), 57)
+        self.assertEqual(len(framework_items), 58)
         frameworks = {item["id"]: item for item in framework_items}
-        self.assertEqual(len(frameworks), 57)
+        self.assertEqual(len(frameworks), 58)
         self.assertEqual(
             set(frameworks),
             {
@@ -72,6 +72,7 @@ class ApiTests(unittest.TestCase):
                 "scientific-agent-skills", "open-autoglm", "500-ai-agent-projects", "envagent-source-intake",
                 "barehands", "ultron-orb-ui", "physical-cutter-safety-intake",
                 "agent-swarm", "roma", "open-multi-agent", "awesome-agent-orchestration", "microsoft-agent-framework",
+                "gods-eye-view",
             },
         )
         self.assertTrue(frameworks["jinwoo-native"]["execution_enabled"])
@@ -144,6 +145,13 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(frameworks["open-multi-agent"]["runtime"], "typescript-service")
         self.assertEqual(frameworks["awesome-agent-orchestration"]["state"], "reference-only")
         self.assertEqual(frameworks["microsoft-agent-framework"]["implementation_status"], "contract-ready")
+        gods_eye_view = frameworks["gods-eye-view"]
+        self.assertFalse(gods_eye_view["execution_enabled"])
+        self.assertEqual(gods_eye_view["integration_batch"], 8)
+        self.assertEqual(gods_eye_view["implementation_status"], "license-review-required")
+        self.assertEqual(gods_eye_view["runtime"], "desktop-client")
+        self.assertEqual(gods_eye_view["category"], "reference")
+        self.assertIn("third-party", gods_eye_view["license"].casefold())
         self.assertIn("LICENSE-CODE", frameworks["autogen"]["license"])
         self.assertNotIn("capcut-patcher", frameworks)
         self.assertTrue(frameworks["jinwoo-native-control-audit"]["execution_enabled"])
@@ -220,6 +228,20 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(catalogue.status_code, 200)
         self.assertFalse(catalogue.json()["external_runtime_invoked"])
         self.assertIn("reference-only", catalogue.json()["summary"])
+
+    def test_batch_eight_geospatial_intake_remains_non_executing_and_live_data_free(self) -> None:
+        response = self.client.post(
+            "/api/frameworks/gods-eye-view/dry-run",
+            json={"prompt": "Prepare a privacy-aware static geospatial visualisation review", "requested_agents": 450},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertEqual(payload["bounded_runtime_workers"], 3)
+        self.assertFalse(payload["external_runtime_invoked"])
+        self.assertIn("licence", " ".join(payload["next_steps"]).casefold())
+        self.assertIn("Do not fetch, display or track live flights", " ".join(payload["next_steps"]))
+        self.assertIn("Do not request camera, microphone", " ".join(payload["next_steps"]))
 
     def test_framework_dry_run_is_bounded_and_never_invokes_upstream_runtime(self) -> None:
         response = self.client.post(
@@ -364,7 +386,7 @@ class ApiTests(unittest.TestCase):
         payload = response.json()
         self.assertTrue(payload["all_passed"])
         self.assertFalse(payload["external_runtime_invoked"])
-        self.assertEqual(len(payload["checks"]), 11)
+        self.assertEqual(len(payload["checks"]), 12)
         self.assertTrue(all(check["passed"] for check in payload["checks"]))
         self.assertIn("external runtime", payload["summary"].casefold())
         audit = self.client.get("/api/audit").json()

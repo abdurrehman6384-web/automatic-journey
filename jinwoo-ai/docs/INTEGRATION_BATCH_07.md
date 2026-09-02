@@ -118,20 +118,21 @@ Run the lightweight guard from `jinwoo-ai`:
 PYTHONPATH=. python3 scripts/check_safe_intake.py
 ```
 
-The guard deliberately inspects only the Batch 07 clean-room implementation and
-manifests:
+The guard deliberately inspects the Batch 07 clean-room implementation and the
+Batch 07/08 dependency manifests:
 
 - `backend/app/shadow_army.py`
 - `src/components/ShadowArmyCore.tsx`
 - `backend/requirements.txt`
 - `package.json`
 
-It rejects direct imports/dependencies for the selected external frameworks,
-embedded secret-like literals, direct capability entry tokens such as subprocess,
-`os.system`, browser automation, camera/media access and common computer-control
-libraries, and a copied `project.zip` inside the Jinwoo source tree. It reports
-only rule/location identifiers, not matching source text. The same guard is run
-by the backend unit suite.
+It rejects direct imports/dependencies for the selected external frameworks and
+God's Eye View's reviewed geospatial runtime packages, embedded secret-like
+literals, direct capability entry tokens such as subprocess, `os.system`, browser
+automation, camera/media access and common computer-control libraries, and a
+copied `project.zip` inside the Jinwoo source tree. It reports only rule/location
+identifiers, not matching source text. The same guard is run by the backend unit
+suite.
 
 This is a narrow regression control, not a claim that static scanning alone can
 prove a repository safe. It complements manual licence/source review, typed

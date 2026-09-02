@@ -67,6 +67,7 @@ authorise a network, shell, browser, desktop or mobile action.
 | 07 | Open Multi-Agent | Bellion | Dynamic DAG, budget, recovery and governance patterns | Native topology reference only; no Node service/provider/tool/runtime |
 | 07 | Awesome Agent Orchestration | Kaisel | Orchestration discovery and comparison catalogue | **Reference only**; every listed downstream source needs individual review |
 | 07 | Microsoft Agent Framework | Jinwoo | Typed workflow, middleware and human-in-loop patterns | Native topology reference only; no hosted workflow/provider/tool/persistence |
+| 08 | God's Eye View — Geospatial Safety Intake | Tank | Non-live geospatial visualisation, provenance and public-data boundary concepts | **Licence/data/asset review required**; no globe, live feed, tracking, camera, voice, location or provider runtime |
 
 `GET /api/frameworks` exposes each record's runtime/category, discovery state,
 licence, source URL, owner, capability tags, activation boundary and contract
@@ -116,9 +117,9 @@ rate/depth/size/domain limits, and retain cited data locally.
 `POST /api/control/review` and its Settings panel provide a zero-side-effect
 local review. It makes no network request, file read, tool call or
 execution-state change. It verifies final Army capacity, native ownership,
-external-runtime locks, Batch 03, Batch 04, Batch 05, Batch 06 and Batch 07
-inventories, restricted source/licence/review gates, read-only Workspace Guard
-and audit availability.
+external-runtime locks, Batch 03, Batch 04, Batch 05, Batch 06, Batch 07 and
+Batch 08 inventories, restricted source/licence/review gates, read-only Workspace
+Guard and audit availability.
 
 ## Why detection is not activation
 
@@ -130,8 +131,10 @@ The following restrictions are specifically enforced in the registry:
 
 - **Licence-review-required:** Firecrawl, TruffleHog, IRIS-GO, IRIS-Mini,
   IRIS-Zero, Anthropic Skills, WordPress Agent Skill Prototypes, Official MCP
-  Servers, Barehands and ROMA cannot be copied, bundled, linked, installed or
-  run until their individual licence/component/deployment decision is documented.
+  Servers, Barehands, ROMA and God's Eye View cannot be copied, bundled, linked,
+  installed or run until their individual licence/component/deployment decision is
+  documented. God's Eye View additionally requires its third-party data, asset,
+  attribution, privacy and provider terms to be resolved per selected layer.
   Barehands additionally needs an AGPL-3.0 compatibility decision before any
   source, derivative, service or runtime is considered.
 - **Archived upstream:** Bytebot cannot be adopted until a maintained source,
@@ -210,6 +213,7 @@ See [`INTEGRATION_BATCH_01.md`](INTEGRATION_BATCH_01.md),
 [`INTEGRATION_BATCH_03.md`](INTEGRATION_BATCH_03.md),
 [`INTEGRATION_BATCH_04.md`](INTEGRATION_BATCH_04.md),
 [`INTEGRATION_BATCH_05.md`](INTEGRATION_BATCH_05.md),
-[`INTEGRATION_BATCH_06.md`](INTEGRATION_BATCH_06.md), and
-[`INTEGRATION_BATCH_07.md`](INTEGRATION_BATCH_07.md) for the source-review
+[`INTEGRATION_BATCH_06.md`](INTEGRATION_BATCH_06.md),
+[`INTEGRATION_BATCH_07.md`](INTEGRATION_BATCH_07.md), and
+[`INTEGRATION_BATCH_08.md`](INTEGRATION_BATCH_08.md) for the source-review
 records and adapter-specific activation requirements.
