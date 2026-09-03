@@ -11,6 +11,7 @@ from __future__ import annotations
 from .army import army_summary
 from .schemas import ControlReview, ControlReviewCheck, FrameworkStatus, WorkspaceStatus
 from .skill_intakes import BATCH_ELEVEN_SKILL_INTAKES, BATCH_TWELVE_UPGRADE_INTAKES
+from .skill_library import SkillLibraryError, skill_library
 
 
 _EXPECTED_CAPACITY = {
@@ -50,6 +51,31 @@ _SOURCE_REVIEW_IDS = {
 }
 
 
+def _native_skill_library_safety() -> tuple[bool, str]:
+    """Validate only Jinwoo-owned local skill metadata without any source/runtime access."""
+
+    try:
+        library = skill_library.library()
+    except SkillLibraryError:
+        return False, "The native skill library manifest needs maintenance before it can be safely exposed."
+    passed = (
+        len(library.skills) == 15
+        and len(library.agents) == 1
+        and len(library.sources) == 20
+        and library.all_sources_covered
+        and not library.external_runtime_invoked
+        and all(skill.jinwoo_native and skill.activation_mode == "planning-only" for skill in library.skills)
+        and all(agent.jinwoo_native and agent.role == "canonical-orchestrator" for agent in library.agents)
+    )
+    detail = (
+        "15 Jinwoo-authored portable skills, one canonical master orchestrator and 20 metadata-only source records are locally discoverable; "
+        "no upstream payload, worker, provider, desktop, device or external runtime is loaded."
+        if passed
+        else "The native skill library inventory or its planning-only boundary differs from the controlled specification."
+    )
+    return passed, detail
+
+
 def build_control_review(
     *,
     framework_statuses: list[FrameworkStatus],
@@ -77,6 +103,7 @@ def build_control_review(
     archived_upstream = [by_id[framework_id] for framework_id in _ARCHIVED_UPSTREAM_IDS if framework_id in by_id]
     queued = [by_id[framework_id] for framework_id in _QUEUED_IDS if framework_id in by_id]
     source_review = [by_id[framework_id] for framework_id in _SOURCE_REVIEW_IDS if framework_id in by_id]
+    native_skills_safe, native_skills_detail = _native_skill_library_safety()
 
     checks = [
         ControlReviewCheck(
@@ -243,6 +270,12 @@ def build_control_review(
                 "The next-ten upgrade candidates are source-review records only; no package, converter, graph, provider, policy engine, "
                 "database, evaluator, formatter, scanner, telemetry exporter, background loop or external runtime is installed or started."
             ),
+        ),
+        ControlReviewCheck(
+            id="batch-thirteen-native-skill-library-safety",
+            label="Batch 13 native skill-library safety",
+            passed=native_skills_safe,
+            detail=native_skills_detail,
         ),
         ControlReviewCheck(
             id="restricted-source-gates",

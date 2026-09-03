@@ -1,0 +1,279 @@
+{
+  "schema_version": 1,
+  "sources": [
+    {
+      "id": "luo-kai-catalogue",
+      "requested_repository": "luokai0/ai-agent-skills-by-luo-kai",
+      "source_url": "https://github.com/luokai0/ai-agent-skills-by-luo-kai",
+      "default_branch": "main",
+      "review_commit": "4d2fb89cdfb75f3f6fd3c6c5ec9ad90ea129eb3c",
+      "license_signal": "GitHub metadata: NOASSERTION; no root licence endpoint was available",
+      "review_scope": "Repository metadata, default-branch ref, path-only recursive tree (truncated) and one selected verification SKILL.md review.",
+      "native_skill_ids": [
+        "catalogue-curation",
+        "evidence-before-completion"
+      ],
+      "decision": "No upstream collection or SKILL.md is copied. It informs original catalogue triage and evidence-first patterns only."
+    },
+    {
+      "id": "antigravity-awesome-skills",
+      "requested_repository": "sickn33/antigravity-awesome-skills",
+      "resolved_repository": "sickn33/agentic-awesome-skills",
+      "source_url": "https://github.com/sickn33/antigravity-awesome-skills",
+      "default_branch": "main",
+      "review_commit": "7eb694978762421c30855d80de73d1a909a8c335",
+      "license_signal": "Root GitHub metadata: MIT; separate LICENSE-CONTENT exists and individual content/provenance remains review-gated",
+      "review_scope": "Repository metadata, default-branch ref, recursive path tree, README and one selected acceptance-orchestrator SKILL.md review.",
+      "native_skill_ids": [
+        "catalogue-curation",
+        "evidence-before-completion"
+      ],
+      "decision": "No collection, plugin, CLI, MCP server or SKILL.md is copied. Only original acceptance/evidence design is retained."
+    },
+    {
+      "id": "mouad-skills",
+      "requested_repository": "mouadja02/skills",
+      "source_url": "https://github.com/mouadja02/skills",
+      "default_branch": "main",
+      "review_commit": "8fa67fad2bb3a9d6d925cdfadb1ad6107486c0a0",
+      "license_signal": "GitHub metadata: NOASSERTION; no root licence endpoint was available",
+      "review_scope": "Repository metadata, default-branch ref, recursive path tree, README and selected governance/team-orchestration SKILL.md reviews.",
+      "native_skill_ids": [
+        "agent-governance",
+        "multi-agent-planning"
+      ],
+      "decision": "No source or instruction payload is copied. Governance and coordination concepts are clean-room reimplemented."
+    },
+    {
+      "id": "theneo-awesome-skills",
+      "requested_repository": "theneoai/awesome-skills",
+      "source_url": "https://github.com/theneoai/awesome-skills",
+      "default_branch": "main",
+      "review_commit": "61fe4f2bb47d6b61505b1b78c2b8ae5fd1ca38dd",
+      "license_signal": "GitHub metadata: NOASSERTION; root licence text identifies itself as MIT with attribution requirement",
+      "review_scope": "Repository metadata, default-branch ref, recursive path tree, README, root licence and one selected idea-validation SKILL.md review.",
+      "native_skill_ids": [
+        "scope-and-delivery-control"
+      ],
+      "decision": "No persona or skill payload is copied. The native skill uses an independently written decision/scope protocol."
+    },
+    {
+      "id": "claude-skills-collection",
+      "requested_repository": "alirezarezvani/claude-skills",
+      "source_url": "https://github.com/alirezarezvani/claude-skills",
+      "default_branch": "main",
+      "review_commit": "19392f7a08264ed00486a251f5b2098321771f94",
+      "license_signal": "GitHub metadata/root licence: MIT; nested skill and integration licences still need individual review",
+      "review_scope": "Repository metadata, default-branch ref, recursive path tree, README, root licence and dependency-auditor SKILL.md review.",
+      "native_skill_ids": [
+        "dependency-review"
+      ],
+      "decision": "No dependency scanner, script, plugin or payload is copied. A native no-scan dependency-review plan is supplied."
+    },
+    {
+      "id": "agent-skills-hub",
+      "requested_repository": "agent-skills-hub/agent-skills-hub",
+      "source_url": "https://github.com/agent-skills-hub/agent-skills-hub",
+      "default_branch": "main",
+      "review_commit": "81857196f21e0b6b6b327e32dc21570d3b21b5b2",
+      "license_signal": "GitHub metadata/root licence: MIT; attribution and per-skill origin remain review-gated",
+      "review_scope": "Repository metadata, default-branch ref, recursive path tree, README, root licence and selected orchestration/evaluation SKILL.md reviews.",
+      "native_skill_ids": [
+        "multi-agent-planning",
+        "agent-evaluation"
+      ],
+      "decision": "No registry API, installer, plugin or upstream SKILL.md is copied. Only native planning/evaluation patterns are included."
+    },
+    {
+      "id": "voltagent-awesome-agent-skills",
+      "requested_repository": "VoltAgent/awesome-agent-skills",
+      "source_url": "https://github.com/VoltAgent/awesome-agent-skills",
+      "default_branch": "main",
+      "review_commit": "4a755af153df462e10859336596c73415d64437a",
+      "license_signal": "GitHub metadata/root licence: MIT",
+      "review_scope": "Repository metadata, default-branch ref, full path tree, README and root licence. The repository is an index rather than a bundled skill payload.",
+      "native_skill_ids": [
+        "catalogue-curation"
+      ],
+      "decision": "No downstream linked skill is inferred, fetched or copied. It informs source-provenance requirements only."
+    },
+    {
+      "id": "desktop-agent",
+      "requested_repository": "patrickporto/desktop-agent",
+      "source_url": "https://github.com/patrickporto/desktop-agent",
+      "default_branch": "main",
+      "review_commit": "c68e947448b17eddb0f9fd53513093523541862d",
+      "license_signal": "GitHub metadata/root licence: MIT",
+      "review_scope": "Repository metadata, default-branch ref, full path tree, README, root licence and root SKILL.md review.",
+      "native_skill_ids": [
+        "consented-computer-use-planning"
+      ],
+      "decision": "No desktop-control code, CLI, screenshot, mouse or keyboard action is copied or enabled."
+    },
+    {
+      "id": "one-m-one-ai-computer-use",
+      "requested_repository": "1m1ai/computer-use",
+      "source_url": "https://github.com/1m1ai/computer-use",
+      "default_branch": "main",
+      "review_commit": "efed7a63a61a97d9a324007d2bc242242d69db79",
+      "license_signal": "GitHub metadata: NOASSERTION; no root licence endpoint was available",
+      "review_scope": "Repository metadata, default-branch ref, full path tree, README and root SKILL.md review.",
+      "native_skill_ids": [
+        "consented-computer-use-planning"
+      ],
+      "decision": "No source, installer, screen capture, input control or shell workflow is copied or enabled."
+    },
+    {
+      "id": "acu-computer-use-index",
+      "requested_repository": "trycua/acu",
+      "source_url": "https://github.com/trycua/acu",
+      "default_branch": "main",
+      "review_commit": "2a9b3fbdda601d339c5e76095b83b8642a0a04b5",
+      "license_signal": "GitHub metadata: NOASSERTION; no root licence endpoint was available",
+      "review_scope": "Repository metadata, default-branch ref, full path tree and README. The repository is a resource index rather than a bundled skill payload.",
+      "native_skill_ids": [
+        "consented-computer-use-planning"
+      ],
+      "decision": "No linked project, browser route or computer-use runtime is fetched or integrated."
+    },
+    {
+      "id": "barehands",
+      "requested_repository": "jaredrhod/barehands",
+      "source_url": "https://github.com/jaredrhod/barehands",
+      "default_branch": "main",
+      "review_commit": "eb23bed2d772f9d5a24de26fb92f46c3c76d69cf",
+      "license_signal": "GitHub metadata/root licence: AGPL-3.0",
+      "review_scope": "Repository metadata, default-branch ref, full path tree, README, root licence and barehands.md review.",
+      "native_skill_ids": [
+        "gesture-and-vision-safety-planning"
+      ],
+      "decision": "AGPL source is not copied. No webcam, Chrome, local service, gesture capture or desktop control is enabled."
+    },
+    {
+      "id": "gesture-controlled-virtual-mouse",
+      "requested_repository": "Viral-Doshi/Gesture-Controlled-Virtual-Mouse",
+      "source_url": "https://github.com/Viral-Doshi/Gesture-Controlled-Virtual-Mouse",
+      "default_branch": "main",
+      "review_commit": "da75197b10c2c48019488fbb76ca4be1332901e4",
+      "license_signal": "GitHub metadata/root licence: GPL-3.0",
+      "review_scope": "Repository metadata, default-branch ref, full path tree, README and root licence.",
+      "native_skill_ids": [
+        "gesture-and-vision-safety-planning"
+      ],
+      "decision": "GPL source is not copied. No camera, MediaPipe, OpenCV, voice, pointer or desktop action is enabled."
+    },
+    {
+      "id": "robotics-agent-skills",
+      "requested_repository": "arpitg1304/robotics-agent-skills",
+      "source_url": "https://github.com/arpitg1304/robotics-agent-skills",
+      "default_branch": "main",
+      "review_commit": "f9bc5467ff9ee3d23f1a1b0b29a649843bb6ad11",
+      "license_signal": "GitHub metadata/root licence: Apache-2.0",
+      "review_scope": "Repository metadata, default-branch ref, full path tree, README, root licence and robotics-testing/robotics-security SKILL.md reviews.",
+      "native_skill_ids": [
+        "robotics-software-review"
+      ],
+      "decision": "No ROS, simulation, hardware, key/certificate, controller or device code is copied or started."
+    },
+    {
+      "id": "glm-skills",
+      "requested_repository": "zai-org/GLM-skills",
+      "source_url": "https://github.com/zai-org/GLM-skills",
+      "default_branch": "main",
+      "review_commit": "2ecd31c37e75671a4767342ba3a68a84c8f1b848",
+      "license_signal": "GitHub metadata/root licence: Apache-2.0",
+      "review_scope": "Repository metadata, default-branch ref, full path tree, README, root licence and GLM master/PRD-to-app SKILL.md reviews.",
+      "native_skill_ids": [
+        "multimodal-provider-boundary"
+      ],
+      "decision": "No provider SDK, key, model, OCR, media input or installer is copied or enabled."
+    },
+    {
+      "id": "grok-custom-skills",
+      "requested_repository": "Stijnman/grok-custom-skills",
+      "source_url": "https://github.com/Stijnman/grok-custom-skills",
+      "default_branch": "main",
+      "review_commit": "5f970c83bf96f9846d4fa6d6c9c11e786cf64fa9",
+      "license_signal": "GitHub metadata/root licence: MIT; individual skill metadata can specify additional terms",
+      "review_scope": "Repository metadata, default-branch ref, full path tree, README, root licence and selected ADR/HITL/goal-verifier SKILL.md reviews.",
+      "native_skill_ids": [
+        "evidence-before-completion",
+        "agent-governance",
+        "architecture-decision-record",
+        "approval-and-permission-boundary"
+      ],
+      "decision": "No .grok payload, service, scheduler, connector or skill source is copied. Native governance patterns are independently written."
+    },
+    {
+      "id": "ai-agents-public",
+      "requested_repository": "vasilyu1983/AI-Agents-public",
+      "source_url": "https://github.com/vasilyu1983/AI-Agents-public",
+      "default_branch": "main",
+      "review_commit": "3d5bc7c5b82636958d59126173b16a8929eec952",
+      "license_signal": "GitHub metadata/root licence: MIT; shared references and tooling require individual review",
+      "review_scope": "Repository metadata, default-branch ref, full path tree, README, root licence and selected permissions/swarm SKILL.md reviews.",
+      "native_skill_ids": [
+        "approval-and-permission-boundary",
+        "multi-agent-planning",
+        "agent-evaluation"
+      ],
+      "decision": "No agent prompt, hook, runtime, provider or tool implementation is copied or enabled."
+    },
+    {
+      "id": "seedance-skills",
+      "requested_repository": "LeoYeAI/seedance-skills",
+      "source_url": "https://github.com/LeoYeAI/seedance-skills",
+      "default_branch": "main",
+      "review_commit": "797e16efaa3c5ac01c0e391d0b8466a87cc5aadc",
+      "license_signal": "GitHub metadata/root licence: MIT; assets/data/provider terms remain individually review-gated",
+      "review_scope": "Repository metadata, default-branch ref, full path tree, README, root licence and copyright/prompt SKILL.md reviews.",
+      "native_skill_ids": [
+        "lawful-media-prompt-planning"
+      ],
+      "decision": "No generation provider, media asset, prompt payload, upload, download or model is copied or enabled."
+    },
+    {
+      "id": "five-hundred-ai-agent-projects",
+      "requested_repository": "ashishpatel26/500-AI-Agents-Projects",
+      "source_url": "https://github.com/ashishpatel26/500-AI-Agents-Projects",
+      "default_branch": "main",
+      "review_commit": "9beeb721c2af551bacaab827a76bddaecaa0ca5e",
+      "license_signal": "GitHub metadata/root licence: MIT; linked projects and their dependencies have their own terms",
+      "review_scope": "Repository metadata, default-branch ref, full path tree, README, root licence and code-review-agent README review.",
+      "native_skill_ids": [
+        "agent-blueprint-triage"
+      ],
+      "decision": "No linked project, agent code, provider configuration or dependency is fetched or copied."
+    },
+    {
+      "id": "awesome-llm-apps",
+      "requested_repository": "Shubhamsaboo/awesome-llm-apps",
+      "source_url": "https://github.com/Shubhamsaboo/awesome-llm-apps",
+      "default_branch": "main",
+      "review_commit": "24c85b099d160fbfc6ca4496464727bce78f9d6b",
+      "license_signal": "GitHub metadata/root licence: Apache-2.0; examples and nested components require individual review",
+      "review_scope": "Repository metadata, default-branch ref, full path tree, README, root licence and selected advisor/scope-control SKILL.md reviews.",
+      "native_skill_ids": [
+        "agent-blueprint-triage",
+        "scope-and-delivery-control",
+        "multi-agent-planning"
+      ],
+      "decision": "No agent implementation, dependency, provider, background loop or skill payload is copied or enabled."
+    },
+    {
+      "id": "github-awesome-copilot",
+      "requested_repository": "github/awesome-copilot",
+      "source_url": "https://github.com/github/awesome-copilot",
+      "default_branch": "main",
+      "review_commit": "6a8fa297b0fe652bd3d7c8946554dc146846b20e",
+      "license_signal": "GitHub metadata/root licence: MIT; community-contributed files and extensions require individual review",
+      "review_scope": "Repository metadata, default-branch ref, full path tree, README, root licence and selected governance/ADR/workflow instruction reviews.",
+      "native_skill_ids": [
+        "agent-governance",
+        "architecture-decision-record",
+        "agent-blueprint-triage"
+      ],
+      "decision": "No .agent.md, extension, prompt, terminal tool or GitHub workflow is copied or enabled."
+    }
+  ]
+}

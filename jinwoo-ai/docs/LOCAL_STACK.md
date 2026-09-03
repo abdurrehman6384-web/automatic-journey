@@ -43,7 +43,10 @@ locked-state status UX to Interaction Lab. Batch 11 adds a ranked, original
 status catalogue for requested skill collections; their reported counts do not
 add agents and their payloads are not loaded. Batch 12 adds a separate finite,
 revision-pinned metadata review queue for ten possible future upgrade lanes; it
-runs no unattended discovery process and retrieves no source content. They can prepare bounded,
+runs no unattended discovery process and retrieves no source content. Batch 13
+adds 15 Jinwoo-authored, planning-only portable skills and a canonical Master
+Orchestrator that can select or control visible local plan state but cannot
+start a worker or external runtime. They can prepare bounded,
 policy-screened plans, but the backend will not install
 or execute an upstream runtime. OpenHands has no container/sandbox path; OpenClaw
 has no gateway/channel/skill path; Batch 04/05/06 computer-use lanes have no
@@ -54,9 +57,11 @@ NEXA intake has no upstream source/configuration/model, voice, screen, camera,
 vision, browser, OS/window, input, device, messaging, media or automation path;
 the Batch 10 Jarvis/hand-gesture lanes have no installer, provider, voice,
 external-tool, camera, hand model/data, pointer, keyboard, desktop or device
-path; the Batch 11 source catalogue has no skill-file loader, installer, local
-skills-path reader, agent process, provider, browser, GitHub, cloud, model or
-self-upgrade route; Batch 12 candidates have no package, parser, graph/index,
+path; the Batch 11 source catalogue has no third-party skill-file loader,
+installer, local skills-path reader, agent process, provider, browser, GitHub,
+cloud, model or self-upgrade route; the Batch 13 native loader reads only
+Jinwoo-authored in-repository planning files and starts no worker/runtime;
+Batch 12 candidates have no package, parser, graph/index,
 gateway, policy engine, database, evaluator, formatter, scanner, collector,
 exporter, network telemetry or background-loop route; secret scanners have no file or Git-history scan path. Firecrawl,
 TruffleHog, IRIS-GO, IRIS-Mini, IRIS-Zero, Anthropic Skills, WordPress Agent
@@ -84,8 +89,9 @@ boundaries. See
 [`INTEGRATION_BATCH_08.md`](INTEGRATION_BATCH_08.md),
 [`INTEGRATION_BATCH_09.md`](INTEGRATION_BATCH_09.md),
 [`INTEGRATION_BATCH_10.md`](INTEGRATION_BATCH_10.md),
-[`INTEGRATION_BATCH_11.md`](INTEGRATION_BATCH_11.md), and
-[`INTEGRATION_BATCH_12.md`](INTEGRATION_BATCH_12.md).
+[`INTEGRATION_BATCH_11.md`](INTEGRATION_BATCH_11.md),
+[`INTEGRATION_BATCH_12.md`](INTEGRATION_BATCH_12.md), and
+[`INTEGRATION_BATCH_13.md`](INTEGRATION_BATCH_13.md).
 
 ## Tank research gate
 

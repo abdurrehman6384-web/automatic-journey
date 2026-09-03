@@ -8,6 +8,8 @@ import { ControlReviewPanel } from './components/ControlReviewPanel'
 import { FrameworkPanel } from './components/FrameworkPanel'
 import { InteractionLab } from './components/InteractionLab'
 import { MemoryVault } from './components/MemoryVault'
+import { NativeSkillLibraryPanel } from './components/NativeSkillLibraryPanel'
+import type { NativeSkillDetail, NativeSkillLibraryData, NativeSkillPlan, NativeSkillSummary } from './components/NativeSkillLibraryPanel'
 import { MissionPanel } from './components/MissionPanel'
 import { ProviderPanel } from './components/ProviderPanel'
 import { ResearchPanel } from './components/ResearchPanel'
@@ -26,7 +28,7 @@ const starterPrompts = [
   'Write a safe release checklist for this desktop application.',
 ]
 
-type ViewId = 'hq' | 'missions' | 'army' | 'core' | 'chat' | 'workspace' | 'research' | 'security' | 'memory' | 'interaction' | 'registry' | 'control' | 'settings'
+type ViewId = 'hq' | 'missions' | 'army' | 'core' | 'chat' | 'workspace' | 'research' | 'security' | 'memory' | 'interaction' | 'skills' | 'registry' | 'control' | 'settings'
 
 type NavigationItem = {
   id: ViewId
@@ -45,6 +47,7 @@ const viewMeta: Record<ViewId, { eyebrow: string; title: string; description: st
   security: { eyebrow: 'GREED // DEFENSIVE ONLY', title: 'Security Gate', description: 'Prepare an authorised no-scan boundary review.' },
   memory: { eyebrow: 'LOCAL MEMORY // CONSENT FIRST', title: 'Memory Vault', description: 'Inspect and control locally stored memories.' },
   interaction: { eyebrow: 'BATCH 06 // SAFETY-LOCKED', title: 'Interaction Lab', description: 'Review gesture and hardware concepts without capture or control.' },
+  skills: { eyebrow: 'BATCH 13 // CLEAN-ROOM PORTABLE SKILLS', title: 'Native skill command', description: 'Discover, select, pause and revise local planning-only skill plans.' },
   registry: { eyebrow: 'ADAPTERS & SKILL CATALOGUES // EXPLICIT BOUNDARIES', title: 'Framework & skill registry', description: 'Review source and capability contracts before any runtime can exist.' },
   control: { eyebrow: 'JINWOO NATIVE // ZERO SIDE EFFECT', title: 'Control & audit', description: 'Verify locks, capacity and local audit availability.' },
   settings: { eyebrow: 'LOCAL-FIRST // CONFIGURATION', title: 'Command settings', description: 'Provider visibility and delivery constraints.' },
@@ -74,6 +77,7 @@ const navigationGroups: Array<{ label: string; items: NavigationItem[] }> = [
     label: 'SYSTEM',
     items: [
       { id: 'interaction', label: 'Interaction Lab', icon: '⌁' },
+      { id: 'skills', label: 'Native skills', icon: '◈' },
       { id: 'registry', label: 'Frameworks & skills', icon: '✧' },
       { id: 'control', label: 'Control & audit', icon: '✓' },
       { id: 'settings', label: 'Settings', icon: '⚙' },
@@ -273,6 +277,13 @@ interface ApiShadowArmyPlan {
   frameworks: ApiShadowArmyFramework[]
   guardrails: string[]
   created_at: string
+}
+
+interface ApiSkillActivationResponse {
+  skill: NativeSkillSummary
+  changed: boolean
+  detail: string
+  external_runtime_invoked: boolean
 }
 
 interface ApiMission {
@@ -501,6 +512,10 @@ function App() {
   const [shadowOverview, setShadowOverview] = useState<ShadowArmyOverview | null>(null)
   const [shadowPlan, setShadowPlan] = useState<ShadowArmyPlan | null>(null)
   const [shadowBusy, setShadowBusy] = useState(false)
+  const [nativeSkillLibrary, setNativeSkillLibrary] = useState<NativeSkillLibraryData | null>(null)
+  const [nativeSkillPlans, setNativeSkillPlans] = useState<NativeSkillPlan[]>([])
+  const [nativeSkillDetail, setNativeSkillDetail] = useState<NativeSkillDetail | null>(null)
+  const [nativeSkillBusy, setNativeSkillBusy] = useState(false)
   const [researchPlan, setResearchPlan] = useState<ResearchPlan | null>(null)
   const [researchBusy, setResearchBusy] = useState(false)
   const [controlReview, setControlReview] = useState<ControlReview | null>(null)
@@ -531,6 +546,130 @@ function App() {
       if (response.ok && Array.isArray(payload)) setAuditEvents(payload.map(auditFromApi))
     } catch {
       // The dashboard remains usable before the local API is available.
+    }
+  }
+
+  const loadNativeSkillLibrary = async (announce = false): Promise<void> => {
+    setNativeSkillBusy(true)
+    try {
+      const [libraryResponse, plansResponse] = await Promise.all([
+        fetch('/api/skills'),
+        fetch('/api/skill-orchestrator/plans'),
+      ])
+      const libraryPayload = await libraryResponse.json() as NativeSkillLibraryData | { detail?: string }
+      const plansPayload = await plansResponse.json() as NativeSkillPlan[] | { detail?: string }
+      if (!libraryResponse.ok || !('skills' in libraryPayload) || !Array.isArray(libraryPayload.skills)) {
+        if (announce) setNotice(errorDetail(libraryPayload, 'The native skill library could not be refreshed.'))
+        return
+      }
+      setNativeSkillLibrary(libraryPayload)
+      if (plansResponse.ok && Array.isArray(plansPayload)) setNativeSkillPlans(plansPayload)
+      if (announce) setNotice(`${libraryPayload.skills.length} Jinwoo-owned planning skills refreshed locally. No external runtime was invoked.`)
+    } catch {
+      if (announce) setNotice('The native skill library is unavailable because the local backend is offline.')
+    } finally {
+      setNativeSkillBusy(false)
+    }
+  }
+
+  const inspectNativeSkill = async (skillId: string): Promise<void> => {
+    setNativeSkillBusy(true)
+    try {
+      const response = await fetch(`/api/skills/${encodeURIComponent(skillId)}`)
+      const payload = await response.json() as NativeSkillDetail | { detail?: string }
+      if (!response.ok || !('instructions' in payload)) {
+        setNotice(errorDetail(payload, 'That native SKILL.md could not be opened.'))
+        return
+      }
+      setNativeSkillDetail(payload)
+      setNotice(`Opened the local ${payload.skill_path} instruction. No upstream source or runtime was opened.`)
+    } catch {
+      setNotice('The native skill instruction is unavailable because the local backend is offline.')
+    } finally {
+      setNativeSkillBusy(false)
+    }
+  }
+
+  const setNativeSkillAvailability = async (skillId: string, enabled: boolean): Promise<boolean> => {
+    setNativeSkillBusy(true)
+    try {
+      const response = await fetch(`/api/skills/${encodeURIComponent(skillId)}/activation`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ enabled }),
+      })
+      const payload = await response.json() as ApiSkillActivationResponse | { detail?: string }
+      if (!response.ok || !('skill' in payload)) {
+        setNotice(errorDetail(payload, 'Native skill availability could not be changed.'))
+        return false
+      }
+      setNativeSkillLibrary((current) => current ? {
+        ...current,
+        skills: current.skills.map((skill) => skill.id === skillId ? payload.skill : skill),
+      } : current)
+      setNativeSkillDetail((current) => current?.id === skillId ? { ...current, ...payload.skill } : current)
+      void loadAudit()
+      setNotice(payload.detail)
+      return true
+    } catch {
+      setNotice('Native skill availability is unavailable because the local backend is offline.')
+      return false
+    } finally {
+      setNativeSkillBusy(false)
+    }
+  }
+
+  const createNativeSkillPlan = async (objective: string, skillIds: string[], controllerInstruction?: string): Promise<boolean> => {
+    setNativeSkillBusy(true)
+    try {
+      const response = await fetch('/api/skill-orchestrator/plans', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ objective, skill_ids: skillIds, controller_instruction: controllerInstruction }),
+      })
+      const payload = await response.json() as NativeSkillPlan | { detail?: string }
+      if (!response.ok || !('id' in payload)) {
+        setNotice(errorDetail(payload, 'The Master Orchestrator could not prepare that native skill plan.'))
+        return false
+      }
+      setNativeSkillPlans((current) => [payload, ...current.filter((plan) => plan.id !== payload.id)])
+      void loadAudit()
+      setNotice(`Jinwoo prepared a ${payload.policy_outcome} skill plan with ${payload.selected_skill_ids.length} native skills. No worker was started.`)
+      return true
+    } catch {
+      setNotice('The Master Orchestrator is unavailable because the local backend is offline.')
+      return false
+    } finally {
+      setNativeSkillBusy(false)
+    }
+  }
+
+  const applyNativeSkillDirective = async (
+    planId: string,
+    action: 'pause' | 'resume' | 'terminate' | 'rewrite-instructions',
+    controllerInstruction?: string,
+  ): Promise<boolean> => {
+    setNativeSkillBusy(true)
+    try {
+      const response = await fetch(`/api/skill-orchestrator/plans/${encodeURIComponent(planId)}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, controller_instruction: controllerInstruction }),
+      })
+      const payload = await response.json() as NativeSkillPlan | { detail?: string }
+      if (!response.ok || !('id' in payload)) {
+        setNotice(errorDetail(payload, 'The Master Orchestrator could not apply that local plan directive.'))
+        return false
+      }
+      setNativeSkillPlans((current) => [payload, ...current.filter((plan) => plan.id !== payload.id)])
+      void loadAudit()
+      setNotice(`Jinwoo ${action.replaceAll('-', ' ')} for a local skill plan. No skill or external runtime was executed.`)
+      return true
+    } catch {
+      setNotice('The Master Orchestrator directive is unavailable because the local backend is offline.')
+      return false
+    } finally {
+      setNativeSkillBusy(false)
     }
   }
 
@@ -926,6 +1065,7 @@ function App() {
 
   useEffect(() => {
     let mounted = true
+    void loadNativeSkillLibrary()
     fetch('/api/providers')
       .then(async (response) => response.ok ? response.json() : Promise.reject(new Error('Backend unavailable')))
       .then((payload: { providers?: ProviderStatus[] }) => {
@@ -1226,6 +1366,20 @@ function App() {
           )}
 
           {activeView === 'interaction' && <InteractionLab frameworks={frameworks} onOpenRegistry={() => navigate('registry')} />}
+
+          {activeView === 'skills' && (
+            <NativeSkillLibraryPanel
+              library={nativeSkillLibrary}
+              plans={nativeSkillPlans}
+              detail={nativeSkillDetail}
+              busy={nativeSkillBusy}
+              onRefresh={() => loadNativeSkillLibrary(true)}
+              onInspect={inspectNativeSkill}
+              onSetAvailability={setNativeSkillAvailability}
+              onCreatePlan={createNativeSkillPlan}
+              onDirective={applyNativeSkillDirective}
+            />
+          )}
 
           {activeView === 'registry' && (
             <>

@@ -2,7 +2,7 @@
 """Static no-import guard for controlled Shadow Army source intakes.
 
 This intentionally checks only the clean-room files and dependency manifests
-that implement or expose Batch 07–12. It does not unpack, execute, import, or
+that implement or expose Batch 07–13. It does not unpack, execute, import, or
 inspect an archive payload. A failing check prints file locations and rule
 names, never matching source text that might contain sensitive material.
 """
@@ -20,7 +20,11 @@ ROOT = Path(__file__).resolve().parents[1]
 CLEAN_ROOM_FILES = (
     ROOT / "backend" / "app" / "shadow_army.py",
     ROOT / "backend" / "app" / "skill_intakes.py",
+    ROOT / "backend" / "app" / "skill_library.py",
+    ROOT / "backend" / "app" / "skill_activation.py",
+    ROOT / "backend" / "app" / "skill_orchestrator.py",
     ROOT / "src" / "components" / "ShadowArmyCore.tsx",
+    ROOT / "src" / "components" / "NativeSkillLibraryPanel.tsx",
     ROOT / "backend" / "app" / "workspace.py",
     ROOT / "src" / "components" / "WorkspacePanel.tsx",
     ROOT / "src" / "components" / "InteractionLab.tsx",
@@ -125,6 +129,17 @@ BATCH_TWELVE_RUNTIME_PACKAGES = {
     "opentelemetry-sdk",
     "opentelemetry-exporter-otlp",
 }
+# Batch 13 is a native clean-room skill library, not a permission to introduce
+# computer-use, vision, robotics or provider dependencies from reviewed sources.
+NATIVE_SKILL_LIBRARY_RUNTIME_PACKAGES = {
+    "anthropic",
+    "easyocr",
+    "mss",
+    "pytesseract",
+    "rclpy",
+    "roslib",
+    "rospy",
+}
 FORBIDDEN_MANIFEST_PACKAGES = (
     EXTERNAL_FRAMEWORK_MODULES
     | GEOSPATIAL_RUNTIME_PACKAGES
@@ -133,6 +148,7 @@ FORBIDDEN_MANIFEST_PACKAGES = (
     | HAND_GESTURE_RUNTIME_PACKAGES
     | SKILL_COLLECTION_RUNTIME_PACKAGES
     | BATCH_TWELVE_RUNTIME_PACKAGES
+    | NATIVE_SKILL_LIBRARY_RUNTIME_PACKAGES
 )
 
 # Import-level checks complement manifest scanning. These are package/module
@@ -186,7 +202,16 @@ BATCH_TWELVE_RUNTIME_MODULES = {
     "syft",
     "trivy",
 }
-RESTRICTED_RUNTIME_MODULES |= BATCH_TWELVE_RUNTIME_MODULES
+NATIVE_SKILL_LIBRARY_RUNTIME_MODULES = {
+    "anthropic",
+    "easyocr",
+    "mss",
+    "pytesseract",
+    "rclpy",
+    "roslib",
+    "rospy",
+}
+RESTRICTED_RUNTIME_MODULES |= BATCH_TWELVE_RUNTIME_MODULES | NATIVE_SKILL_LIBRARY_RUNTIME_MODULES
 
 # This is intentionally narrow: it flags direct capability-entry APIs, not
 # ordinary words in documentation, status messages, or policy descriptions.
@@ -232,8 +257,19 @@ SECRET_LITERAL = re.compile(
 )
 TS_IMPORT = re.compile(r"(?im)^\s*(?:import|export)\b[^;\n]*?\bfrom\s*['\"]([^'\"]+)['\"]|\brequire\(\s*['\"]([^'\"]+)['\"]\s*\)")
 _SKILL_PAYLOAD_NAMES = {"skill.md"}
+_AGENT_PAYLOAD_NAMES = {"agent.md"}
 _SKILL_PAYLOAD_SUFFIX = ".agent.md"
 _IGNORED_PAYLOAD_DIRECTORIES = {".git", ".venv", "node_modules", "dist", "coverage", "__pycache__", ".vite", "data"}
+_NATIVE_SKILLS_DIRECTORY = ROOT / "skills"
+_NATIVE_AGENTS_DIRECTORY = ROOT / "agents"
+_NATIVE_SKILL_MARKER = "jinwoo_native: true"
+_NATIVE_SKILL_HEADINGS = ("## Purpose", "## Procedure", "## Output", "## Safety boundary")
+_NATIVE_SKILL_KEYS = {
+    "id", "name", "description", "category", "activation_mode", "requires_approval",
+    "tags", "routing_terms", "source_refs", "jinwoo_native",
+}
+_NATIVE_SKILL_ID = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+_NATIVE_AGENT_KEYS = {"id", "name", "description", "role", "skill_scope", "jinwoo_native"}
 
 
 def _module_root(module: str) -> str:
@@ -251,6 +287,77 @@ def _python_imports(path: Path, text: str) -> set[str]:
     return modules
 
 
+def _is_valid_native_skill(path: Path) -> bool:
+    """Allow only the narrowly structured Jinwoo-authored portable skill files."""
+
+    try:
+        relative = path.relative_to(_NATIVE_SKILLS_DIRECTORY)
+    except ValueError:
+        return False
+    if len(relative.parts) != 3 or relative.parts[-1] != "SKILL.md" or path.is_symlink():
+        return False
+    try:
+        text = path.read_text(encoding="utf-8")
+    except (OSError, UnicodeError):
+        return False
+    if not text.startswith("---\n") or len(text.encode("utf-8")) > 16_000 or "\n---\n" not in text:
+        return False
+    frontmatter, body = text[4:].split("\n---\n", 1)
+    fields: dict[str, str] = {}
+    for line in frontmatter.splitlines():
+        if not line or line[:1].isspace() or ":" not in line:
+            return False
+        key, value = line.split(":", 1)
+        if key in fields or key not in _NATIVE_SKILL_KEYS or not value.strip():
+            return False
+        fields[key] = value.strip()
+    return (
+        set(fields) == _NATIVE_SKILL_KEYS
+        and fields["jinwoo_native"] == "true"
+        and fields["activation_mode"] == "planning-only"
+        and fields["requires_approval"] in {"true", "false"}
+        and _NATIVE_SKILL_ID.fullmatch(fields["id"]) is not None
+        and relative.parts[-2] == fields["id"]
+        and _NATIVE_SKILL_MARKER in frontmatter
+        and all(heading in body for heading in _NATIVE_SKILL_HEADINGS)
+    )
+
+
+def _is_valid_native_agent(path: Path) -> bool:
+    """Allow only the canonical Jinwoo-owned Master Orchestrator manifest."""
+
+    try:
+        relative = path.relative_to(_NATIVE_AGENTS_DIRECTORY)
+    except ValueError:
+        return False
+    if len(relative.parts) != 2 or relative.parts[-1] != "AGENT.md" or path.is_symlink():
+        return False
+    try:
+        text = path.read_text(encoding="utf-8")
+    except (OSError, UnicodeError):
+        return False
+    if not text.startswith("---\n") or len(text.encode("utf-8")) > 12_000 or "\n---\n" not in text:
+        return False
+    frontmatter, _body = text[4:].split("\n---\n", 1)
+    fields: dict[str, str] = {}
+    for line in frontmatter.splitlines():
+        if not line or line[:1].isspace() or ":" not in line:
+            return False
+        key, value = line.split(":", 1)
+        if key in fields or key not in _NATIVE_AGENT_KEYS or not value.strip():
+            return False
+        fields[key] = value.strip()
+    return (
+        set(fields) == _NATIVE_AGENT_KEYS
+        and fields["jinwoo_native"] == "true"
+        and fields["role"] == "canonical-orchestrator"
+        and fields["skill_scope"] == "all-native-skills"
+        and _NATIVE_SKILL_ID.fullmatch(fields["id"]) is not None
+        and relative.parts[-2] == fields["id"]
+        and _NATIVE_SKILL_MARKER in frontmatter
+    )
+
+
 def _upstream_skill_payloads() -> list[Path]:
     """Find copied upstream skill/instruction files while skipping local tooling."""
 
@@ -259,8 +366,15 @@ def _upstream_skill_payloads() -> list[Path]:
         directories[:] = [name for name in directories if name not in _IGNORED_PAYLOAD_DIRECTORIES]
         for filename in filenames:
             lowered_name = filename.casefold()
-            if lowered_name in _SKILL_PAYLOAD_NAMES or lowered_name.endswith(_SKILL_PAYLOAD_SUFFIX):
-                payloads.append(Path(directory) / filename)
+            candidate = Path(directory) / filename
+            if lowered_name in _SKILL_PAYLOAD_NAMES:
+                if not _is_valid_native_skill(candidate):
+                    payloads.append(candidate)
+            elif lowered_name in _AGENT_PAYLOAD_NAMES:
+                if not _is_valid_native_agent(candidate):
+                    payloads.append(candidate)
+            elif lowered_name.endswith(_SKILL_PAYLOAD_SUFFIX):
+                payloads.append(candidate)
     return payloads
 
 
@@ -317,6 +431,12 @@ def scan() -> list[str]:
     if any(ROOT.rglob("project.zip")):
         violations.append("archive-copied-into-jinwoo-source-tree")
 
+    for native_skill in sorted(_NATIVE_SKILLS_DIRECTORY.glob("*/*/SKILL.md")):
+        if _is_valid_native_skill(native_skill):
+            native_text = native_skill.read_text(encoding="utf-8")
+            if SECRET_LITERAL.search(native_text):
+                violations.append(f"embedded-secret-literal:{native_skill.relative_to(ROOT)}")
+
     for payload in _upstream_skill_payloads():
         violations.append(f"unreviewed-skill-payload:{payload.relative_to(ROOT)}")
 
@@ -326,7 +446,7 @@ def scan() -> list[str]:
 def main() -> int:
     violations = scan()
     report = {
-        "check": "controlled-source-intake-batch-07-12",
+        "check": "controlled-source-intake-batch-07-13",
         "clean_room_files": [str(path.relative_to(ROOT)) for path in CLEAN_ROOM_FILES],
         "manifest_files": [str(path.relative_to(ROOT)) for path in MANIFESTS],
         "passed": not violations,

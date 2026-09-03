@@ -17,6 +17,9 @@ from .providers import ProviderError, ProviderGateway
 from .research import ResearchPolicyError, build_research_plan
 from .security import SecurityPlanError, build_security_scan_plan
 from .shadow_army import ShadowArmyPolicyError, ShadowArmyStore
+from .skill_activation import SkillActivationError, SkillActivationStore
+from .skill_library import SkillLibraryError, skill_library
+from .skill_orchestrator import SkillOrchestratorError, SkillOrchestratorStore
 from .sensitive import contains_sensitive_value
 from .schemas import (
     ApprovalRequest,
@@ -38,6 +41,16 @@ from .schemas import (
     SecurityScanPlan,
     SecurityScanPlanRequest,
     ShadowArmyOverview,
+    NativeAgentSummary,
+    NativeSkillDetail,
+    SkillActivationRequest,
+    SkillActivationResponse,
+    SkillLibrary,
+    SkillOrchestratorDirectiveRequest,
+    SkillOrchestratorPlan,
+    SkillOrchestratorPlanRequest,
+    SkillResolveRequest,
+    SkillResolution,
     ShadowArmyPlan,
     ShadowArmyPlanRequest,
     WorkspaceAnalysis,
@@ -58,6 +71,8 @@ memory = LocalMemoryStore(settings.data_dir)
 workspace = WorkspaceStore(settings.data_dir)
 providers = ProviderGateway(settings)
 shadow_army = ShadowArmyStore(audit)
+skill_activation = SkillActivationStore(audit)
+skill_orchestrator = SkillOrchestratorStore(audit, activation_store=skill_activation)
 
 
 @app.get("/health")
@@ -94,6 +109,91 @@ async def create_shadow_army_plan(request: ShadowArmyPlanRequest) -> ShadowArmyP
         return shadow_army.create(request)
     except ShadowArmyPolicyError as error:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error)) from error
+
+
+@app.get("/api/skills", response_model=SkillLibrary)
+async def get_native_skill_library() -> SkillLibrary:
+    """Discover Jinwoo-owned portable skills and the canonical local agent only."""
+    try:
+        return skill_library.library(skill_activation.disabled_skill_ids())
+    except SkillLibraryError as error:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Native skill library needs maintenance") from error
+
+
+@app.post("/api/skills/resolve", response_model=SkillResolution)
+async def resolve_native_skills(request: SkillResolveRequest) -> SkillResolution:
+    """Select local planning-only skills without a model, tool or network call."""
+    if contains_sensitive_value(request.objective):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Credentials and one-time codes cannot be included in a native skill request.")
+    try:
+        resolution = skill_library.resolve(
+            request.objective,
+            request.skill_ids,
+            request.max_results,
+            skill_activation.disabled_skill_ids(),
+        )
+    except SkillLibraryError as error:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error)) from error
+    audit.record(
+        "skill_library.resolved",
+        f"Jinwoo selected {len(resolution.selected_skill_ids)} local planning skills deterministically; no runtime was invoked.",
+        actor="local-user",
+    )
+    return resolution
+
+
+@app.put("/api/skills/{skill_id}/activation", response_model=SkillActivationResponse)
+async def set_native_skill_availability(skill_id: str, request: SkillActivationRequest) -> SkillActivationResponse:
+    """Enable or disable local plan selection only; no capability is activated."""
+    try:
+        return skill_activation.set_enabled(skill_id, request.enabled)
+    except SkillActivationError as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Unknown native skill") from error
+
+
+@app.get("/api/skills/{skill_id}", response_model=NativeSkillDetail)
+async def get_native_skill(skill_id: str) -> NativeSkillDetail:
+    """Return one locally authored SKILL.md document without touching external sources."""
+    try:
+        return skill_library.skill(skill_id, skill_activation.disabled_skill_ids())
+    except SkillLibraryError as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Unknown native skill") from error
+
+
+@app.get("/api/agents/{agent_id}", response_model=NativeAgentSummary)
+async def get_native_agent(agent_id: str) -> NativeAgentSummary:
+    """Return one locally authored agent manifest without starting an agent."""
+    try:
+        return skill_library.agent(agent_id)
+    except SkillLibraryError as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Unknown native agent") from error
+
+
+@app.get("/api/skill-orchestrator/plans", response_model=list[SkillOrchestratorPlan])
+async def list_native_skill_plans() -> list[SkillOrchestratorPlan]:
+    """List visible local master-orchestrator plans; no skill execution occurs."""
+    return skill_orchestrator.list()
+
+
+@app.post("/api/skill-orchestrator/plans", response_model=SkillOrchestratorPlan, status_code=status.HTTP_201_CREATED)
+async def create_native_skill_plan(request: SkillOrchestratorPlanRequest) -> SkillOrchestratorPlan:
+    """Create a visible native-skill plan without invoking any runtime."""
+    try:
+        return skill_orchestrator.create(request)
+    except SkillOrchestratorError as error:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error)) from error
+
+
+@app.patch("/api/skill-orchestrator/plans/{plan_id}", response_model=SkillOrchestratorPlan)
+async def apply_native_skill_directive(plan_id: str, request: SkillOrchestratorDirectiveRequest) -> SkillOrchestratorPlan:
+    """Pause, resume, terminate or revise only a local plan overlay."""
+    try:
+        plan = skill_orchestrator.directive(plan_id, request)
+    except SkillOrchestratorError as error:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error)) from error
+    if plan is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Native skill plan not found")
+    return plan
 
 
 @app.get("/api/providers", response_model=dict[str, list[ProviderStatus]])

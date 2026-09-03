@@ -160,6 +160,30 @@ if any record leaves this controlled state. See
 [`INTEGRATION_BATCH_12.md`](INTEGRATION_BATCH_12.md) for the complete metadata
 matrix and per-candidate activation gates.
 
+### Batch 13 native skill library and Master Orchestrator
+
+Batch 13 adds a **Jinwoo-owned** library of 15 original, portable,
+planning-only `SKILL.md` files plus one canonical
+`jinwoo-master-orchestrator` agent manifest. It is intentionally distinct from
+the Batch 11 collection catalogue: source collections remain metadata review
+records, while native skills are independently written local capabilities with
+strict loader validation and explicit safety sections.
+
+`GET /api/skills` discovers the native inventory, its 20 metadata-only
+provenance records, and the canonical agent. `POST /api/skills/resolve` makes a
+deterministic local selection without a model call. `POST
+/api/skill-orchestrator/plans` maps enabled skills to visible Planner → Executor
+→ Verifier stages and reports zero started workers; the plan controller may only
+pause, resume, terminate, or change a session-local plan overlay. Per-skill
+availability controls (`PUT /api/skills/{id}/activation`) change plan selection
+only and never enable an external implementation.
+
+No upstream source, instruction payload, extension, installer, agent worker,
+provider, desktop/controller, camera, robotics runtime, model, or package is
+loaded. The complete source matrix, local API contract, portable-use guidance,
+and future activation gates are in
+[`INTEGRATION_BATCH_13.md`](INTEGRATION_BATCH_13.md).
+
 ### Nox desktop and hand-gesture safety intake
 
 Batch 10 adds two original status-UX records to the responsive Interaction Lab:
@@ -174,11 +198,14 @@ webcam, hand-data or input-control path is imported. See
 ### Jinwoo native control & audit review
 
 `POST /api/control/review` and its Settings panel provide a zero-side-effect
-local review. It makes no network request, file read, tool call or
-execution-state change. It verifies final Army capacity, native ownership,
+local review. It makes no network request, **workspace/user-data** file read,
+tool call or execution-state change. Batch 13 additionally validates its own
+checked-in native skill metadata/instructions locally. It verifies final Army
+capacity, native ownership,
 external-runtime locks, Batch 03, Batch 04, Batch 05, Batch 06, Batch 07 and
-Batch 08, Batch 09, Batch 10, Batch 11 and Batch 12 inventories, restricted
-source/licence/review gates, read-only Workspace Guard and audit availability.
+Batch 08, Batch 09, Batch 10, Batch 11, Batch 12 and Batch 13 inventories,
+restricted source/licence/review gates, read-only Workspace Guard and audit
+availability.
 
 ## Why detection is not activation
 
@@ -292,6 +319,8 @@ See [`INTEGRATION_BATCH_01.md`](INTEGRATION_BATCH_01.md),
 [`INTEGRATION_BATCH_07.md`](INTEGRATION_BATCH_07.md),
 [`INTEGRATION_BATCH_08.md`](INTEGRATION_BATCH_08.md),
 [`INTEGRATION_BATCH_09.md`](INTEGRATION_BATCH_09.md),
-[`INTEGRATION_BATCH_10.md`](INTEGRATION_BATCH_10.md), and
-[`INTEGRATION_BATCH_11.md`](INTEGRATION_BATCH_11.md) for the source-review
+[`INTEGRATION_BATCH_10.md`](INTEGRATION_BATCH_10.md),
+[`INTEGRATION_BATCH_11.md`](INTEGRATION_BATCH_11.md),
+[`INTEGRATION_BATCH_12.md`](INTEGRATION_BATCH_12.md), and
+[`INTEGRATION_BATCH_13.md`](INTEGRATION_BATCH_13.md) for the source-review
 records and adapter-specific activation requirements.

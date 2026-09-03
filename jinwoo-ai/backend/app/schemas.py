@@ -407,3 +407,158 @@ class ChatResponse(BaseModel):
     reply: str
     provider: str
     local_only: bool
+
+
+class NativeSkillSummary(BaseModel):
+    """A Jinwoo-owned portable SKILL.md descriptor, never an upstream payload."""
+
+    id: str
+    name: str
+    description: str
+    category: str
+    activation_mode: Literal["planning-only"] = "planning-only"
+    requires_approval: bool = False
+    tags: list[str] = Field(default_factory=list, max_length=12)
+    source_refs: list[str] = Field(default_factory=list, max_length=8)
+    skill_path: str
+    content_sha256: str
+    availability: Literal["enabled", "disabled"] = "enabled"
+    jinwoo_native: bool = True
+
+
+class NativeSkillDetail(NativeSkillSummary):
+    """A native skill plus its locally authored instruction body."""
+
+    instructions: str
+
+
+class SkillActivationRequest(BaseModel):
+    """Turns local skill-plan availability on or off; it never activates a runtime."""
+
+    enabled: bool
+
+
+class SkillActivationResponse(BaseModel):
+    skill: NativeSkillSummary
+    changed: bool
+    detail: str
+    external_runtime_invoked: bool = False
+
+
+class NativeAgentSummary(BaseModel):
+    """A Jinwoo-owned agent manifest that can select native skills."""
+
+    id: str
+    name: str
+    description: str
+    role: Literal["canonical-orchestrator"]
+    skill_scope: Literal["all-native-skills"]
+    agent_path: str
+    jinwoo_native: bool = True
+
+
+class SkillSourceProvenance(BaseModel):
+    """Metadata-only review record for a user-requested public source."""
+
+    id: str
+    requested_repository: str
+    resolved_repository: str | None = None
+    source_url: str
+    default_branch: str
+    review_commit: str
+    license_signal: str
+    review_scope: str
+    native_skill_ids: list[str] = Field(default_factory=list, max_length=8)
+    decision: str
+
+
+class SkillLibrary(BaseModel):
+    """The discoverable native skill and agent library."""
+
+    skills: list[NativeSkillSummary]
+    agents: list[NativeAgentSummary]
+    sources: list[SkillSourceProvenance]
+    all_sources_covered: bool
+    external_runtime_invoked: bool = False
+    detail: str
+
+
+class SkillResolveRequest(BaseModel):
+    objective: str = Field(min_length=2, max_length=4_000)
+    skill_ids: list[str] = Field(default_factory=list, max_length=5)
+    max_results: int = Field(default=4, ge=1, le=5)
+
+    @field_validator("objective")
+    @classmethod
+    def objective_is_not_blank(cls, value: str) -> str:
+        return _require_non_blank(value)
+
+
+class SkillResolution(BaseModel):
+    """Deterministic local selection result without a model or tool call."""
+
+    objective: str
+    selected_skill_ids: list[str]
+    skills: list[NativeSkillSummary]
+    selection_basis: str
+    external_runtime_invoked: bool = False
+    guardrails: list[str]
+
+
+class SkillOrchestratorState(str, Enum):
+    PLANNED = "planned"
+    PAUSED = "paused"
+    TERMINATED = "terminated"
+
+
+class SkillOrchestratorStage(BaseModel):
+    id: Literal["planner", "executor", "verifier"]
+    label: str
+    skill_ids: list[str]
+    detail: str
+    requires_approval: bool = False
+
+
+class SkillOrchestratorPlanRequest(BaseModel):
+    objective: str = Field(min_length=2, max_length=4_000)
+    skill_ids: list[str] = Field(default_factory=list, max_length=5)
+    controller_instruction: str | None = Field(default=None, max_length=2_000)
+
+    @field_validator("objective")
+    @classmethod
+    def objective_is_not_blank(cls, value: str) -> str:
+        return _require_non_blank(value)
+
+    @field_validator("controller_instruction")
+    @classmethod
+    def controller_instruction_is_not_blank_when_present(cls, value: str | None) -> str | None:
+        return _require_non_blank(value) if value is not None else None
+
+
+class SkillOrchestratorDirectiveRequest(BaseModel):
+    action: Literal["pause", "resume", "terminate", "rewrite-instructions"]
+    controller_instruction: str | None = Field(default=None, max_length=2_000)
+
+    @field_validator("controller_instruction")
+    @classmethod
+    def directive_instruction_is_not_blank_when_present(cls, value: str | None) -> str | None:
+        return _require_non_blank(value) if value is not None else None
+
+
+class SkillOrchestratorPlan(BaseModel):
+    """Visible, mutable plan state; it is not a worker/runtime session."""
+
+    id: str = Field(default_factory=lambda: f"skill-plan-{uuid4().hex[:10]}")
+    objective: str
+    agent_id: Literal["jinwoo-master-orchestrator"] = "jinwoo-master-orchestrator"
+    state: SkillOrchestratorState = SkillOrchestratorState.PLANNED
+    selected_skill_ids: list[str] = Field(default_factory=list, max_length=5)
+    policy_outcome: Literal["safe-plan", "approval-required"]
+    requires_approval: bool
+    instruction_overlay: str | None = None
+    runtime_workers_started: int = 0
+    external_runtime_invoked: bool = False
+    stages: list[SkillOrchestratorStage]
+    guardrails: list[str]
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))

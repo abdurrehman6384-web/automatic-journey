@@ -16,6 +16,10 @@ from app.providers import ProviderError, ProviderGateway
 from app.schemas import CoordinationPattern, ShadowArmyPlanRequest, WorkspaceStatus
 from app.shadow_army import ShadowArmyPolicyError, ShadowArmyStore, build_shadow_army_plan, iter_logical_agent_ids
 from app.skill_intakes import BATCH_ELEVEN_SKILL_INTAKES, BATCH_TWELVE_UPGRADE_INTAKES, source_intake_guardrails
+from app.skill_activation import SkillActivationStore
+from app.skill_library import SkillLibraryError, skill_library
+from app.skill_orchestrator import SkillOrchestratorError, SkillOrchestratorStore
+from app.schemas import SkillOrchestratorDirectiveRequest, SkillOrchestratorPlanRequest
 from scripts.check_safe_intake import (
     CLEAN_ROOM_FILES,
     FORBIDDEN_MANIFEST_PACKAGES,
@@ -103,18 +107,72 @@ class ShadowArmyCoreTests(unittest.TestCase):
             build_shadow_army_plan(request)
 
 
+class NativeSkillLibraryTests(unittest.TestCase):
+    def test_native_skill_library_is_complete_original_and_source_mapped(self) -> None:
+        library = skill_library.library()
+        self.assertEqual(len(library.skills), 15)
+        self.assertEqual(len(library.agents), 1)
+        self.assertEqual(len(library.sources), 20)
+        self.assertTrue(library.all_sources_covered)
+        self.assertFalse(library.external_runtime_invoked)
+        self.assertEqual(library.agents[0].id, "jinwoo-master-orchestrator")
+        self.assertTrue(all(skill.activation_mode == "planning-only" and skill.jinwoo_native for skill in library.skills))
+        self.assertTrue(all(skill.availability == "enabled" for skill in library.skills))
+        source_ids = {source.id for source in library.sources}
+        observed = {source_id for skill in library.skills for source_id in skill.source_refs}
+        self.assertEqual(observed, source_ids)
+        for source in library.sources:
+            self.assertTrue(source.native_skill_ids)
+            self.assertTrue(all(skill_id in {skill.id for skill in library.skills} for skill_id in source.native_skill_ids))
+        detail = skill_library.skill("consented-computer-use-planning")
+        self.assertIn("No screenshot", detail.instructions)
+        self.assertIn("## Safety boundary", detail.instructions)
+
+    def test_disabled_skill_cannot_enter_a_master_plan_and_plan_state_never_starts_a_worker(self) -> None:
+        activation = SkillActivationStore()
+        activation.set_enabled("consented-computer-use-planning", False)
+        with self.assertRaises(SkillLibraryError):
+            skill_library.resolve(
+                "Prepare a desktop plan",
+                ["consented-computer-use-planning"],
+                1,
+                activation.disabled_skill_ids(),
+            )
+        store = SkillOrchestratorStore(activation_store=activation)
+        with self.assertRaises(SkillOrchestratorError):
+            store.create(SkillOrchestratorPlanRequest(
+                objective="Prepare a desktop plan",
+                skill_ids=["consented-computer-use-planning"],
+            ))
+        activation.set_enabled("consented-computer-use-planning", True)
+        plan = store.create(SkillOrchestratorPlanRequest(
+            objective="Prepare a desktop plan",
+            skill_ids=["consented-computer-use-planning"],
+        ))
+        self.assertEqual(plan.runtime_workers_started, 0)
+        self.assertFalse(plan.external_runtime_invoked)
+        self.assertTrue(plan.requires_approval)
+        self.assertEqual(store.directive(plan.id, SkillOrchestratorDirectiveRequest(action="pause")).state.value, "paused")
+        self.assertEqual(store.directive(plan.id, SkillOrchestratorDirectiveRequest(action="resume")).state.value, "planned")
+        self.assertEqual(store.directive(plan.id, SkillOrchestratorDirectiveRequest(action="terminate")).state.value, "terminated")
+
+
 class SourceIntakeGuardTests(unittest.TestCase):
-    def test_batch_seven_to_twelve_intakes_have_no_restricted_runtime_import_or_secret_literal(self) -> None:
+    def test_batch_seven_to_thirteen_intakes_have_no_restricted_runtime_import_or_secret_literal(self) -> None:
         self.assertEqual(scan_safe_intake(), [])
 
-    def test_batch_ten_to_twelve_guard_covers_clean_room_ui_and_reviewed_runtime_sets(self) -> None:
+    def test_batch_ten_to_thirteen_guard_covers_clean_room_ui_and_reviewed_runtime_sets(self) -> None:
         clean_room_paths = {path.relative_to(Path(__file__).resolve().parents[2]) for path in CLEAN_ROOM_FILES}
         self.assertIn(Path("src/components/InteractionLab.tsx"), clean_room_paths)
         self.assertIn(Path("src/components/SkillIntakePanel.tsx"), clean_room_paths)
         self.assertIn(Path("src/components/UpgradeReviewPanel.tsx"), clean_room_paths)
         self.assertIn(Path("src/data/upgradeReview.ts"), clean_room_paths)
-        self.assertTrue({"livekit-client", "mcp", "mem0ai", "mediapipe", "numpy", "clawhub", "markitdown", "graphrag", "litellm", "lancedb", "trivy", "opentelemetry-sdk"}.issubset(FORBIDDEN_MANIFEST_PACKAGES))
-        self.assertTrue({"livekit", "mediapipe", "pyautogui", "webbrowser", "child_process", "octokit", "markitdown", "graphrag", "litellm", "lancedb", "opentelemetry"}.issubset(RESTRICTED_RUNTIME_MODULES))
+        self.assertIn(Path("src/components/NativeSkillLibraryPanel.tsx"), clean_room_paths)
+        self.assertIn(Path("backend/app/skill_library.py"), clean_room_paths)
+        self.assertIn(Path("backend/app/skill_activation.py"), clean_room_paths)
+        self.assertIn(Path("backend/app/skill_orchestrator.py"), clean_room_paths)
+        self.assertTrue({"livekit-client", "mcp", "mem0ai", "mediapipe", "numpy", "clawhub", "markitdown", "graphrag", "litellm", "lancedb", "trivy", "opentelemetry-sdk", "rclpy", "rospy", "pytesseract"}.issubset(FORBIDDEN_MANIFEST_PACKAGES))
+        self.assertTrue({"livekit", "mediapipe", "pyautogui", "webbrowser", "child_process", "octokit", "markitdown", "graphrag", "litellm", "lancedb", "opentelemetry", "rclpy", "rospy", "pytesseract"}.issubset(RESTRICTED_RUNTIME_MODULES))
 
     def test_batch_eleven_specs_are_unique_and_never_activate_a_payload(self) -> None:
         self.assertEqual(len(BATCH_ELEVEN_SKILL_INTAKES), 27)
@@ -170,6 +228,32 @@ class SourceIntakeGuardTests(unittest.TestCase):
         finally:
             payload.unlink(missing_ok=True)
             agent_profile.unlink(missing_ok=True)
+            payload_directory.rmdir()
+
+    def test_batch_thirteen_guard_rejects_an_invalid_skill_inside_native_tree(self) -> None:
+        root = Path(__file__).resolve().parents[2]
+        payload_directory = root / "skills" / "core" / "untrusted-copy"
+        payload = payload_directory / "SKILL.md"
+        payload_directory.mkdir(exist_ok=True)
+        payload.write_text("---\nid: untrusted-copy\njinwoo_native: true\n---\nCopied payload", encoding="utf-8")
+        try:
+            violations = scan_safe_intake()
+            self.assertIn("unreviewed-skill-payload:skills/core/untrusted-copy/SKILL.md", violations)
+        finally:
+            payload.unlink(missing_ok=True)
+            payload_directory.rmdir()
+
+    def test_batch_thirteen_guard_rejects_an_invalid_agent_inside_native_tree(self) -> None:
+        root = Path(__file__).resolve().parents[2]
+        payload_directory = root / "agents" / "untrusted-agent"
+        payload = payload_directory / "AGENT.md"
+        payload_directory.mkdir(exist_ok=True)
+        payload.write_text("---\nid: untrusted-agent\njinwoo_native: true\n---\nCopied payload", encoding="utf-8")
+        try:
+            violations = scan_safe_intake()
+            self.assertIn("unreviewed-skill-payload:agents/untrusted-agent/AGENT.md", violations)
+        finally:
+            payload.unlink(missing_ok=True)
             payload_directory.rmdir()
 
 

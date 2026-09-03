@@ -9,5 +9,6 @@ __pycache__/
 *.py[cod]
 .venv/
 /data/
+/backend/data/
 coverage/
 .DS_Store

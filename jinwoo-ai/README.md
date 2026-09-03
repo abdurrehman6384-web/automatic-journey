@@ -14,8 +14,9 @@ An original, local-first desktop assistant foundation for the **Jinwoo AI / Shad
 - redacted local audit trail for mission routing, approvals, completion and Memory Vault changes;
 - Igris Workspace Guard: user-selected, read-only folder listing, bounded filename-only local locator and source diagnostics with path-escape protection; the locator does not read file contents, open a file, run a process or record search terms in audit;
 - provider registry for Ollama, LM Studio, Claude, GLM/Z.ai, Hugging Face and optional Mem0;
-- controlled Batch 01–12 adapter/advanced-skill registry: core orchestration, coding, research, memory, security, media, document, connector, browser, MCP, science, interaction, geospatial, desktop-assistant, hand-gesture, skill-catalogue, upgrade-review and mobile-companion lanes all remain policy-gated and non-executing in V1;
+- controlled Batch 01–13 adapter/advanced-skill registry: core orchestration, coding, research, memory, security, media, document, connector, browser, MCP, science, interaction, geospatial, desktop-assistant, hand-gesture, skill-catalogue, upgrade-review and mobile-companion lanes all remain policy-gated and non-executing in V1;
 - Batch 07 adds a native, mobile-first Shadow Army Core: 450 logical seats, visible Planner/Executor/Verifier topology maps, zero started external workers, and reviewed pattern references for Ruflo, CrewAI, AutoGen, MetaGPT, LangGraph, Agent Swarm, ROMA, Open Multi-Agent, Awesome Agent Orchestration and Microsoft Agent Framework; Batch 08 adds God's Eye View as a licence/data/asset-gated, non-live geospatial visualisation safety intake with no map, feed, tracking, camera, location or provider runtime; Batch 09 adds a clean-room filename-only workspace locator and keeps NEXA AI Assistant source/configuration, voice, vision, browser, desktop, device and automation capabilities disabled pending licence/source review; Batch 10 adds source-gated Jarvis setup and PC hand-gesture records plus a mobile-friendly Interaction Lab status update, with no upstream installer, model, webcam, pointer or desktop runtime; Batch 11 adds a ranked, mobile-friendly review catalogue for the requested skill collections without loading their skills, agents, prompts or installers; Batch 12 adds a finite next-ten upgrade review queue based only on public GitHub metadata/default-branch refs, with no cloned source, package, service, model, scan, telemetry route or unattended discovery loop;
+- Batch 13 supplies a clean-room native skill library: 15 original, portable, planning-only `SKILL.md` documents; metadata-only provenance for all 20 owner-requested sources; per-skill local selection enable/disable controls; and the canonical Jinwoo Master Orchestrator, which can select, combine, pause, resume, terminate, or locally overlay visible plans without invoking a worker, model, provider, desktop/device, process, or upstream runtime;
 - Batch 05 registers lawful AI-video, defensive-security, document/research, engineering, connector/MCP, browser, multi-agent and science skill contracts; Batch 06 adds gesture/orb and physical-hardware safety-intake contracts plus an original CSS-only command orb; IRIS-AI, IRIS-X, Awesome MCP Servers, 500 AI Agents Projects and Awesome Agent Orchestration remain reference-only, while required licence/source gates stay locked;
 - Tank's no-fetch Research Gate for validating explicit public HTTPS source plans without opening a URL, starting a browser or calling a crawler;
 - Greed's no-scan secret-review preflight for selected workspaces, with no file/history read, scanner launch or credential disclosure;
@@ -183,6 +184,29 @@ Internet loop is activated. See
 [`docs/INTEGRATION_BATCH_12.md`](docs/INTEGRATION_BATCH_12.md), and
 [`docs/FRAMEWORK_ADAPTERS.md`](docs/FRAMEWORK_ADAPTERS.md) before enabling any
 adapter.
+
+## Native skills and Master Orchestrator (Batch 13)
+
+The local `skills/` tree now holds 15 original Jinwoo `SKILL.md` capabilities,
+arranged by category and compatible with the portable folder convention used by
+SKILL.md-aware tools such as Claude Code, Cursor, Grok-compatible agents, and
+other consumers configured to read a repository-local skills directory. The
+files are not copied third-party skills. `skills/SOURCES.json` is a
+metadata-only, immutable-review provenance ledger for all 20 supplied source
+repositories; it does not grant source reuse permission.
+
+Use `GET /api/skills` to discover native skills and provenance, `POST
+/api/skills/resolve` for deterministic local selection, and `POST
+/api/skill-orchestrator/plans` to create a visible planning-only
+Planner → Executor → Verifier map. `PUT /api/skills/{id}/activation` toggles
+only whether a native skill can be selected into a plan; it cannot activate a
+runtime. The Master Orchestrator can pause, resume, terminate, or revise a
+session-local plan overlay through its plan endpoint, but cannot rewrite an
+immutable `SKILL.md`, approve an impactful action, or execute a tool. The
+**Native skills** dashboard page exposes the same controls. See
+[`docs/INTEGRATION_BATCH_13.md`](docs/INTEGRATION_BATCH_13.md) and
+[`skills/README.md`](skills/README.md) for activation, compatibility,
+provenance, and safety details.
 
 ## Desktop packaging
 

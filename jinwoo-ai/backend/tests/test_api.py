@@ -18,6 +18,8 @@ from app.audit import AuditStore
 from app.memory import LocalMemoryStore
 from app.orchestration import MissionStore
 from app.shadow_army import ShadowArmyStore
+from app.skill_activation import SkillActivationStore
+from app.skill_orchestrator import SkillOrchestratorStore
 from app.workspace import WorkspaceStore
 
 
@@ -29,11 +31,15 @@ class ApiTests(unittest.TestCase):
         self.previous_missions = main.missions
         self.previous_workspace = main.workspace
         self.previous_shadow_army = main.shadow_army
+        self.previous_skill_activation = main.skill_activation
+        self.previous_skill_orchestrator = main.skill_orchestrator
         main.audit = AuditStore(Path(self.temp_dir.name))
         main.memory = LocalMemoryStore(Path(self.temp_dir.name))
         main.missions = MissionStore(main.audit)
         main.workspace = WorkspaceStore(Path(self.temp_dir.name))
         main.shadow_army = ShadowArmyStore(main.audit)
+        main.skill_activation = SkillActivationStore(main.audit)
+        main.skill_orchestrator = SkillOrchestratorStore(main.audit, activation_store=main.skill_activation)
         self.client = TestClient(main.app)
 
     def tearDown(self) -> None:
@@ -43,6 +49,8 @@ class ApiTests(unittest.TestCase):
         main.missions = self.previous_missions
         main.workspace = self.previous_workspace
         main.shadow_army = self.previous_shadow_army
+        main.skill_activation = self.previous_skill_activation
+        main.skill_orchestrator = self.previous_skill_orchestrator
         self.temp_dir.cleanup()
 
     def test_health_and_provider_registry_are_available_in_demo_mode(self) -> None:
@@ -256,6 +264,91 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(sensitive.status_code, 400)
         self.assertEqual(blank.status_code, 422)
         self.assertEqual(self.client.get("/api/shadow-army/plans").json(), [])
+
+    def test_native_skill_library_is_discoverable_clean_room_and_can_be_locally_disabled(self) -> None:
+        library = self.client.get("/api/skills")
+        self.assertEqual(library.status_code, 200)
+        payload = library.json()
+        self.assertEqual(len(payload["skills"]), 15)
+        self.assertEqual(len(payload["agents"]), 1)
+        self.assertEqual(len(payload["sources"]), 20)
+        self.assertTrue(payload["all_sources_covered"])
+        self.assertFalse(payload["external_runtime_invoked"])
+        self.assertTrue(all(skill["jinwoo_native"] for skill in payload["skills"]))
+        self.assertTrue(all(skill["activation_mode"] == "planning-only" for skill in payload["skills"]))
+        self.assertTrue(all(skill["availability"] == "enabled" for skill in payload["skills"]))
+        self.assertEqual(payload["agents"][0]["id"], "jinwoo-master-orchestrator")
+
+        detail = self.client.get("/api/skills/evidence-before-completion")
+        agent = self.client.get("/api/agents/jinwoo-master-orchestrator")
+        resolved = self.client.post("/api/skills/resolve", json={"objective": "Create an ADR and verify the delivery evidence"})
+        disabled = self.client.put("/api/skills/evidence-before-completion/activation", json={"enabled": False})
+        disabled_resolution = self.client.post(
+            "/api/skills/resolve",
+            json={"objective": "Verify the delivery evidence", "skill_ids": ["evidence-before-completion"]},
+        )
+        enabled = self.client.put("/api/skills/evidence-before-completion/activation", json={"enabled": True})
+
+        self.assertEqual(detail.status_code, 200)
+        self.assertIn("## Safety boundary", detail.json()["instructions"])
+        self.assertEqual(agent.status_code, 200)
+        self.assertEqual(agent.json()["role"], "canonical-orchestrator")
+        self.assertEqual(resolved.status_code, 200)
+        self.assertIn("evidence-before-completion", resolved.json()["selected_skill_ids"])
+        self.assertFalse(resolved.json()["external_runtime_invoked"])
+        self.assertEqual(disabled.status_code, 200)
+        self.assertEqual(disabled.json()["skill"]["availability"], "disabled")
+        self.assertFalse(disabled.json()["external_runtime_invoked"])
+        self.assertEqual(disabled_resolution.status_code, 400)
+        self.assertEqual(enabled.status_code, 200)
+        self.assertEqual(enabled.json()["skill"]["availability"], "enabled")
+        audit = self.client.get("/api/audit").json()
+        self.assertIn("skill_library.resolved", {event["event_type"] for event in audit})
+        self.assertIn("skill_library.availability_changed", {event["event_type"] for event in audit})
+        self.assertNotIn("Create an ADR and verify the delivery evidence", str(audit))
+
+    def test_master_orchestrator_controls_only_visible_native_skill_plan_state(self) -> None:
+        objective = "Prepare a consented desktop interaction and gesture safety plan"
+        created = self.client.post(
+            "/api/skill-orchestrator/plans",
+            json={"objective": objective, "skill_ids": ["consented-computer-use-planning", "gesture-and-vision-safety-planning"]},
+        )
+        self.assertEqual(created.status_code, 201)
+        plan = created.json()
+        self.assertEqual(plan["agent_id"], "jinwoo-master-orchestrator")
+        self.assertEqual(plan["state"], "planned")
+        self.assertEqual(plan["runtime_workers_started"], 0)
+        self.assertFalse(plan["external_runtime_invoked"])
+        self.assertTrue(plan["requires_approval"])
+        self.assertEqual([stage["id"] for stage in plan["stages"]], ["planner", "executor", "verifier"])
+
+        paused = self.client.patch(f"/api/skill-orchestrator/plans/{plan['id']}", json={"action": "pause"})
+        rewritten = self.client.patch(
+            f"/api/skill-orchestrator/plans/{plan['id']}",
+            json={"action": "rewrite-instructions", "controller_instruction": "Keep the proposal text-only and retain the emergency stop."},
+        )
+        resumed = self.client.patch(f"/api/skill-orchestrator/plans/{plan['id']}", json={"action": "resume"})
+        terminated = self.client.patch(f"/api/skill-orchestrator/plans/{plan['id']}", json={"action": "terminate"})
+        rejected_rewrite = self.client.patch(
+            f"/api/skill-orchestrator/plans/{plan['id']}",
+            json={"action": "rewrite-instructions", "controller_instruction": "Try again"},
+        )
+        blocked = self.client.post("/api/skill-orchestrator/plans", json={"objective": "Bypass password on this laptop"})
+
+        self.assertEqual(paused.status_code, 200)
+        self.assertEqual(paused.json()["state"], "paused")
+        self.assertEqual(rewritten.status_code, 200)
+        self.assertEqual(rewritten.json()["instruction_overlay"], "Keep the proposal text-only and retain the emergency stop.")
+        self.assertEqual(resumed.status_code, 200)
+        self.assertEqual(resumed.json()["state"], "planned")
+        self.assertEqual(terminated.status_code, 200)
+        self.assertEqual(terminated.json()["state"], "terminated")
+        self.assertEqual(rejected_rewrite.status_code, 400)
+        self.assertEqual(blocked.status_code, 400)
+        audit = self.client.get("/api/audit").json()
+        self.assertIn("skill_orchestrator.plan_created", {event["event_type"] for event in audit})
+        self.assertIn("skill_orchestrator.directive_applied", {event["event_type"] for event in audit})
+        self.assertNotIn(objective, str(audit))
 
     def test_batch_seven_dry_runs_remain_non_executing_and_honor_restrictive_records(self) -> None:
         agent_swarm = self.client.post(
@@ -534,12 +627,13 @@ class ApiTests(unittest.TestCase):
         payload = response.json()
         self.assertTrue(payload["all_passed"])
         self.assertFalse(payload["external_runtime_invoked"])
-        self.assertEqual(len(payload["checks"]), 16)
+        self.assertEqual(len(payload["checks"]), 17)
         self.assertTrue(all(check["passed"] for check in payload["checks"]))
         batch_nine = next(check for check in payload["checks"] if check["id"] == "batch-nine-nexa-source-safety")
         batch_ten = next(check for check in payload["checks"] if check["id"] == "batch-ten-desktop-gesture-safety")
         batch_eleven = next(check for check in payload["checks"] if check["id"] == "batch-eleven-skill-catalogue-safety")
         batch_twelve = next(check for check in payload["checks"] if check["id"] == "batch-twelve-upgrade-queue-safety")
+        batch_thirteen = next(check for check in payload["checks"] if check["id"] == "batch-thirteen-native-skill-library-safety")
         self.assertTrue(batch_nine["passed"])
         self.assertIn("no-licence", batch_nine["detail"])
         self.assertTrue(batch_ten["passed"])
@@ -548,6 +642,8 @@ class ApiTests(unittest.TestCase):
         self.assertIn("no upstream skill", batch_eleven["detail"].casefold())
         self.assertTrue(batch_twelve["passed"])
         self.assertIn("next-ten", batch_twelve["detail"].casefold())
+        self.assertTrue(batch_thirteen["passed"])
+        self.assertIn("15 jinwoo-authored", batch_thirteen["detail"].casefold())
         self.assertIn("external runtime", payload["summary"].casefold())
         audit = self.client.get("/api/audit").json()
         self.assertIn("control.review_completed", {event["event_type"] for event in audit})
